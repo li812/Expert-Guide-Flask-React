@@ -1,0 +1,210 @@
+.PageHeader-module--page-header--36a7c {
+  background-color: var(--cds-background);
+  border-bottom: 1px solid var(--cds-border-subtle);
+  padding: 1rem 0;
+}
+
+/* Video Styles */
+.blurred {
+  filter: blur(8px) !important;
+  -webkit-filter: blur(8px) !important;
+  transition: filter 0.3s ease-in-out;
+  -webkit-transition: -webkit-filter 0.3s ease-in-out;
+}
+
+video {
+  transition: filter 0.3s ease-in-out;
+  -webkit-transition: -webkit-filter 0.3s ease-in-out;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bx--grid {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (max-width: 1056px) {
+  .bx--col-lg-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+.login-box-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 75vh; /* Full viewport height */
+}
+
+.login-box {
+  border: 2px solid rgb(15, 98, 254);
+  border-radius: 4px;
+  padding: 2rem;
+  background-color: var(--cds-layer);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  max-width: 450px;
+  width: 100%;
+}
+
+.login-box-title {
+  color: rgb(15, 98, 254);
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.input-wrapper {
+  width: 100%;
+}
+
+
+
+.bx--btn__icon {
+  margin-left: auto;
+  padding-right: 2px;
+}
+
+.login-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-tile {
+  padding: 2rem;
+  background-color: var(--cds-layer);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Video Container Styles */
+.video-container {
+  border-radius: 50%;
+  border: 5px solid #0f62fe;
+  overflow: hidden;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.login-illustration {
+  width: 100%;
+  height: auto;
+  margin-top: 2rem;
+}
+
+/* Face Recognition Container */
+.face-rec-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  background-color: var(--cds-background);
+}
+
+#face-rec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  height: 600px;
+}
+
+
+
+.face-rec-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5cm;
+  max-width: 400px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.bx--progress {
+  margin-top: 1rem;
+  width: 200px;
+}
+
+/* Face Recognition Content */
+.face-rec-content h2 {
+  color: var(--cds-text-01);
+  margin-bottom: 1rem;
+}
+
+.face-rec-content p {
+  color: var(--cds-text-02);
+  margin-bottom: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .face-rec-content {
+    padding: 1rem;
+  }
+  
+  .video-container {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* Add these styles */
+.account-creation {
+  margin-top: 2rem;
+  text-align: center;
+  border-top: 1px solid var(--cds-border-subtle);
+  padding-top: 1.5rem;
+}
+
+.account-creation p {
+  color: var(--cds-text-02);
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.register-button {
+  width: 60% !important;
+  max-width: 100px;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 672px) {
+  .register-button {
+    width: 100% !important;
+  }
+}
+
+
+
+
+.submit-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

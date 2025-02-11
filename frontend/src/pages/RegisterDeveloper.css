@@ -1,0 +1,155 @@
+.PageHeader-module--page-header--36a7c {
+  background-color: var(--cds-background);
+  border-bottom: 1px solid var(--cds-border-subtle);
+  padding: 1rem 0;
+}
+
+.blurred {
+  filter: blur(8px) !important;
+  -webkit-filter: blur(8px) !important;
+  transition: filter 0.3s ease-in-out;
+  -webkit-transition: -webkit-filter 0.3s ease-in-out;
+}
+
+video {
+  transition: filter 0.3s ease-in-out;
+  -webkit-transition: -webkit-filter 0.3s ease-in-out;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bx--grid {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (max-width: 1056px) {
+  .bx--col-lg-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+.register-box-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 75vh; /* Full viewport height */
+}
+
+.register-box {
+  border: 2px solid rgb(15, 98, 254);
+  border-radius: 4px;
+  padding: 2rem;
+  background-color: var(--cds-layer);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  max-width: 450px;
+  width: 100%;
+}
+
+.register-box-title {
+  color: rgb(15, 98, 254);
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.input-wrapper {
+  width: 100%;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.bx--btn__icon {
+  margin-left: auto;
+  padding-right: 2px;
+}
+
+.register-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.register-tile {
+  padding: 2rem;
+  background-color: var(--cds-layer);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  width: 100%;
+}
+
+.video-container {
+  border-radius: 50%;
+  border: 5px solid #0f62fe;
+  overflow: hidden;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.register-illustration {
+  width: 100%;
+  height: auto;
+  margin-top: 2rem;
+}
+
+.face-rec-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  background-color: var(--cds-background);
+}
+
+#face-rec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  height: 600px;
+}
+
+#video-capture-button {
+  position: absolute;
+  bottom: 0.5cm;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  margin-top: 0.5cm;
+}
+
+.face-rec-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5cm;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.bx--progress {
+  margin-top: 1rem;
+  width: 200px;
+}
+
+.account-option {
+  text-align: center;
+  margin-top: 1rem;
+}

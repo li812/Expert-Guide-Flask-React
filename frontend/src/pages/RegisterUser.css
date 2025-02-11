@@ -1,0 +1,247 @@
+.PageHeader-module--page-header--36a7c {
+  background-color: var(--cds-background);
+  border-bottom: 1px solid var(--cds-border-subtle);
+  padding: 1rem 0;
+}
+
+.blurred {
+  filter: blur(8px) !important;
+  -webkit-filter: blur(8px) !important;
+  transition: filter 0.3s ease-in-out;
+  -webkit-transition: -webkit-filter 0.3s ease-in-out;
+}
+
+video {
+  transition: filter 0.3s ease-in-out;
+  -webkit-transition: -webkit-filter 0.3s ease-in-out;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bx--grid {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (max-width: 1056px) {
+  .bx--col-lg-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+.register-box-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 75vh; /* Full viewport height */
+}
+
+.register-box {
+  border: 2px solid rgb(15, 98, 254);
+  border-radius: 4px;
+  padding: 2rem;
+  background-color: var(--cds-layer);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  max-width: 450px;
+  width: 100%;
+}
+
+.register-box-title {
+  color: rgb(15, 98, 254);
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.input-wrapper {
+  width: 100%;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.bx--btn__icon {
+  margin-left: auto;
+  padding-right: 2px;
+}
+
+.register-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.register-tile {
+  padding: 2rem;
+  background-color: var(--cds-layer);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  width: 100%;
+}
+
+.video-container {
+  border-radius: 50%;
+  border: 5px solid #0f62fe;
+  overflow: hidden;
+  width: 200px;
+  height: 200px;
+  margin: 2rem auto;
+  position: relative;
+}
+
+.register-illustration {
+  width: 100%;
+  height: auto;
+  margin-top: 2rem;
+}
+
+.face-rec-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  background-color: var(--cds-background);
+}
+
+#face-rec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  height: 600px;
+}
+
+#video-capture-button {
+  position: absolute;
+  bottom: 0.5cm;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  margin-top: 0.5cm;
+}
+
+.face-rec-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5cm;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.bx--progress {
+  margin-top: 1rem;
+  width: 200px;
+}
+
+.account-option {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.face-registration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.face-registration video {
+  width: 100%;
+  max-width: 640px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Add progress bar styling */
+.progress-container {
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 300px;
+  margin: 1rem auto;
+}
+
+.bx--progress-bar {
+  background-color: var(--cds-background);
+}
+
+.bx--progress-bar__label {
+  color: var(--cds-text-01) !important;
+  font-weight: 500;
+}
+
+.bx--progress-bar__helper-text {
+  color: var(--cds-text-02) !important;
+}
+
+.bx--progress-step__label {
+  color: var(--cds-text-01) !important;
+}
+
+.bx--progress-step__label-text {
+  color: var(--cds-text-02) !important;
+}
+
+/* Progress indicator updates */
+.bx--progress-step svg {
+  color: var(--cds-text-01);
+}
+
+.bx--progress-line {
+  background-color: var(--cds-interactive-04);
+}
+
+.bx--progress-step--current .bx--progress-line {
+  background-color: var(--cds-interactive-01);
+}
+
+.bx--progress-step--complete .bx--progress-line {
+  background-color: var(--cds-interactive-02);
+}
+
+/* Add these styles */
+#illu_image {
+  display: block;
+}
+
+.step-6 #illu_image {
+  display: none;
+}
+
+#face-capture-tile {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.face-verify-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.face-verify-tile h2 {
+  margin-bottom: 1rem;
+  text-align: center;
+}

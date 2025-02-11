@@ -1,0 +1,40 @@
+/* filepath: /Users/li/Desktop/flask-react-app/frontend/src/App.css */
+@import '@carbon/styles/css/styles.css';
+
+.logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.read-the-docs {
+  margin-top: 2rem;
+}
+
+
+.LLM_Chat_button {
+  position: fixed;
+  bottom: 20px; /* Distance from the bottom of the screen */
+  right: 20px;  /* Distance from the right side of the screen */
+  background-color: #0f62fe; /* Blue background */
+  fill: white;
+  color: white; /* White text */
+  border: none; /* No border */
+  border-radius: 50%; /* Circular button */
+  padding: 15px 20px; /* Adjust padding for size */
+  font-size: 16px; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+  z-index: 1000; /* Ensure it's above other elements */
+  display: flex; /* Center the content */
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+.LLM_Chat_button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.HeaderMenuItem {
+  list-style-type: none; /* Remove bullet points */
+}

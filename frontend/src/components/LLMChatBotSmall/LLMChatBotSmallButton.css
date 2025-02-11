@@ -1,0 +1,25 @@
+.LLM_Chat_button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #0f62fe;
+  fill: white;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.LLM_Chat_button:hover {
+  background-color: #0056b3;
+}

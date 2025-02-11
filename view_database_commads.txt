@@ -1,0 +1,6 @@
+mysql -u root -p
+root
+show databases;
+use HumanDB;
+show tables;
+
