@@ -19,7 +19,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='None' if ENV == "production" else 'Lax',  # Set SameSite to None for cross-site requests in production
     SESSION_COOKIE_SECURE=(ENV == "production"),  # Only secure in production (HTTPS)
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_NAME='humanid_session',
+    SESSION_COOKIE_NAME='Expert_Guide_session',
     PERMANENT_SESSION_LIFETIME=1800,
     SESSION_COOKIE_PATH='/',
     SESSION_COOKIE_DOMAIN=None,  # Allow dynamic domain resolution

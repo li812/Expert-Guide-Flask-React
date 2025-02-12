@@ -140,7 +140,7 @@ def client_verify_user_type(username, api_key):
     
     
 def client_verify_user_face(api_key, video_data, username):
-    """Verify face video for HumanID authentication"""
+    """Verify face video for Expert_Guide authentication"""
     try:
         print(f"\nStarting face verification:")
         print(f"Username: {username}")
@@ -190,7 +190,7 @@ def client_verify_user_face(api_key, video_data, username):
 
     
 def verify_client_password(api_key, username, password):
-    """Verify user password for HumanID authentication"""
+    """Verify user password for Expert_Guide authentication"""
     try:
         # Validate API key logic (assuming validate_api_key exists)
         api_result = client_validate_api_key(api_key)

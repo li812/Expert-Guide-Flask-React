@@ -10,7 +10,7 @@ DB_CONFIG_docker = {
         'host': 'db',
         'user': 'root',
         'password': 'root',
-        'database': 'HumanDB',
+        'database': 'expert_guide_DB',
         'auth_plugin': 'mysql_native_password',
         'connect_timeout': 30
     }
@@ -18,7 +18,7 @@ DB_CONFIG_local = {
         'host': 'localhost',
         'user': 'root',
         'password': 'root',
-        'database': 'HumanDB',
+        'database': 'expert_guide_DB',
         'auth_plugin': 'mysql_native_password',
         'connect_timeout': 30
     }
@@ -45,8 +45,7 @@ def init_db(app, run_env):
             print("Adding default user types...")
             user_types = [
                 UserType(type_id=1, type='admin'),
-                UserType(type_id=2, type='user'),
-                UserType(type_id=3, type='developer')
+                UserType(type_id=2, type='user')
             ]
             db.session.add_all(user_types)
             db.session.commit()
@@ -56,8 +55,7 @@ def init_db(app, run_env):
             print("Adding default users...")
             default_users = [
                 Login(login_id=1, username='admin', password='admin', type_id=1),
-                Login(login_id=2, username='user', password='user', type_id=2),
-                Login(login_id=3, username='developer', password='developer', type_id=3)
+                Login(login_id=2, username='user', password='user', type_id=2)
             ]
             db.session.add_all(default_users)
             db.session.commit()

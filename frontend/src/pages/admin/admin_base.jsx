@@ -21,10 +21,7 @@ import {
 import { Search, Logout, Light, Asleep, UserAvatar, Settings, Api, UserAdmin, Dashboard, Email } from '@carbon/icons-react';
 import AdminHome from './admin_home';
 import AdminManageUsers from './admin_manage_users.jsx';
-import AdminManageDevelopers from './admin_manage_developers.jsx'; 
-import AdminManageApis from './admin_manage_apis.jsx';
 import AdminSettings from './admin_settings.jsx';
-import AdminDeveloperManageComplaints from './admin_manage_developer_complaints.jsx';
 import AdminManageUserComplaints from './admin_manage_users_complaints.jsx';
 import './admin.css'; // Import the CSS file for styling
 
@@ -154,26 +151,6 @@ function AdminBase() {
                       Manage Users
                     </SideNavLink>
                     <SideNavLink
-                      renderIcon={() => <UserAvatar size={40} />}
-                      isActive={location.pathname === "/admin/developers"}
-                      as={Link}
-                      to="/admin/developers"
-                      className="side-nav-link"
-                      style={{ fontSize: "1.5rem" }}
-                    >
-                      Manage Developers
-                    </SideNavLink>
-                    <SideNavLink
-                      renderIcon={() => <Api size={40} />}
-                      isActive={location.pathname === "/admin/apis"}
-                      as={Link}
-                      to="/admin/apis"
-                      className="side-nav-link"
-                      style={{ fontSize: "1.5rem" }}
-                    >
-                      Manage APIs
-                    </SideNavLink>
-                    <SideNavLink
                       renderIcon={() => <Email size={40} />}
                       isActive={location.pathname === "/admin/manage-user-complaints"}
                       as={Link}
@@ -183,16 +160,7 @@ function AdminBase() {
                     >
                       User Complaints
                     </SideNavLink>
-                    <SideNavLink
-                      renderIcon={() => <Email size={40} />}
-                      isActive={location.pathname === "/admin/manage-developer-complaints"}
-                      as={Link}
-                      to="/admin/manage-developer-complaints"
-                      className="side-nav-link"
-                      style={{ fontSize: "1.5rem" }}
-                    >
-                      Developer Complaints
-                    </SideNavLink>
+
                     <SideNavLink
                       renderIcon={() => <Settings size={40} />}
                       isActive={location.pathname === "/admin/settings"}
@@ -212,12 +180,9 @@ function AdminBase() {
                   <Route path="/" element={<AdminHome username={username} />} />
                   <Route path="home" element={<AdminHome username={username} />} />
                   <Route path="users" element={<AdminManageUsers username={username} />} />
-                  <Route path="developers" element={<AdminManageDevelopers username={username} />} />
-                  <Route path="apis" element={<AdminManageApis username={username} />} />
                   <Route path="settings" element={<AdminSettings username={username} />} />
                   <Route path="manage-user-complaints" element={<AdminManageUserComplaints username={username} />} />
-                  <Route path="manage-developer-complaints" element={<AdminDeveloperManageComplaints username={username} />} />
-                  <Route path="*" element={<AdminHome username={username} />} />
+                 <Route path="*" element={<AdminHome username={username} />} />
                 </Routes>
               </Content>
             </>

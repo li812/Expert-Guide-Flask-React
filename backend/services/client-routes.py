@@ -51,7 +51,7 @@ def register_client():
         'pincode': request.form.get('pincode')
     }
 
-    return jsonify(register_humanid_user(
+    return jsonify(register_Expert_Guide_user(
         api_key,
         username, 
         user_data,

@@ -153,7 +153,7 @@ function RegisterDeveloper() {
       {/* Left Column */}
       <Column lg={9} md={9} sm={4} id="illu">
         <h1>Register as Developer</h1>
-        <p>Join HumanID's developer community...</p>
+        <p>Join Expert_Guide's developer community...</p>
         <img src={illustration} alt="Illustration" />
       </Column>
 

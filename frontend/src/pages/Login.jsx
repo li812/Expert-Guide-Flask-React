@@ -351,7 +351,7 @@ const Login = () => {
             <Tile className="login-tile">
               <Stack gap={7}>
                 <Security className="login-pictogram" />
-                <h1>Welcome to HumanID</h1>
+                <h1>Welcome to Expert_Guide</h1>
                 <p>Enter your username or email to continue</p>
                 <Form onSubmit={handleIdentifierSubmit}>
                   <Stack gap={6}>

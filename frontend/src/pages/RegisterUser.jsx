@@ -587,10 +587,10 @@ function RegisterUser() {
   return (
     <Grid className="register-page">
       <Column lg={9} md={9} sm={4} id="illu">
-        <h1>Register to HumanID</h1>
+        <h1>Register to Expert_Guide</h1>
         <br></br>
         <p>
-          Join HumanID and enjoy secure and private identity verification,
+          Join Expert_Guide and enjoy secure and private identity verification,
           access to exclusive content, and more.
         </p>
         <img

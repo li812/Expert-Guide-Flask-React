@@ -163,7 +163,7 @@ const LLMChatBotSmallModal = ({ open, setOpen, isFirstOpen }) => {
         <div className="">
           <div className="chat-title">
           <AiGenerate size={24} />
-            <span>HumanID Assistant</span>
+            <span>Expert Guide Assistant</span>
           </div>
         </div>
       }
@@ -188,7 +188,7 @@ const LLMChatBotSmallModal = ({ open, setOpen, isFirstOpen }) => {
             <div className="empty-state">
               <WatsonxAi size={32} />
               <h4>Start a Conversation</h4>
-              <p>Ask me anything about HumanID!</p>
+              <p>Ask me anything!</p>
             </div>
           ) : (
             messages.map((msg, idx) => (
@@ -213,7 +213,7 @@ const LLMChatBotSmallModal = ({ open, setOpen, isFirstOpen }) => {
             ))
           )}
           {loading && (
-            <div className="typing-indicator">Assistant is thinking...</div>
+            <div className="typing-indicator">I'm is thinking...</div>
           )}
           <div ref={messagesEndRef} />
         </div>

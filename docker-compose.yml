@@ -1,10 +1,9 @@
-version: '3.8'
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: humanid-backend
+    container_name: Expert_Guide_Backend
     ports:
       - "5001:5001"  # Update port to match WebSocket server
     volumes:
@@ -29,6 +28,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: Expert_Guide_Frontend
     ports:
       - "3000:5173"  # Change to Vite dev server port
     volumes:
@@ -46,7 +46,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: 'HumanDB'
+      MYSQL_DATABASE: 'expert_guide_DB'
     volumes:
       - db_data:/var/lib/mysql
     ports:

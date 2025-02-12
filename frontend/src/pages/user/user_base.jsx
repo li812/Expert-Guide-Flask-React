@@ -146,7 +146,7 @@ function UserBase() {
       <HeaderContainer
         render={({ isSideNavExpanded, onClickSideNavExpand }) => (
           <>
-            <Header aria-label="HumanID Platform" className="header">
+            <Header aria-label="Expert_Guide Platform" className="header">
               <SkipToContent />
               <HeaderMenuButton
                 aria-label={isSideNavExpanded ? 'Close menu' : 'Open menu'}
@@ -158,7 +158,7 @@ function UserBase() {
                 {profile.fullName || username}
               </HeaderName>
 
-              <HeaderNavigation aria-label="HumanID Platform">
+              <HeaderNavigation aria-label="Expert_Guide Platform">
                 <HeaderMenuItem>
                   <div className="profile-picture-container-small">
                     {profile.profilePicture ? (

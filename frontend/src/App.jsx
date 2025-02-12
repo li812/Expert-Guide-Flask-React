@@ -28,8 +28,6 @@ import "./App.css";
 import LLMChatBotSmallButton from './components/LLMChatBotSmall/LLMChatBotSmallButton';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminManageUsers from "./pages/admin/admin_manage_users.jsx";
-import AdminManageDevelopers from "./pages/admin/admin_manage_developers.jsx";
-import AdminManageApis from "./pages/admin/admin_manage_apis.jsx";
 import AdminSettings from "./pages/admin/admin_settings.jsx";
 import DeveloperSettings from './pages/developer/developer_settings';
 
@@ -47,11 +45,11 @@ function App() {
     <Theme theme={darkMode ? "g100" : "white"}>
       <Router>
         <div>
-          <Header style={{ fontSize: "1rem" }} aria-label="HumanID">
+          <Header style={{ fontSize: "1rem" }} aria-label="Expert Guide">
             <HeaderName style={{ fontSize: "2rem" }} href="/" prefix="">
-              HumanID
+              Expert Guide
             </HeaderName>
-            <HeaderNavigation style={{ fontSize: "1rem" }} aria-label="HumanID">
+            <HeaderNavigation style={{ fontSize: "1rem" }} aria-label="Expert Guide">
               <HeaderMenuItem as={Link} to="/" style={{ fontSize: "1rem" }}>
                 Home
               </HeaderMenuItem>
@@ -62,7 +60,7 @@ function App() {
                 Sum
               </HeaderMenuItem> */}
               <HeaderMenuItem as={Link} to="/for_developers" style={{ fontSize: "1rem" }}>
-                For Developers
+                For Students
               </HeaderMenuItem>
             </HeaderNavigation>
             <HeaderGlobalBar id="Top-Bar-left">
@@ -72,9 +70,7 @@ function App() {
               <HeaderMenuItem as={Link} to="/register-user" style={{ fontSize: "1rem" }}>
                 Register as User
               </HeaderMenuItem>
-              <HeaderMenuItem as={Link} to="/register-developer" style={{ fontSize: "1rem" }}>
-              Register as Developer
-              </HeaderMenuItem>
+
               <HeaderMenuItem as={Link} to="/login" style={{ fontSize: "1rem" }}>
                 Login
               </HeaderMenuItem>
@@ -103,8 +99,6 @@ function App() {
                 <Route index element={<AdminHome />} />
                 <Route path="home" element={<AdminHome />} />
                 <Route path="users" element={<AdminManageUsers />} />
-                <Route path="developers" element={<AdminManageDevelopers />} />
-                <Route path="apis" element={<AdminManageApis />} />
                 <Route path="settings" element={<AdminSettings />} /> 
               </Route>
 

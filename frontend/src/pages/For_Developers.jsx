@@ -25,15 +25,15 @@ function ForDevelopers() {
       {/* Hero Section */}
       <div className="bx--row" style={{ margin: '2rem 0' }}>
         <div className="bx--col-lg-16">
-          <h1>HumanID Developer Documentation</h1>
+          <h1>Expert_Guide Developer Documentation</h1>
           <h2 style={{ color: '#666', marginTop: '1rem', fontSize: '1.25rem' }}>
             Secure Face Recognition Authentication for Modern Applications
           </h2>
           <p className="landing-page__p" style={{ margin: '1rem 0', fontSize: '1.1rem', lineHeight: '1.5' }}>
-            Welcome to HumanID's developer documentation. Our powerful face recognition system 
+            Welcome to Expert_Guide's developer documentation. Our powerful face recognition system 
             provides enterprise-grade security for verifying real human users and preventing automated attacks. 
             With support for both simple face verification and enhanced face password sequences, 
-            HumanID offers flexible authentication options for your applications.
+            Expert_Guide offers flexible authentication options for your applications.
           </p>
           <p className="landing-page__p" style={{ margin: '1rem 0', lineHeight: '1.5' }}>
             Whether you're building a web application, mobile app, or enterprise system, 
@@ -50,12 +50,12 @@ function ForDevelopers() {
         </div>
       </div>
 
-      {/* Why HumanID? Section */}
+      {/* Why Expert_Guide? Section */}
       <div className="bx--row" style={{ margin: '3rem 0' }}>
         <div className="bx--col-lg-16">
-          <h2 style={{ marginBottom: '1.5rem' }}>Why Choose HumanID?</h2>
+          <h2 style={{ marginBottom: '1.5rem' }}>Why Choose Expert_Guide?</h2>
           <p style={{ fontSize: '1.1rem', lineHeight: '1.5', marginBottom: '2rem' }}>
-            HumanID combines cutting-edge face recognition technology with enterprise-grade security 
+            Expert_Guide combines cutting-edge face recognition technology with enterprise-grade security 
             to provide a reliable solution for human verification. Our platform is designed for 
             developers who need robust authentication while maintaining user privacy.
           </p>
@@ -105,7 +105,7 @@ function ForDevelopers() {
       <div style={{ margin: '3rem 0 1rem' }}>
         <h2>Getting Started Guide</h2>
         <p style={{ fontSize: '1.1rem', lineHeight: '1.5', margin: '1rem 0' }}>
-          Follow these steps to integrate HumanID into your application. Our straightforward 
+          Follow these steps to integrate Expert_Guide into your application. Our straightforward 
           setup process will have you up and running in minutes.
         </p>
                                                                                                                                                                                                  
@@ -122,7 +122,7 @@ function ForDevelopers() {
             <ClickableTile>
               <Code style={{ marginBottom: '1rem' }} />
               <h4>2. Installation</h4>
-              <p>Install the HumanID SDK in your project</p>
+              <p>Install the Expert_Guide SDK in your project</p>
             </ClickableTile>
           </Column>
           <Column sm={4} md={4} lg={4}>
@@ -170,7 +170,7 @@ function ForDevelopers() {
             style={{ marginBottom: '1rem' }}
           >
             <h4 style={{ marginBottom: '1rem' }}>Create Your Developer Account</h4>
-            <p>Start by registering for a HumanID developer account:</p>
+            <p>Start by registering for a Expert_Guide developer account:</p>
             <ol style={{ margin: '1rem 0', lineHeight: '1.5' }}>
               <li>Visit the <Link href="/register-developer">Developer Registration page</Link></li>
               <li>Complete the registration form</li>
@@ -205,25 +205,25 @@ function ForDevelopers() {
             
             <h5>NPM Installation</h5>
             <CodeSnippet type="multi">
-  {`npm install @humanid/sdk
+  {`npm install @Expert_Guide/sdk
   
   # Additional dependencies for React applications
-  npm install @humanid/react`}
+  npm install @Expert_Guide/react`}
             </CodeSnippet>
       
             <h5 style={{ marginTop: '1.5rem' }}>Yarn Installation</h5>
             <CodeSnippet type="multi">
-  {`yarn add @humanid/sdk
-  yarn add @humanid/react`}
+  {`yarn add @Expert_Guide/sdk
+  yarn add @Expert_Guide/react`}
             </CodeSnippet>
       
             <h4 style={{ margin: '1.5rem 0 1rem' }}>Environment Configuration</h4>
             <p>Create a .env file in your project root:</p>
             <CodeSnippet type="multi">
-  {`REACT_APP_HUMANID_API_KEY=your_api_key
-  REACT_APP_HUMANID_CLIENT_ID=your_client_id
-  REACT_APP_HUMANID_CLIENT_SECRET=your_client_secret
-  REACT_APP_HUMANID_API_URL=https://api.humanid.com`}
+  {`REACT_APP_Expert_Guide_API_KEY=your_api_key
+  REACT_APP_Expert_Guide_CLIENT_ID=your_client_id
+  REACT_APP_Expert_Guide_CLIENT_SECRET=your_client_secret
+  REACT_APP_Expert_Guide_API_URL=https://api.Expert_Guide.com`}
             </CodeSnippet>
           </AccordionItem>
       
@@ -233,29 +233,29 @@ function ForDevelopers() {
           >
             <h4 style={{ marginBottom: '1rem' }}>Basic SDK Configuration</h4>
             <CodeSnippet type="multi">
-  {`import { HumanIDClient } from '@humanid/sdk';
+  {`import { Expert_GuideClient } from '@Expert_Guide/sdk';
   
-  const client = new HumanIDClient({
-    apiKey: process.env.REACT_APP_HUMANID_API_KEY,
-    clientId: process.env.REACT_APP_HUMANID_CLIENT_ID,
-    clientSecret: process.env.REACT_APP_HUMANID_CLIENT_SECRET,
-    apiUrl: process.env.REACT_APP_HUMANID_API_URL
+  const client = new Expert_GuideClient({
+    apiKey: process.env.REACT_APP_Expert_Guide_API_KEY,
+    clientId: process.env.REACT_APP_Expert_Guide_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_Expert_Guide_CLIENT_SECRET,
+    apiUrl: process.env.REACT_APP_Expert_Guide_API_URL
   });`}
             </CodeSnippet>
       
             <h4 style={{ margin: '1.5rem 0 1rem' }}>Advanced Configuration</h4>
             <CodeSnippet type="multi">
-  {`const client = new HumanIDClient({
+  {`const client = new Expert_GuideClient({
     // Required configuration
-    apiKey: process.env.REACT_APP_HUMANID_API_KEY,
-    clientId: process.env.REACT_APP_HUMANID_CLIENT_ID,
-    clientSecret: process.env.REACT_APP_HUMANID_CLIENT_SECRET,
+    apiKey: process.env.REACT_APP_Expert_Guide_API_KEY,
+    clientId: process.env.REACT_APP_Expert_Guide_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_Expert_Guide_CLIENT_SECRET,
     
     // Optional configuration
     timeout: 30000, // Request timeout in milliseconds
     retryAttempts: 3, // Number of retry attempts
     debug: process.env.NODE_ENV === 'development', // Enable debug logging
-    onError: (error) => console.error('HumanID Error:', error)
+    onError: (error) => console.error('Expert_Guide Error:', error)
   });`}
             </CodeSnippet>
       
@@ -321,16 +321,16 @@ function ForDevelopers() {
                     <AccordionItem title="2. Set Up Environment">
                       <p>Configure your development environment with the required dependencies:</p>
                       <CodeSnippet type="multi">
-{`npm install @humanid/sdk
+{`npm install @Expert_Guide/sdk
 # or
-yarn add @humanid/sdk`}
+yarn add @Expert_Guide/sdk`}
                       </CodeSnippet>
                     </AccordionItem>
                     <AccordionItem title="3. Initialize SDK">
                       <CodeSnippet type="multi">
-{`import { HumanIDClient } from '@humanid/sdk';
+{`import { Expert_GuideClient } from '@Expert_Guide/sdk';
 
-const client = new HumanIDClient({
+const client = new Expert_GuideClient({
   apiKey: 'YOUR_API_KEY',
   clientId: 'YOUR_CLIENT_ID',
   clientSecret: 'YOUR_CLIENT_SECRET'
@@ -345,7 +345,7 @@ const client = new HumanIDClient({
               <TabPanel>
                 <Tile style={{ margin: '1rem 0' }}>
                   <h3>Authentication</h3>
-                  <p>HumanID uses API key authentication for all API requests.</p>
+                  <p>Expert_Guide uses API key authentication for all API requests.</p>
                   <CodeSnippet type="multi">
 {`// Example HTTP Request Header
 {
@@ -485,12 +485,12 @@ const client = new HumanIDClient({
                       <TabPanel>
                         <CodeSnippet type="multi">
 {`// JavaScript Example using async/await
-const HumanID = {
+const Expert_Guide = {
   async verifyFace(userId, imageFile) {
     // Convert image to base64
     const base64Image = await this.fileToBase64(imageFile);
     
-    const response = await fetch('https://api.humanid.com/api/client/verify-face', {
+    const response = await fetch('https://api.Expert_Guide.com/api/client/verify-face', {
       method: 'POST',
       headers: {
         'X-API-Key': 'YOUR_API_KEY',
@@ -513,7 +513,7 @@ const HumanID = {
       }))
     );
 
-    const response = await fetch('https://api.humanid.com/api/client/verify-face-password', {
+    const response = await fetch('https://api.Expert_Guide.com/api/client/verify-face-password', {
       method: 'POST',
       headers: {
         'X-API-Key': 'YOUR_API_KEY',
@@ -547,10 +547,10 @@ const HumanID = {
 import requests
 import base64
 
-class HumanIDClient:
+class Expert_GuideClient:
     def __init__(self, api_key):
         self.api_key = api_key
-        self.base_url = 'https://api.humanid.com/api/client'
+        self.base_url = 'https://api.Expert_Guide.com/api/client'
         
     def verify_face(self, user_id, image_path):
         # Read and encode image
@@ -572,7 +572,7 @@ class HumanIDClient:
         return response.json()
 
 # Usage Example
-client = HumanIDClient('YOUR_API_KEY')
+client = Expert_GuideClient('YOUR_API_KEY')
 result = client.verify_face('user123', 'path/to/image.jpg')
 print(result)`}
                         </CodeSnippet>
@@ -596,10 +596,10 @@ function FaceVerification() {
     setLoading(true);
     try {
       const base64Image = await fileToBase64(file);
-      const response = await fetch('https://api.humanid.com/api/client/verify-face', {
+      const response = await fetch('https://api.Expert_Guide.com/api/client/verify-face', {
         method: 'POST',
         headers: {
-          'X-API-Key': process.env.REACT_APP_HUMANID_API_KEY,
+          'X-API-Key': process.env.REACT_APP_Expert_Guide_API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -655,7 +655,7 @@ function FaceVerification() {
                   <h3>Testing API with cURL</h3>
                   <p>Use the following cURL command to test the face verification API:</p>
                   <CodeSnippet type="multi">
-{`curl -X POST https://api.humanid.com/api/client/verify-face \
+{`curl -X POST https://api.Expert_Guide.com/api/client/verify-face \
   -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -674,7 +674,7 @@ function FaceVerification() {
       <div style={{ margin: '3rem 0' }}>
         <h3 style={{ marginBottom: '1rem' }}>Implementation Best Practices</h3>
         <p style={{ marginBottom: '1rem', lineHeight: '1.5' }}>
-          Follow these guidelines to ensure optimal integration and performance of HumanID in your application:
+          Follow these guidelines to ensure optimal integration and performance of Expert_Guide in your application:
         </p>
         <Grid>
           <Column sm={4} md={4} lg={8}>
@@ -702,7 +702,7 @@ function FaceVerification() {
       <div style={{ margin: '3rem 0' }}>
         <h3>Performance Optimization Guide</h3>
         <p style={{ marginBottom: '1rem', lineHeight: '1.5' }}>
-          Optimize your HumanID integration for the best possible performance and user experience:
+          Optimize your Expert_Guide integration for the best possible performance and user experience:
         </p>
         <Grid>
           <Column sm={4} md={4} lg={8}>
@@ -733,7 +733,7 @@ function FaceVerification() {
             <h3>Need Help?</h3>
             <p style={{ margin: '1rem 0' }}>
               Get support from our developer community and team. We offer multiple channels
-              to help you integrate and optimize HumanID in your applications.
+              to help you integrate and optimize Expert_Guide in your applications.
             </p>
             <div style={{ marginTop: '1rem' }}>
               <Button kind="primary" href="#" renderIcon={IbmWatsonxCodeAssistant} style={{ marginRight: '1rem' }}>
@@ -748,7 +748,7 @@ function FaceVerification() {
             </div>
             <p style={{ marginTop: '1rem' }}>
               For enterprise support and custom integration assistance, contact our support team
-              at support@humanid.com
+              at support@Expert_Guide.com
             </p>
           </Tile>
         </div>

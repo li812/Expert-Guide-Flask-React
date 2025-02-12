@@ -25,6 +25,7 @@ import "./Home.css";
 import "../index.css";
 import faceScanImage from "../assets/face_scan_img/face_scan1.png";
 import howWorkImage from "../assets/face_scan_img/how_work.png";
+import careerHome from "../assets/consulting.png";
 
 function Home() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -41,10 +42,10 @@ function Home() {
       className="bx--grid bx--grid--full-width home-page"
       data-theme={darkMode ? "dark" : "light"}
     >
-      {/* Hero Section  */}
+      {/* Hero Section */}
       <div id="Hero Section">
-        <br></br>
-        <br></br>
+        <br />
+        <br />
         <div className="bx--row hero-section">
           <div className="bx--col-lg-8 hero-text">
             <Stack gap={7}>
@@ -52,15 +53,19 @@ function Home() {
                 className="animate__animated animate__fadeInDown"
                 style={{ color: "#0f62fe", fontSize: "6rem" }}
               >
-                Secure Authentication Made Simple
+                Your Future, Simplified
               </h1>
               <p
                 className="animate__animated animate__fadeInDown animate__delay-1s"
                 style={{ fontSize: "1.5rem" }}
               >
-                HumanID offers a unified authentication platform that combines
-                facial recognition with traditional security measures to provide
-                secure, seamless access across all your applications.
+                Expert Guide is the ultimate AI-powered career guidance platform for Indian students after 12. Discover your ideal career path with our deep learning assessment and interactive AI chat assistant.
+              </p>
+              <p
+                className="animate__animated animate__fadeInDown animate__delay-1s"
+                style={{ fontSize: "1.25rem", lineHeight: "1.6" }}
+              >
+                Our innovative system asks you 30 thought-provoking questions powered by TensorFlow deep learning to pinpoint your strengths and preferences. In addition, our state-of-the-art LLM chat bot, driven by Google’s Gemma open source model, is available 24/7 to answer your career queries instantly. With curated college and course explorations, Expert Guide empowers you to make informed decisions for a bright future.
               </p>
               <div className="animate__animated animate__fadeInDown animate__delay-2s">
                 <Button
@@ -68,153 +73,139 @@ function Home() {
                   size="lg"
                   onClick={() => (window.location.href = "/register-user")}
                 >
-                  <span className="button-text">Sign-in to HumanID</span>{" "}
-                  <ArrowRight className="arrow-icon" />
-                </Button>
-
-                <Button
-                  className="arrowright-button"
-                  style={{ marginLeft: "3rem" }}
-                  size="lg"
-                  onClick={() => (window.location.href = "/register-developer")}
-                >
-                  <span className="button-text">Sign-in as Developer</span>{" "}
+                  <span className="button-text">Discover Your Future</span>{" "}
                   <ArrowRight className="arrow-icon" />
                 </Button>
               </div>
             </Stack>
           </div>
-          <div className="bx--col-lg-8 hero-image">
+          <div className="bx--col-lg-10 hero-image">
             {/* Hero Image */}
-            <AspectRatio ratio="1x1">
-              <img src={faceScanImage} alt="Face Scan" />
+            <AspectRatio>
+              <img src={careerHome} alt="Career Guidance" style={{ width: '120%', height: '120%' }} />
             </AspectRatio>
           </div>
         </div>
-        <br></br>
-        <br></br>
+        <br />
+        <br />
       </div>
 
       <hr style={{ opacity: 0.5 }} />
 
       {/* Key Features Section */}
       <div id="Key Features Section">
-      <br></br>
-      <br></br>
+        <br />
+        <br />
         <div className="bx--col-lg-16">
           <h2
             className="animate__animated animate__fadeInUp"
             style={{ fontSize: "3.75rem", fontWeight: 300 }}
           >
-            Key Features{" "}
+            Key Features
           </h2>
-          <br></br>
-          <br></br>
+          <p style={{ fontSize: "1.2rem", marginTop: "1rem" }}>
+            At Expert Guide, we combine cutting-edge AI technology with expert human insights to provide a holistic career guidance experience. Every feature is designed to help you uncover your true potential and navigate the complex world of career choices.
+          </p>
+          <br />
+          <br />
         </div>
         <div className="bx--row features-section">
           <div className="bx--col-lg-8 bx--col-md-4 bx--col-sm-4">
             <Tile className="animate__animated animate__fadeInUp animate__delay-1s">
               <Security size={48} />
-              <h3>Advanced Security</h3>
+              <h3>Personalized Career Assessment</h3>
               <p>
-                AES encryption for data protection and bcrypt hashing for
-                passwords, ensuring maximum security.
+                Answer 30 in-depth questions and receive tailored career recommendations powered by advanced deep learning using TensorFlow. Our assessment identifies your unique strengths and aligns them with future career opportunities.
               </p>
             </Tile>
           </div>
           <div className="bx--col-lg-8 bx--col-md-4 bx--col-sm-4">
             <Tile className="animate__animated animate__fadeInUp animate__delay-2s">
               <DataBackup size={48} />
-              <h3>Single Account</h3>
+              <h3>Unified Guidance Experience</h3>
               <p>
-                Create one secure account with facial recognition for seamless
-                access across multiple platforms.
+                Seamlessly integrate career assessments, real-time AI chat support, and a comprehensive college and course explorer—all in one platform.
               </p>
             </Tile>
           </div>
           <div className="bx--col-lg-8 bx--col-md-4 bx--col-sm-4">
             <Tile className="animate__animated animate__fadeInUp animate__delay-1s">
               <Integration size={48} />
-              <h3>Easy Integration</h3>
+              <h3>Instant Career Insights</h3>
               <p>
-                Simple API integration for third-party applications with
-                comprehensive documentation.
+                Get immediate, actionable career insights that match your interests and skills, ensuring you are always one step ahead in planning your future.
               </p>
             </Tile>
           </div>
           <div className="bx--col-lg-8 bx--col-md-4 bx--col-sm-4">
             <Tile className="animate__animated animate__fadeInUp animate__delay-2s">
               <Touch size={48} />
-              <h3>Facial Recognition</h3>
+              <h3>AI Chat Guidance</h3>
               <p>
-                Utilize advanced facial recognition technology for secure and
-                convenient authentication.
+                Chat with our intelligent LLM bot powered by Google's Gemma model. Receive personalized, real-time advice on career options, entrance exams, and application processes anytime you need.
               </p>
             </Tile>
           </div>
           <div className="bx--col-lg-8 bx--col-md-4 bx--col-sm-4">
             <Tile className="animate__animated animate__fadeInUp animate__delay-1s">
               <Api size={48} />
-              <h3>Robust API</h3>
+              <h3>Cutting-Edge Technology</h3>
               <p>
-                Access a robust API for seamless integration and enhanced
-                functionality.
+                Harness the power of AI with TensorFlow-driven assessments and advanced language models, ensuring you receive recommendations based on the latest industry trends.
               </p>
             </Tile>
           </div>
           <div className="bx--col-lg-8 bx--col-md-4 bx--col-sm-4">
             <Tile className="animate__animated animate__fadeInUp animate__delay-2s">
               <Cloud size={48} />
-              <h3>Cloud-Based</h3>
+              <h3>Explore Colleges & Courses</h3>
               <p>
-                Leverage cloud-based infrastructure for scalability and
-                reliability.
+                Dive into a curated database of top colleges, online courses, and career programs tailored to your selected career path. Your journey to higher education starts here.
               </p>
             </Tile>
           </div>
         </div>
       </div>
-      <br></br>
-      <br></br>
+      <br />
+      <br />
 
       <hr style={{ opacity: 0.5 }} />
 
       {/* How It Works Section */}
-      <br></br>
-      <br></br>
+      <br />
+      <br />
       <div id="HowItWorkSection">
         <div className="bx--col-lg-16">
           <h2
             className="animate__animated animate__fadeInUp"
             style={{ fontSize: "3.75rem", fontWeight: 300 }}
           >
-            How It Works{" "}
+            How It Works
           </h2>
-          <br></br>
-          <br></br>
+          <p style={{ fontSize: "1.2rem", marginTop: "1rem" }}>
+            Our process is designed to be simple, yet powerful. Whether you're just starting your career journey or looking for expert advice to pivot into a new field, our dual-AI system is here to support you at every step.
+          </p>
+          <br />
+          <br />
         </div>
         <div className="bx--row how-it-works-section">
           <div className="bx--col-lg-8 how-it-works-image">
             <AspectRatio ratio="16x9">
-              <img
-                src={howWorkImage}
-                alt="How It Works"
-              />
+              <img src={howWorkImage} alt="How It Works" />
             </AspectRatio>
           </div>
           <div className="bx--col-lg-8 how-it-works-steps">
             <Grid>
               <Column lg={8} md={4} sm={4}>
-                <h3>For Users</h3>
+                <h3>Career Assessment</h3>
                 <Tile className="step-tile">
                   <div className="step-icon">
                     <span>1</span>
                   </div>
                   <div className="step-content">
-                    <h4>Register</h4>
+                    <h4>Take the Assessment</h4>
                     <p>
-                      Register with your essential credentials and set up facial
-                      recognition.
+                      Answer our 30 carefully crafted questions to uncover your interests, strengths, and career aspirations.
                     </p>
                   </div>
                 </Tile>
@@ -223,8 +214,10 @@ function Home() {
                     <span>2</span>
                   </div>
                   <div className="step-content">
-                    <h4>Access</h4>
-                    <p>Access any integrated platform using your HumanID.</p>
+                    <h4>Receive Tailored Insights</h4>
+                    <p>
+                      Our advanced TensorFlow model processes your answers to generate personalized career recommendations that align with your future goals.
+                    </p>
                   </div>
                 </Tile>
                 <Tile className="step-tile">
@@ -232,24 +225,25 @@ function Home() {
                     <span>3</span>
                   </div>
                   <div className="step-content">
-                    <h4>Verify</h4>
+                    <h4>Explore Opportunities</h4>
                     <p>
-                      Verify your identity quickly through facial recognition
-                      for secure access.
+                      Browse through curated college lists and online courses that match your recommended career paths.
                     </p>
                   </div>
                 </Tile>
               </Column>
               
               <Column lg={8} md={4} sm={4}>
-                <h3>For Developers</h3>
+                <h3>AI Chat Guidance</h3>
                 <Tile className="step-tile">
                   <div className="step-icon">
                     <span>1</span>
                   </div>
                   <div className="step-content">
-                    <h4>Get API Key</h4>
-                    <p>Register as a developer and get your API key.</p>
+                    <h4>Start a Conversation</h4>
+                    <p>
+                      Initiate a chat with our AI bot powered by Google's Gemma model to ask any career-related questions.
+                    </p>
                   </div>
                 </Tile>
                 <Tile className="step-tile">
@@ -257,8 +251,10 @@ function Home() {
                     <span>2</span>
                   </div>
                   <div className="step-content">
-                    <h4>Integrate</h4>
-                    <p>Integrate HumanID API into your application.</p>
+                    <h4>Get Real-Time Advice</h4>
+                    <p>
+                      Receive instant, accurate responses on everything from course selection to future job prospects.
+                    </p>
                   </div>
                 </Tile>
                 <Tile className="step-tile">
@@ -266,8 +262,10 @@ function Home() {
                     <span>3</span>
                   </div>
                   <div className="step-content">
-                    <h4>Deploy</h4>
-                    <p>Deploy your application with HumanID authentication.</p>
+                    <h4>Plan Your Next Steps</h4>
+                    <p>
+                      Use our AI insights to set actionable goals and design a step-by-step plan for your academic and career journey.
+                    </p>
                   </div>
                 </Tile>
               </Column>
@@ -275,24 +273,27 @@ function Home() {
           </div>
         </div>
       </div>
-      <br></br>
-      <br></br>
+      <br />
+      <br />
 
       <hr style={{ opacity: 0.5 }} />
 
       {/* Testimonials Section */}
-      <br></br>
-      <br></br>
+      <br />
+      <br />
       <div id="Testimonials Section">
         <div className="bx--col-lg-16">
           <h2
             className="animate__animated animate__fadeInUp"
             style={{ fontSize: "3.75rem", fontWeight: 300 }}
           >
-            What Our Users Say
+            What Our Students Say
           </h2>
-          <br></br>
-          <br></br>
+          <p style={{ fontSize: "1.2rem", marginTop: "1rem" }}>
+            Hear from students who have transformed uncertainty into clarity with Expert Guide. Our blend of AI-driven insights and personalized support has empowered countless young minds to pursue their dream careers.
+          </p>
+          <br />
+          <br />
         </div>
         <div className="bx--row testimonials-section">
           <div className="bx--col-lg-16">
@@ -300,50 +301,47 @@ function Home() {
               <Column lg={4} md={4} sm={4}>
                 <Tile className="testimonial-tile animate__animated animate__fadeInUp animate__delay-1s">
                   <p>
-                    "HumanID has revolutionized the way we handle
-                    authentication. It's secure and easy to use!"
+                    "Expert Guide not only helped me find my true calling but also provided me with a clear roadmap to achieve it. The AI insights were truly transformative!"
                   </p>
-                  <p>- John Doe, CEO of TechCorp</p>
+                  <p>- Ravi Kumar, Student</p>
                 </Tile>
               </Column>
               <Column lg={4} md={4} sm={4}>
                 <Tile className="testimonial-tile animate__animated animate__fadeInUp animate__delay-2s">
                   <p>
-                    "The facial recognition feature is a game-changer. Our users
-                    love the seamless login experience."
+                    "The personalized career assessment made me realize my strengths, and the AI chat bot was like having a mentor available 24/7. Highly recommended!"
                   </p>
-                  <p>- Jane Smith, CTO of Innovate Inc.</p>
+                  <p>- Ananya Singh, Student</p>
                 </Tile>
               </Column>
               <Column lg={4} md={4} sm={4}>
                 <Tile className="testimonial-tile animate__animated animate__fadeInUp animate__delay-3s">
                   <p>
-                    "Integrating HumanID into our platform was a breeze. The
-                    documentation is excellent."
+                    "I was overwhelmed with options, but Expert Guide helped me narrow down the perfect career path with clear, actionable advice."
                   </p>
-                  <p>- Mike Johnson, Developer at DevWorks</p>
+                  <p>- Vikram Patel, Student</p>
                 </Tile>
               </Column>
               <Column lg={4} md={4} sm={4}>
                 <Tile className="testimonial-tile animate__animated animate__fadeInUp animate__delay-4s">
                   <p>
-                    "HumanID's support team is fantastic. They helped us every
-                    step of the way."
+                    "The in-depth assessment report and expert guidance have completely changed my outlook on my future. I feel confident and empowered."
                   </p>
-                  <p>- Sarah Lee, Product Manager at SoftSolutions</p>
+                  <p>- Priya Sharma, Student</p>
                 </Tile>
               </Column>
             </Grid>
           </div>
         </div>
       </div>
-      <br></br>
-      <br></br>
+      <br />
+      <br />
+
+
+
       <hr style={{ opacity: 0.5 }} />
 
-      {/* Footer Section */}
-      <br></br>
-      <br></br>
+
       {/* Footer Section */}
       <div id="Footer Section">
         <footer className="footer-section">
@@ -406,16 +404,11 @@ function Home() {
             </Column>
           </Grid>
           <div className="footer-bottom">
-            <p>© 2025 HumanID. All rights reserved.</p>
+            <p>© 2025 Expert Guide. All rights reserved.</p>
           </div>
         </footer>
       </div>
-
-
-
-
     </div>
-
   );
 }
 

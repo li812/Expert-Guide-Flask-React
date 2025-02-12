@@ -1,10 +1,10 @@
-# HumanID - Advanced Facial Recognition Authentication Platform
+# Expert_Guide - Advanced Facial Recognition Authentication Platform
 
 A comprehensive biometric authentication platform built with modern technologies, providing secure facial recognition services through a microservices architecture.
 
 ## 🎯 Overview
 
-HumanID is an enterprise-grade facial recognition system that enables secure user authentication through advanced computer vision and deep learning techniques. The platform is designed for high availability, scalability, and robust security.
+Expert_Guide is an enterprise-grade facial recognition system that enables secure user authentication through advanced computer vision and deep learning techniques. The platform is designed for high availability, scalability, and robust security.
 
 ## 🚀 Core Features
 
@@ -110,8 +110,8 @@ HumanID is an enterprise-grade facial recognition system that enables secure use
 
 ```javascript
 // Example of secure API integration
-const secureClient = new HumanIDClient({
-    apiKey: process.env.HUMANID_API_KEY,
+const secureClient = new Expert_GuideClient({
+    apiKey: process.env.Expert_Guide_API_KEY,
     encryption: 'AES-256-GCM',
     timeout: 5000,
     retryAttempts: 3,

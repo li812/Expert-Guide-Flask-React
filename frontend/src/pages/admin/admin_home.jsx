@@ -8,10 +8,7 @@ import "./admin.css"; // Import the CSS file for styling
 const AdminHome = ({ username }) => {
   const [stats, setStats] = useState({
     user_count: 0,
-    developer_count: 0,
-    api_count: 0,
     pending_user_complaints: 0,
-    pending_developer_complaints: 0,
   });
   const [serverInfo, setServerInfo] = useState({
     uptime: 0,
@@ -193,7 +190,7 @@ const AdminHome = ({ username }) => {
 
   return (
     <Grid className="dashboard">
-      <Column lg={15} md={8} sm={4}>
+      <Column lg={16} md={8} sm={4}>
         <Tile className="stat-tile">
           <Heading className="dashboard-heading">Welcome, {username}!</Heading>
           <p className="dashboard-content">
@@ -216,41 +213,23 @@ const AdminHome = ({ username }) => {
       <br></br>
       <br></br>
       {/* Statistics Section */}
-      <Column lg={3} md={2} sm={1}>
+      <Column lg={7} md={2} sm={1}>
         <Tile className="stat-tile">
           <UserAdmin size={32} />
           <h4>Total<br></br>Users</h4>
           <p>{stats.user_count}</p>
         </Tile>
       </Column>
-      <Column lg={3} md={2} sm={1}>
-        <Tile className="stat-tile">
-          <UserAvatar size={32} />
-          <h4>Total<br></br>Developers</h4>
-          <p>{stats.developer_count}</p>
-        </Tile>
-      </Column>
-      <Column lg={3} md={2} sm={1}>
+
+
+      <Column lg={7} md={2} sm={1}>
         <Tile className="stat-tile">
           <Api size={32} />
-          <h4>Total<br></br>APIs</h4>
-          <p>{stats.api_count}</p>
-        </Tile>
-      </Column>
-      <Column lg={3} md={2} sm={1}>
-        <Tile className="stat-tile">
-          <Api size={32} />
-          <h4>New User Complaints</h4>
+          <h4>New User<br></br>Complaints</h4>
           <p>{stats.pending_user_complaints}</p>
         </Tile>
       </Column>
-      <Column lg={3} md={2} sm={1}>
-        <Tile className="stat-tile">
-          <Api size={32} />
-          <h4>New Developer Complaints</h4>
-          <p>{stats.pending_developer_complaints}</p>
-        </Tile>
-      </Column>
+
       {/* Server Information Section */}
       <Column lg={15} md={8} sm={4}>
         <Tile className="stat-tile">
