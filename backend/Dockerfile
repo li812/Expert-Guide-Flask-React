@@ -1,9 +1,5 @@
 FROM python:3.10-slim
 
-LABEL maintainer="Ali Ahammad"
-LABEL version="1.0"
-LABEL description="Backend service for HumanID"
-
 WORKDIR /app
 
 # Install system dependencies

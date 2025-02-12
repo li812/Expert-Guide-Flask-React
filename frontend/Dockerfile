@@ -1,9 +1,6 @@
 # Use an official Node.js runtime as a parent image
 FROM node:20-alpine
 
-LABEL maintainer="Ali Ahammad mail@aliahammad.com"
-LABEL version="1.0"
-LABEL description="Frontend service for HumanID"
 
 # Set the working directory in the container
 WORKDIR /app
