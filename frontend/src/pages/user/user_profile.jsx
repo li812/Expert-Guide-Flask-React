@@ -103,7 +103,7 @@ const UserProfile = () => {
                         <Form onSubmit={handleProfileUpdate}>
                             <Stack gap={7}>
                                 <Tile className="profile-picture-tile">
-                                    <div className="profile-picture-container">
+                                    <div className="profile-picture-container-big">
                                         {profile.profilePicture ? (
                                             <img
                                                 src={`http://localhost:5001${profile.profilePicture}`}

@@ -138,17 +138,17 @@ const Login = () => {
           }
         } else {
           setError(data.error);
-        }  
+        }
       }
       else {
         if (response.ok) {
           setUserType(data.type);
           setStep(LOGIN_STEPS.PASSWORD);
-          
-          
+
+
         } else {
           setError(data.error);
-        }  
+        }
       }
     } catch (err) {
       console.error("Failed to verify credentials:", err);
@@ -366,7 +366,7 @@ const Login = () => {
             <Tile className="login-tile">
               <Stack gap={7}>
                 <Security className="login-pictogram" />
-                <h1>Welcome to Expert_Guide</h1>
+                <h1>Welcome to Expert Guide</h1>
                 <p>Enter your username or email to continue</p>
                 <Form onSubmit={handleIdentifierSubmit}>
                   <Stack gap={6}>
@@ -401,15 +401,7 @@ const Login = () => {
                       >
                         Register as User
                       </Button>
-                      <Button
-                        kind="tertiary"
-                        renderIcon={ArrowRight}
-                        onClick={() => navigate("/register-developer")}
-                        className="register-button"
-                        size="lg"
-                      >
-                        Register as Developer
-                      </Button>
+
                     </div>
                   </Stack>
                 </div>
@@ -429,6 +421,7 @@ const Login = () => {
         <Column lg={{ span: 8, offset: 4 }} md={{ span: 6, offset: 1 }} sm={4}>
           <Tile className="face-verify-tile">
             <Stack gap={5}>
+
               <h2>Face Verification</h2>
               <div className="video-container">
                 {!isVideoReady && <Loading description="Initializing camera..." small />}
@@ -470,7 +463,8 @@ const Login = () => {
             <Tile className="login-tile">
               <Stack gap={7}>
                 <Security className="login-pictogram" />
-                <h2>Enter Password</h2>
+                <h1>Welcome to Expert Guide</h1>
+                <p>Enter your password to continue</p>
                 <Form onSubmit={handlePasswordSubmit}>
                   <Stack gap={6}>
                     <PasswordInput
@@ -495,13 +489,6 @@ const Login = () => {
                       className="register-button"
                     >
                       Register as User
-                    </Button>
-                    <Button
-                      kind="tertiary"
-                      onClick={() => navigate("/register-developer")}
-                      className="register-button"
-                    >
-                      Register as Developer
                     </Button>
                   </div>
                 </div>

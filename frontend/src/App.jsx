@@ -17,19 +17,16 @@ import Sum from "./pages/Sum";
 import Login from "./pages/Login";
 import UserBase from "./pages/user/user_base";
 import UserHome from './pages/user/user_home';
-import ForDevelopers from "./pages/For_Developers";
+import ForDevelopers from "./pages/for_students";
 import AdminBase from "./pages/admin/admin_base";
 import AdminHome from "./pages/admin/admin_home";
-import DeveloperBase from "./pages/developer/developer_base";
-import DeveloperHome from "./pages/developer/developer_home";
 import RegisterUser from "./pages/RegisterUser";
-import RegisterDeveloper from "./pages/RegisterDeveloper";
 import "./App.css";
 import LLMChatBotSmallButton from './components/LLMChatBotSmall/LLMChatBotSmallButton';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminManageUsers from "./pages/admin/admin_manage_users.jsx";
 import AdminSettings from "./pages/admin/admin_settings.jsx";
-import DeveloperSettings from './pages/developer/developer_settings';
+
 
 function App() {
   const [darkMode, setDarkMode] = React.useState(() => {
@@ -59,7 +56,7 @@ function App() {
               {/* <HeaderMenuItem as={Link} to="/sum" style={{ fontSize: "1rem" }}>
                 Sum
               </HeaderMenuItem> */}
-              <HeaderMenuItem as={Link} to="/for_developers" style={{ fontSize: "1rem" }}>
+              <HeaderMenuItem as={Link} to="/for_students" style={{ fontSize: "1rem" }}>
                 For Students
               </HeaderMenuItem>
             </HeaderNavigation>
@@ -85,10 +82,9 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/sum" element={<Sum />} />
-              <Route path="/for_developers" element={<ForDevelopers />} /> {/* Add this line */}
+              <Route path="/for_students" element={<ForDevelopers />} /> {/* Add this line */}
               <Route path="/login" element={<Login />} />
               <Route path="/register-user" element={<RegisterUser />} /> 
-              <Route path="/register-developer" element={<RegisterDeveloper />} /> 
               
               {/* Protected admin routes */}
               <Route path="/admin/*" element={
@@ -112,16 +108,6 @@ function App() {
                 <Route path="home" element={<UserHome />} />
               </Route>
 
-              {/* Protected developer routes */}
-              <Route path="/developer/*" element={
-                <ProtectedRoute requiredType={3}>
-                  <DeveloperBase />
-                </ProtectedRoute>
-              }>
-                <Route index element={<DeveloperHome />} />
-                <Route path="home" element={<DeveloperHome />} />
-                <Route path="settings" element={<DeveloperSettings />} /> {/* Add if needed */}
-              </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Content>

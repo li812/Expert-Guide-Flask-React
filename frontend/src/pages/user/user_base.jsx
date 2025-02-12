@@ -50,6 +50,7 @@ function UserBase() {
     profilePicture: null
   });
   const [error, setError] = useState(null);
+  const [imageLoading, setImageLoading] = useState(true);
 
   // Theme Management
   useEffect(() => {
@@ -162,17 +163,32 @@ function UserBase() {
                 <HeaderMenuItem>
                   <div className="profile-picture-container-small">
                     {profile.profilePicture ? (
-                      <img
-                        src={`http://localhost:5001${profile.profilePicture}`}
-                        alt="Profile"
-                        className="profile-picture"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "default-profile.jpg";
-                        }}
-                      />
+                      <>
+                        {imageLoading && (
+                          <div className="loading-avatar" aria-label="Loading profile picture">
+                            <UserAvatar size={20} />
+                          </div>
+                        )}
+                        <img
+                          src={`http://localhost:5001${profile.profilePicture}`}
+                          alt={`${profile.fullName || username}'s profile`}
+                          className={`profile-picture ${imageLoading ? 'hidden' : ''}`}
+                          onError={(e) => {
+                            console.log("Profile picture load error");
+                            e.target.onerror = null;
+                            e.target.src = "/default-avatar.png";
+                            setImageLoading(false);
+                          }}
+                          onLoad={() => {
+                            console.log("Profile picture loaded successfully");
+                            setImageLoading(false);
+                          }}
+                        />
+                      </>
                     ) : (
-                      <UserAvatar size={20} />
+                      <div className="default-avatar" aria-label="Default profile picture">
+                        <UserAvatar size={20} />
+                      </div>
                     )}
                   </div>
                 </HeaderMenuItem>
@@ -219,25 +235,9 @@ function UserBase() {
                     Dashboard
                   </SideNavLink>
 
-                  <SideNavLink
-                    renderIcon={() => <UserAvatar size={40} style={{ fontSize: "3rem" }} />}
-                    isActive={location.pathname === "/user/profile"}
-                    as={Link}
-                    to="/user/profile"
-                    className="side-nav-link"
-                  >
-                    Profile
-                  </SideNavLink>
 
-                  <SideNavLink
-                    renderIcon={() => <Settings size={40} style={{ fontSize: "3rem" }} />}
-                    isActive={location.pathname === "/user/settings"}
-                    as={Link}
-                    to="/user/settings"
-                    className="side-nav-link"
-                  >
-                    Settings
-                  </SideNavLink>
+
+
 
                   <SideNavLink
                     renderIcon={() => <Email size={40} style={{ fontSize: "3rem" }} />}
@@ -258,7 +258,15 @@ function UserBase() {
                   >
                     Manage Complaints  
                   </SideNavLink>
-
+                  <SideNavLink
+                    renderIcon={() => <UserAvatar size={40} style={{ fontSize: "3rem" }} />}
+                    isActive={location.pathname === "/user/profile"}
+                    as={Link}
+                    to="/user/profile"
+                    className="side-nav-link"
+                  >
+                    Profile
+                  </SideNavLink>
                   <SideNavLink
                     renderIcon={() => <FaceMask size={40} style={{ fontSize: "3rem" }} />}
                     isActive={location.pathname === "/user/facial-data"}
@@ -267,6 +275,15 @@ function UserBase() {
                     className="side-nav-link"
                   >
                     Manage Facial Data
+                  </SideNavLink>
+                  <SideNavLink
+                    renderIcon={() => <Settings size={40} style={{ fontSize: "3rem" }} />}
+                    isActive={location.pathname === "/user/settings"}
+                    as={Link}
+                    to="/user/settings"
+                    className="side-nav-link"
+                  >
+                    Settings
                   </SideNavLink>
                 </SideNavItems>
               </SideNav>
