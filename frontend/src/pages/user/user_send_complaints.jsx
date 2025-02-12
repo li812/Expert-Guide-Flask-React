@@ -92,13 +92,14 @@ const UserSendComplaints = () => {
             description="Complaint submitted"
           />
         </ProgressIndicator>
+        <br></br><br></br>
 
         <Tile className="generate-api-tile">
           {/* Step 1: Write Complaint */}
           {step === 1 && (
             <>
-              <h2>Send a Complaint</h2>
-              <p className="subtitle">Please provide the details of your complaint</p>
+              <h2>Send a Complaint<br></br><br></br></h2>
+              <p className="subtitle">Please provide the details of your complaint<br></br><br></br></p>
               
               <Form onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
                 <Stack gap={7}>
@@ -147,19 +148,19 @@ const UserSendComplaints = () => {
           {/* Step 2: Review */}
           {step === 2 && (
             <>
-              <h2>Review Complaint</h2>
-              <p className="subtitle">Please review your complaint before submitting</p>
+              <h2>Review Complaint</h2><br></br>
+              <p className="subtitle">Please review your complaint before submitting</p><br></br><br></br>
               
               <div className="review-details">
                 <Stack gap={5}>
                   <div className="review-item">
-                    <h4>Subject</h4>
-                    <p>{complaint.subject}</p>
+                    <h4>Subject</h4><br></br>
+                    <p>{complaint.subject}</p><br></br>
                   </div>
                   
                   <div className="review-item">
-                    <h4>Message</h4>
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.message}</p>
+                    <h4>Message</h4><br></br>
+                    <p style={{ whiteSpace: 'pre-wrap' }}>{complaint.message}</p><br></br>
                   </div>
 
                   <div className="button-group">
@@ -187,21 +188,21 @@ const UserSendComplaints = () => {
           {/* Step 3: Complete */}
           {step === 3 && submittedComplaint && (
             <>
-              <h2>Complaint Submitted Successfully!</h2>
-              <p className="subtitle">Your complaint has been sent. We'll review it shortly.</p>
+              <h2>Complaint Submitted Successfully!</h2><br></br><br></br>
+              <p className="subtitle">Your complaint has been sent. We'll review it shortly.</p><br></br><br></br>
               
               <div className="complaint-details">
                 <Stack gap={7}>
                   <div className="credential-item">
-                    <h4>Complaint ID</h4>
+                    <h4>Complaint ID</h4><br></br>
                     <CodeSnippet type="single">
                       {submittedComplaint.id}
                     </CodeSnippet>
                   </div>
 
                   <div className="credential-item">
-                    <h4>Status</h4>
-                    <Tag type="blue">Pending Review</Tag>
+                    <h4>Status</h4><br></br>
+                    <Tag type="blue">Pending Review</Tag><br></br>
                   </div>
 
                   <div className="button-group">

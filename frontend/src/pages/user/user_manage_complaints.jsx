@@ -188,7 +188,7 @@ const UserManageComplaints = () => {
             </>
           )}
         </Stack>
-      </div>
+      </div><br></br><br></br>
     </Modal>
   );
 
@@ -196,7 +196,7 @@ const UserManageComplaints = () => {
     <Grid className="complaints-page">
       <Column lg={16} md={8} sm={4}>
         <Tile className="complaints-section">
-          <h2>Manage Complaints</h2>
+          <h2>Manage Complaints</h2><br></br>
 
           {/* Filters */}
           <Stack gap={5}>

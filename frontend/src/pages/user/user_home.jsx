@@ -77,13 +77,12 @@ const UserHome = ({ username }) => {
         <Grid className="dashboard">
             {/* Header Section */}
             <Column lg={16} md={8} sm={4}>
-                <Tile className="stat-tile" align= "center">
-                    <div className="profile-picture-container-big" align= "center">
+                <Tile className="stat-tile">
+                    <div className="profile-picture-container-big">
                         {profile.profilePicture ? (
                             <img
                                 src={`http://localhost:5001${profile.profilePicture}`}
                                 alt="Profile"
-                                align= "center"
                                 className="profile-picture"
                                 onError={(e) => {
                                     e.target.onerror = null;
@@ -91,10 +90,12 @@ const UserHome = ({ username }) => {
                                 }}
                             />
                         ) : (
-                            <UserAvatar size={48} align= "center" />
+                            <UserAvatar size={48} />
                         )}
                     </div>
-                    <Heading className="dashboard-heading">Welcome, {profile.fullName || username}!</Heading>
+                    <Heading className="dashboard-heading">
+                        Welcome, {profile.fullName || username}!
+                    </Heading>
                 </Tile>
             </Column>
 

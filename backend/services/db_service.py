@@ -91,73 +91,6 @@ def register_user(user_data, profile_picture):
         print(f"Error in register_user: {str(e)}")
         return {"error": str(e)}
     
-def register_developer(developer_data, profile_picture):
-    try:
-        # Validate user data first
-        is_valid, error_message = validate_user_data(developer_data)
-        if not is_valid:
-            return {"error": error_message}
-
-        # Validate date format
-        try:
-            datetime.strptime(developer_data['dateOfBirth'], '%Y-%m-%d')
-        except ValueError:
-            return {"error": "Invalid date format"}
-
-        # Create login record
-        login = Login(
-            username=developer_data.get('username'),
-            password=developer_data.get('password'),
-            type_id=developer_data.get('type_id', 3)
-        )
-        db.session.add(login)
-        db.session.flush()  # Get login_id
-
-        # Create Developer record
-        new_developer = Developers(
-            login_id=login.login_id,
-            full_name=developer_data.get('full_name'),
-            email=developer_data.get('email'),
-            phone=developer_data.get('phone'),
-            dateOfBirth=developer_data.get('dateOfBirth'),
-            gitHubUsername=developer_data.get('gitHubUsername'),
-            linkedInUsername=developer_data.get('linkedInUsername'),
-            typeOfDeveloper=developer_data.get('typeOfDeveloper'),
-            companyName=developer_data.get('companyName', ''),  # Default empty string if not provided
-            address=developer_data.get('address'),
-            state=developer_data.get('state'),
-            district=developer_data.get('district'),
-            postalPinCode=developer_data.get('postalPinCode')
-        )
-
-        # Add developer to session
-        db.session.add(new_developer)  # This was missing
-
-        # Save profile picture if provided
-        if profile_picture:
-            profile_picture_path = f"developer_data/developer_profile_picture/{login.login_id}.jpg"
-            os.makedirs(os.path.dirname(profile_picture_path), exist_ok=True)
-            profile_picture.save(profile_picture_path)
-            new_developer.profilePicture = profile_picture_path
-
-        # Commit both login and developer records
-        db.session.commit()
-        print(f"Developer registered successfully with login_id: {login.login_id}")
-        return {"message": "Developer registered successfully", "login_id": login.login_id}
-
-    except Exception as e:
-        db.session.rollback()
-        print("Error in register_developer:", str(e))
-        if "Duplicate entry" in str(e):
-            if "email" in str(e):
-                return {"error": "Email already registered"}
-            elif "gitHubUsername" in str(e):
-                return {"error": "GitHub username already registered"}
-            elif "linkedInUsername" in str(e):
-                return {"error": "LinkedIn username already registered"}
-            elif "phone" in str(e):
-                return {"error": "Phone number already registered"}
-        return {"error": str(e)}
 
 def check_credentials(identifier):
     """Check if identifier exists and get user type"""
@@ -171,21 +104,6 @@ def check_credentials(identifier):
                 "exists": True,
                 "type": 1,
                 "username": admin.username
-            }
-            
-        # Check developer (username or email)
-        developer = Login.query.join(Developers).filter(
-            or_(
-                Login.username == identifier,
-                Developers.email == identifier
-            )
-        ).first()
-        if developer:
-            print("Developer credentials found")
-            return {
-                "exists": True,
-                "type": 3,
-                "username": developer.username
             }
             
         # Check regular user
@@ -260,26 +178,6 @@ def verify_password(identifier, password):
                     "error": "Invalid credentials"
                 }
 
-        # Try email lookups for Developers if still not found
-        user = db.session.query(Login).join(Developers).filter(
-            Developers.email == identifier
-        ).first()
-        if user:
-            print(f"Found user by Developers email")
-            if user.password == password:
-                print("Password verified successfully")
-                return {
-                    "success": True,
-                    "type": user.type_id,
-                    "login_id": user.login_id
-                }
-            else:
-                print(f"Password mismatch for developer email login")
-                return {
-                    "success": False,
-                    "error": "Invalid credentials"
-                }
-
         print("User not found")
         return {
             "success": False,
@@ -292,7 +190,4 @@ def verify_password(identifier, password):
             "success": False,
             "error": str(e)
         }
-
-
-
 

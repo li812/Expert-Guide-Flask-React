@@ -28,6 +28,7 @@ import {
   Report,         // Add these
   Email,          // Add these
   FaceMask,       // Add this icon
+  Chat
 } from '@carbon/icons-react';
 import UserHome from './user_home';
 import UserSettings from './user_settings';
@@ -35,6 +36,7 @@ import UserProfile from './user_profile'; // Add this
 import UserManageFacialData from './user_manage_facial_data'; // Add this
 import UserSendComplaints from './user_send_complaints';
 import UserManageComplaints from './user_manage_complaints';
+import UserLLMChat from './user_llm_chat';
 
 function UserBase() {
   const navigate = useNavigate();
@@ -236,7 +238,15 @@ function UserBase() {
                   </SideNavLink>
 
 
-
+                  <SideNavLink
+                    renderIcon={() => <Chat size={40} style={{ fontSize: "3rem" }} />}
+                    isActive={location.pathname === "/user/llm-chat"}
+                    as={Link}
+                    to="/user/llm-chat"
+                    className="side-nav-link"
+                  >
+                    LLM Chat
+                  </SideNavLink>
 
 
                   <SideNavLink
@@ -256,7 +266,7 @@ function UserBase() {
                     to="/user/manage-complaints"
                     className="side-nav-link"
                   >
-                    Manage Complaints  
+                    Manage Complaints
                   </SideNavLink>
                   <SideNavLink
                     renderIcon={() => <UserAvatar size={40} style={{ fontSize: "3rem" }} />}
@@ -307,6 +317,7 @@ function UserBase() {
                 <Route path="/facial-data" element={<UserManageFacialData />} />
                 <Route path="/complaints" element={<UserSendComplaints />} />
                 <Route path="/manage-complaints" element={<UserManageComplaints />} />
+                <Route path="/llm-chat" element={<UserLLMChat />} /> {/* Add this route */}
                 <Route path="*" element={<UserHome username={username} />} />
               </Routes>
             </Content>

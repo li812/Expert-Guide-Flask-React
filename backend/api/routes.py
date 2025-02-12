@@ -13,7 +13,6 @@ from services.db_service import (
     get_user_type,
     get_username_by_login_id,
     register_user,
-    register_developer,
     check_credentials,
     verify_password
 )
@@ -29,40 +28,17 @@ from services.session_management import (
 from services.admin_services import (
     get_all_users,
     delete_user,
-    get_all_developers,
-    delete_developer,
-    get_all_apis,
-    delete_api as admin_delete_api,
-    update_api_status as admin_update_api_status,
     get_server_info,
-    get_all_developer_complaints,
-    get_all_developer_complaints,
-    reply_to_developer_complaints,
     get_all_user_complaints,
     reply_to_user_complaints,
     update_admin_password# Ensure this import is present
 )
 
-from services.developer_services import (
-    generate_api,
-    get_apis_by_developer,
-    update_api_status as developer_update_api_status,
-    delete_api as developer_delete_api,
-    get_developer_stats,
-    get_developer_profile,
-    update_developer_profile,
-    update_developer_password,
-    get_complaints,
-    create_complaint,
-    delete_complaint,
-    update_complaint,
-    get_complaint_details,
-)
 from services.user_services import (
     get_user_stats, 
     user_update_password,
-    get_user_complaints,  # Add this import
-    create_user_complaint,  # Add this import
+    get_user_complaints, 
+    create_user_complaint,  
     update_user_profile, 
     update_user_facial_data, 
     delete_user_facial_data
@@ -271,26 +247,6 @@ def verify_face():
         print(f"Error in face verification: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@api.route('/api/register-developer', methods=['POST'])
-def developer_registration_api():
-    try:
-        developer_data = request.form.to_dict()
-        profile_picture = request.files.get('profile_picture')
-        
-        if not profile_picture:
-            return jsonify({"error": "Profile picture is required"}), 400
-
-        # Set type_id for developer
-        developer_data['type_id'] = 3  # Developer type ID
-        
-        result = register_developer(developer_data, profile_picture)
-        if "error" in result:
-            return jsonify(result), 400
-        return jsonify(result), 201
-        
-    except Exception as e:
-        print("Error in registration API:", str(e))
-        return jsonify({"error": str(e)}), 500
 
 # Protect admin routes
 @api.route('/api/admin/users', methods=['GET', 'OPTIONS'])
@@ -317,128 +273,29 @@ def delete_user_route(login_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@api.route('/api/admin/developers', methods=['GET', 'OPTIONS'])
-@check_session(required_type=1)
-def get_developers():
-    if request.method == 'OPTIONS':
-        return '', 204
-        
-    try:
-        developers = get_all_developers()
-        return jsonify({'developers': developers})
-    except Exception as e:
-        print("Error in get_developers:", str(e))
-        return jsonify({'error': str(e)}), 500
-
-@api.route('/api/admin/developers/<int:login_id>', methods=['DELETE', 'OPTIONS'])
-@check_session(required_type=1)
-def delete_developer_route(login_id):
-    if request.method == 'OPTIONS':
-        return '', 204
-        
-    try:
-        delete_developer(login_id)
-        return jsonify({'message': 'Developer deleted successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 
 
-@api.route('/api/admin/developer-complaints', methods=['GET'])
-@check_session(required_type=1)  # Ensure admin type_id=1
-def get_all_developer_complaints_route():
-    try:
-        login_id = session.get('login_id')
-        if not login_id:
-            return jsonify({'error': 'Unauthorized'}), 401
 
-        complaints = get_all_developer_complaints()
-        if "error" in complaints:
-            return jsonify(complaints), 500
-        return jsonify({'complaints': complaints})
-    except Exception as e:
-        print(f"Error in get_all_developer_complaints_route: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
-@api.route('/api/admin/developer-complaints/<int:complaint_id>/reply', methods=['PUT'])
-@check_session(required_type=1)
-def admin_reply_developer_complaint_route(complaint_id):
-    try:
-        data = request.get_json()
-        reply = data.get('reply')
-        replier_login_id = session.get('login_id')
 
-        if not reply:
-            return jsonify({'error': 'Reply is required'}), 400
 
-        result = reply_to_developer_complaints(complaint_id, reply, replier_login_id)
-        if "error" in result:
-            return jsonify(result), 500
-        return jsonify({'complaint': result})
-    except Exception as e:
-        print(f"Error in admin_reply_complaint_route: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
-# Fetch all APIs
-@api.route('/api/admin/apis', methods=['GET', 'OPTIONS'])
-@check_session(required_type=1)
-def get_apis():
-    if request.method == 'OPTIONS':
-        return '', 204
-        
-    try:
-        apis = get_all_apis()
-        return jsonify({'apis': apis})
-    except Exception as e:
-        print(f"Error in get_apis route: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-# Delete an API
-@api.route('/api/admin/apis/<int:api_id>', methods=['DELETE', 'OPTIONS'])
-@check_session(required_type=1)
-def admin_delete_api_route(api_id):
-    if request.method == 'OPTIONS':
-        return '', 204
-        
-    try:
-        admin_delete_api(api_id)
-        return jsonify({'message': 'API deleted successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# Update API status
-@api.route('/api/admin/apis/<int:api_id>/status', methods=['PUT', 'OPTIONS'])
-@check_session(required_type=1)
-def admin_update_api_status_route(api_id):
-    if request.method == 'OPTIONS':
-        return '', 204
-        
-    try:
-        data = request.json
-        new_status = data.get('status')
-        updated_api = admin_update_api_status(api_id, new_status)
-        return jsonify(updated_api)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @api.route('/api/admin/stats', methods=['GET'])
 @check_session(required_type=1)  # Admin type_id = 1
 def get_admin_stats():
     try:
         user_count = Users.query.count()
-        developer_count = Developers.query.count()
         api_count = APIs.query.count()
         
         # Specify the onclause for the join
         pending_user_complaints = Complaints.query.join(Login, Complaints.sender_login_id == Login.login_id).filter(Login.type_id == 2, Complaints.status == 'pending').count()
-        pending_developer_complaints = Complaints.query.join(Login, Complaints.sender_login_id == Login.login_id).filter(Login.type_id == 3, Complaints.status == 'pending').count()
         
         return jsonify({
             'user_count': user_count,
-            'developer_count': developer_count,
             'api_count': api_count,
             'pending_user_complaints': pending_user_complaints,
-            'pending_developer_complaints': pending_developer_complaints
         })
     except Exception as e:
         print(f"Error in get_admin_stats: {str(e)}")
@@ -522,208 +379,7 @@ def server_info_route():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Route to generate a new API
-@api.route('/api/developer/generate-api', methods=['POST'])
-@check_session(required_type=3)
-def generate_api_route():
-    try:
-        api_data = request.form.to_dict()
-        logo = request.files.get('logo')
-        api_data['login_id'] = session['login_id']
-        result = generate_api(api_data, logo)
-        if "error" in result:
-            print(f"Error generating API: {result['error']}")
-            return jsonify(result), 400
-        return jsonify(result["api"]), 201
-    except Exception as e:
-        print(f"Exception in generate_api_route: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
 
-# Route to get APIs by developer
-@api.route('/api/developer/apis', methods=['GET'])
-@check_session(required_type=3)
-def get_apis_route():
-    try:
-        login_id = session['login_id']
-        apis = get_apis_by_developer(login_id)
-        if "error" in apis:
-            return jsonify(apis), 400
-        return jsonify({'apis': apis}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Route to update API status
-@api.route('/api/developer/apis/<int:api_id>/status', methods=['PUT'])
-@check_session(required_type=3)
-def developer_update_api_status_route(api_id):
-    try:
-        data = request.json
-        if not data or 'status' not in data:
-            return jsonify({"error": "Status not provided"}), 400
-            
-        new_status = data.get('status')
-        if new_status not in ['active', 'inactive']:
-            return jsonify({"error": "Invalid status value"}), 400
-            
-        result = developer_update_api_status(api_id, new_status)
-        
-        if "error" in result:
-            return jsonify(result), 400
-            
-        return jsonify(result), 200
-    except Exception as e:
-        print(f"Error in status update route: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-# Route to delete an API
-@api.route('/api/developer/apis/<int:api_id>', methods=['DELETE'])
-@check_session(required_type=3)
-def developer_delete_api_route(api_id):
-    try:
-        result = developer_delete_api(api_id)
-        if "error" in result:
-            return jsonify(result), 400
-        return jsonify(result), 200
-    except Exception as e:
-        print(f"Exception in developer_delete_api_route: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-# Route to get developer stats
-@api.route('/api/developer/stats', methods=['GET'])
-@check_session(required_type=3)
-def get_developer_stats_route():
-    try:
-        login_id = session['login_id']
-        stats = get_developer_stats(login_id)
-        return jsonify(stats), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Route to get developer profile
-@api.route('/api/developer/profile', methods=['GET'])
-@check_session(required_type=3)  # Developer type_id = 3
-def get_developer_profile_route():
-    try:
-        login_id = session.get('login_id')
-        profile = get_developer_profile(login_id)
-        if "error" in profile:
-            return jsonify(profile), 400
-        return jsonify(profile), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Route to update developer profile
-@api.route('/api/developer/profile', methods=['PUT'])
-@check_session(required_type=3)  # Developer type_id = 3
-def update_developer_profile_route():
-    try:
-        login_id = session.get('login_id')
-        profile_data = request.form.to_dict()
-        profile_picture = request.files.get('profile_picture')
-        
-        result = update_developer_profile(login_id, profile_data, profile_picture)
-        if "error" in result:
-            return jsonify(result), 400
-            
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@api.route('/api/developer/complaints', methods=['GET'])
-def get_complaints_route():
-    try:
-        login_id = session.get('login_id')
-        if not login_id:
-            return jsonify({'error': 'Unauthorized'}), 401
-
-        complaints = get_complaints(login_id)
-        if "error" in complaints:
-            return jsonify(complaints), 500
-        return jsonify({'complaints': complaints})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@api.route('/api/developer/complaints', methods=['POST'])
-def create_complaint_route():
-    try:
-        login_id = session.get('login_id')
-        if not login_id:
-            return jsonify({'error': 'Unauthorized'}), 401
-
-        data = request.json
-        result = create_complaint(login_id, data['subject'], data['message'])
-        if "error" in result:
-            return jsonify(result), 500
-        return jsonify({'complaint': result}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@api.route('/api/developer/complaints/<int:complaint_id>', methods=['DELETE'])
-def delete_complaint_route(complaint_id):
-    try:
-        login_id = session.get('login_id')
-        if not login_id:
-            return jsonify({'error': 'Unauthorized'}), 401
-
-        result = delete_complaint(login_id, complaint_id)
-        if "error" in result:
-            return jsonify(result), 500
-        return jsonify({'message': 'Complaint deleted successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@api.route('/api/developer/complaints/<int:complaint_id>', methods=['PUT'])
-def update_complaint_route(complaint_id):
-    try:
-        login_id = session.get('login_id')
-        if not login_id:
-            return jsonify({'error': 'Unauthorized'}), 401
-
-        data = request.json
-        result = update_complaint(login_id, complaint_id, data)
-        
-        if "error" in result:
-            return jsonify(result), 500
-            
-        return jsonify({'complaint': result})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@api.route('/api/developer/complaints/<int:complaint_id>/details', methods=['GET'])
-def get_complaint_details_route(complaint_id):
-    try:
-        login_id = session.get('login_id')
-        if not login_id:
-            return jsonify({'error': 'Unauthorized'}), 401
-
-        result = get_complaint_details(login_id, complaint_id)
-        if "error" in result:
-            return jsonify(result), 404
-        return jsonify({'complaint': result})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@api.route('/api/developer/update-password', methods=['PUT'])
-@check_session(required_type=3)
-def update_developer_password_route():
-    try:
-        data = request.json
-        login_id = session.get('login_id')
-        
-        result = update_developer_password(
-            login_id, 
-            data['currentPassword'], 
-            data['newPassword']
-        )
-        
-        if "error" in result:
-            return jsonify(result), 400
-            
-        return jsonify({'message': 'Password updated successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @api.route('/api/admin/complaints/<int:complaint_id>/reply', methods=['PUT'])
 @check_session(required_type=1)
