@@ -17,7 +17,7 @@ import Sum from "./pages/Sum";
 import Login from "./pages/Login";
 import UserBase from "./pages/user/user_base";
 import UserHome from './pages/user/user_home';
-import ForDevelopers from "./pages/for_students";
+import ForStudents from "./pages/For_Students";
 import AdminBase from "./pages/admin/admin_base";
 import AdminHome from "./pages/admin/admin_home";
 import RegisterUser from "./pages/RegisterUser";
@@ -82,7 +82,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/sum" element={<Sum />} />
-              <Route path="/for_students" element={<ForDevelopers />} /> {/* Add this line */}
+              <Route path="/for_students" element={<ForStudents />} /> {/* Add this line */}
               <Route path="/login" element={<Login />} />
               <Route path="/register-user" element={<RegisterUser />} /> 
               

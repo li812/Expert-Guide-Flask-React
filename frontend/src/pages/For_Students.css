@@ -1,0 +1,138 @@
+.students-page {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.hero-section {
+  margin: 4rem 0;
+  align-items: center;
+}
+
+.hero-section img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.features-section {
+  margin: 4rem 0;
+}
+
+.feature-tile {
+  height: 100%;
+  padding: 2rem;
+  transition: transform 0.2s;
+}
+
+.feature-tile:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.feature-tile h3 {
+  margin: 1rem 0;
+  color: #0f62fe;
+}
+
+.benefits-tags {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.how-it-works-section {
+  margin: 4rem 0;
+  padding: 2rem;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+}
+
+.cta-section {
+  margin: 4rem 0;
+  text-align: center;
+}
+
+.cta-section .bx--tile {
+  padding: 3rem;
+  background-color: #0f62fe;
+  color: white;
+  border-radius: 8px;
+}
+
+.cta-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.cta-section .bx--btn {
+  background-color: white;
+  color: #0f62fe;
+}
+
+.footer-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin: 0.75rem 0;
+}
+
+.footer-section ul li a {
+  color: #525252;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-section ul li a:hover {
+  color: #0f62fe;
+}
+
+.footer-bottom {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+  color: #525252;
+}
+
+.bx--tab-content {
+  padding: 2rem 0;
+}
+
+.bx--tabs--scrollable {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    margin: 2rem 0;
+  }
+  
+  .hero-section h1 {
+    font-size: 3rem !important;
+  }
+  
+  .features-section h2,
+  .how-it-works-section h2 {
+    font-size: 2rem !important;
+  }
+  
+  .cta-section h2 {
+    font-size: 2rem;
+  }
+  
+  .feature-tile {
+    margin-bottom: 1rem;
+  }
+}
