@@ -171,6 +171,8 @@ function RegisterUser() {
     }
   };
 
+  const face_lock = false;
+
   useEffect(() => {
     if (step === 6) {
       navigator.mediaDevices
@@ -377,19 +379,14 @@ function RegisterUser() {
     setError(null);
 
     try {
-      // Create FormData object
       const formDataToSend = new FormData();
-
-      // Map field names to match backend expectations
       const fieldMapping = {
         fullName: 'full_name',
         dateOfBirth: 'dateOfBirth',
       };
 
-      // Add all form fields
       Object.keys(formData).forEach(key => {
         const backendKey = fieldMapping[key] || key;
-        // Handle profile picture separately
         if (key === 'profilePicture' && formData[key]) {
           formDataToSend.append('profilePicture', formData[key]);
         } else {
@@ -397,19 +394,25 @@ function RegisterUser() {
         }
       });
 
-      // Add user type
       formDataToSend.append('type_id', 2);
 
       const response = await fetch('http://localhost:5001/api/register-user', {
         method: 'POST',
         credentials: 'include',
-        body: formDataToSend  // Send as FormData
+        body: formDataToSend
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setStep(6);  // Move to step 6
+        if (face_lock) {
+          // If face_lock is enabled, proceed to face registration
+          setStep(6);
+        } else {
+          // If face_lock is disabled, skip face registration and go to login
+          alert("Registration successful!");
+          navigate('/login');
+        }
       } else {
         setError(data.error || 'Registration failed');
       }

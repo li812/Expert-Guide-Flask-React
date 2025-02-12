@@ -126,15 +126,29 @@ const Login = () => {
       const data = await response.json();
       console.log("Identifier response data:", data);
 
-      if (response.ok) {
-        setUserType(data.type);
-        if (data.type === 2) {
-          setStep(LOGIN_STEPS.FACE_VERIFY);
+      const face_lock = false;
+
+      if (face_lock == true) {
+        if (response.ok) {
+          setUserType(data.type);
+          if (data.type === 2) {
+            setStep(LOGIN_STEPS.FACE_VERIFY);
+          } else {
+            setStep(LOGIN_STEPS.PASSWORD);
+          }
         } else {
+          setError(data.error);
+        }  
+      }
+      else {
+        if (response.ok) {
+          setUserType(data.type);
           setStep(LOGIN_STEPS.PASSWORD);
-        }
-      } else {
-        setError(data.error);
+          
+          
+        } else {
+          setError(data.error);
+        }  
       }
     } catch (err) {
       console.error("Failed to verify credentials:", err);
@@ -334,7 +348,8 @@ const Login = () => {
           <ProgressStep
             label="Step 2"
             description="Verification"
-            secondaryLabel="Face/Password"
+            // secondaryLabel="Face/Password"
+            secondaryLabel="Password"
           />
           <ProgressStep
             label="Step 3"
