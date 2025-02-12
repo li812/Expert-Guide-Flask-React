@@ -2,13 +2,39 @@ from db.db_models import db, Questions
 from datetime import datetime
 
 
-def get_all_questions():
+def get_all_questions(page=1, per_page=10, sort_key='question_id', sort_direction='asc'):
     try:
-        questions = Questions.query.all()
-        return [{
-            'question_id': q.question_id,
-            'question': q.question
-        } for q in questions]
+        # Create base query
+        query = Questions.query
+
+        # Apply sorting
+        if sort_key == 'question_id':
+            sort_column = Questions.question_id
+        else:
+            sort_column = Questions.question
+
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        questions = query.paginate(
+            page=page, 
+            per_page=per_page, 
+            error_out=False
+        )
+
+        return {
+            'questions': [{
+                'question_id': q.question_id,
+                'question': q.question
+            } for q in questions.items],
+            'total': total
+        }
     except Exception as e:
         return {"error": str(e)}
 

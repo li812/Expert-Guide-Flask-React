@@ -303,10 +303,24 @@ def get_admin_stats():
 @check_session(required_type=1)  # Admin only
 def get_all_questions_route():
     try:
-        questions = get_all_questions()
-        if "error" in questions:
-            return jsonify({'error': questions["error"]}), 500
-        return jsonify({'questions': questions})
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        sort_key = request.args.get('sort', 'question_id')
+        sort_direction = request.args.get('direction', 'asc')
+
+        # Get paginated questions
+        result = get_all_questions(
+            page=page,
+            per_page=per_page,
+            sort_key=sort_key,
+            sort_direction=sort_direction
+        )
+
+        if "error" in result:
+            return jsonify({'error': result["error"]}), 500
+
+        return jsonify(result)
     except Exception as e:
         print(f"Error fetching questions: {str(e)}")
         return jsonify({'error': str(e)}), 500

@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from .db_models import db, UserType, Login, Users
+from .db_models import db, UserType, Login, Users, Questions, Careers
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime

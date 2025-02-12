@@ -64,3 +64,10 @@ class Questions(db.Model):
     question = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+class Careers(db.Model):
+    __tablename__ = 'careers'
+    career_id = db.Column(db.Integer, primary_key=True)
+    career = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
