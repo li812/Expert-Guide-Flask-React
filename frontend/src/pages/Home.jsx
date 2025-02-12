@@ -44,8 +44,6 @@ function Home() {
     >
       {/* Hero Section */}
       <div id="Hero Section">
-        <br />
-        <br />
         <div className="bx--row hero-section">
           <div className="bx--col-lg-8 hero-text">
             <Stack gap={7}>

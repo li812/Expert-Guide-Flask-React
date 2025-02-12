@@ -245,7 +245,7 @@ function UserBase() {
                     to="/user/llm-chat"
                     className="side-nav-link"
                   >
-                    LLM Chat
+                    Career Guidance AI
                   </SideNavLink>
 
 
@@ -277,7 +277,7 @@ function UserBase() {
                   >
                     Profile
                   </SideNavLink>
-                  <SideNavLink
+                  {/* <SideNavLink
                     renderIcon={() => <FaceMask size={40} style={{ fontSize: "3rem" }} />}
                     isActive={location.pathname === "/user/facial-data"}
                     as={Link}
@@ -285,7 +285,7 @@ function UserBase() {
                     className="side-nav-link"
                   >
                     Manage Facial Data
-                  </SideNavLink>
+                  </SideNavLink> */}
                   <SideNavLink
                     renderIcon={() => <Settings size={40} style={{ fontSize: "3rem" }} />}
                     isActive={location.pathname === "/user/settings"}

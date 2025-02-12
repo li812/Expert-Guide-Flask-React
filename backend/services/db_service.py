@@ -1,9 +1,9 @@
-from db.db_models import db, Login, UserType, Users, Developers
+from db.db_models import db, Login, UserType, Users
 from services.face_lock import register_user_face
 import os
 from datetime import datetime
 from sqlalchemy import or_
-from db.db_models import db, Login, Users, Developers
+from db.db_models import db, Login, Users
 
 def authenticate_user(username, password):
     print(f"Authenticating user: {username}")

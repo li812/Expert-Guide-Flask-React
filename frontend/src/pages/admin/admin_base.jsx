@@ -18,11 +18,12 @@ import {
   Theme,
   SideNavLink
 } from '@carbon/react';
-import { Search, Logout, Light, Asleep, UserAvatar, Settings, Api, UserAdmin, Dashboard, Email } from '@carbon/icons-react';
+import { Search, Logout, Light, Asleep, UserAvatar, Settings, Api, UserAdmin, Dashboard, Email, Add, TrashCan, Edit, Save, View, QuestionAnswering } from '@carbon/icons-react';
 import AdminHome from './admin_home';
 import AdminManageUsers from './admin_manage_users.jsx';
 import AdminSettings from './admin_settings.jsx';
 import AdminManageUserComplaints from './admin_manage_users_complaints.jsx';
+import AdminManageQuestions from './admin_manage_questions';
 import './admin.css'; // Import the CSS file for styling
 
 function AdminBase() {
@@ -141,6 +142,16 @@ function AdminBase() {
                       Dashboard
                     </SideNavLink>
                     <SideNavLink
+                      renderIcon={() => <QuestionAnswering size={40} />}
+                      isActive={location.pathname === "/admin/questions"}
+                      as={Link}
+                      to="/admin/questions"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Career Questions
+                    </SideNavLink>
+                    <SideNavLink
                       renderIcon={() => <UserAdmin size={40} />}
                       isActive={location.pathname === "/admin/users"}
                       as={Link}
@@ -172,6 +183,7 @@ function AdminBase() {
                       Settings
                     </SideNavLink>
 
+
                   </SideNavItems>
                 </SideNav>
               </Header>
@@ -182,6 +194,7 @@ function AdminBase() {
                   <Route path="users" element={<AdminManageUsers username={username} />} />
                   <Route path="settings" element={<AdminSettings username={username} />} />
                   <Route path="manage-user-complaints" element={<AdminManageUserComplaints username={username} />} />
+                  <Route path="questions" element={<AdminManageQuestions username={username} />} />
                  <Route path="*" element={<AdminHome username={username} />} />
                 </Routes>
               </Content>

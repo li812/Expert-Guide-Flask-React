@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from functools import wraps
 import time
 import os
-from db.db_models import Complaints, db
+from db.db_models import Complaints, db, Questions
 from datetime import datetime
 
 # Service imports
@@ -33,6 +33,13 @@ from services.admin_services import (
     reply_to_user_complaints,
     update_admin_password# Ensure this import is present
 )
+from services.question_services import (
+    get_all_questions,
+    add_question,
+    update_question,
+    delete_question,
+    validate_question
+)
 
 from services.user_services import (
     get_user_stats, 
@@ -45,7 +52,7 @@ from services.user_services import (
 )
 
 # Database models
-from db.db_models import Users, Developers, APIs, Login, UserType, Complaints
+from db.db_models import Users, Login, UserType, Complaints
 
 api = Blueprint('api', __name__)
 
@@ -273,32 +280,94 @@ def delete_user_route(login_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-
-
-
-
-
-
-
-
 @api.route('/api/admin/stats', methods=['GET'])
 @check_session(required_type=1)  # Admin type_id = 1
 def get_admin_stats():
     try:
         user_count = Users.query.count()
-        api_count = APIs.query.count()
+        
         
         # Specify the onclause for the join
         pending_user_complaints = Complaints.query.join(Login, Complaints.sender_login_id == Login.login_id).filter(Login.type_id == 2, Complaints.status == 'pending').count()
         
         return jsonify({
             'user_count': user_count,
-            'api_count': api_count,
             'pending_user_complaints': pending_user_complaints,
         })
     except Exception as e:
         print(f"Error in get_admin_stats: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Update the question routes to use the services
+@api.route('/api/admin/questions', methods=['GET'])
+@check_session(required_type=1)  # Admin only
+def get_all_questions_route():
+    try:
+        questions = get_all_questions()
+        if "error" in questions:
+            return jsonify({'error': questions["error"]}), 500
+        return jsonify({'questions': questions})
+    except Exception as e:
+        print(f"Error fetching questions: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/api/admin/questions', methods=['POST'])
+@check_session(required_type=1)  # Admin only
+def add_question_route():
+    try:
+        data = request.get_json()
+        question_text = data.get('question')
+        
+        # Validate question
+        is_valid, error_message = validate_question(question_text)
+        if not is_valid:
+            return jsonify({'error': error_message}), 400
+            
+        result = add_question(question_text)
+        if "error" in result:
+            return jsonify({'error': result["error"]}), 500
+            
+        return jsonify({'question': result}), 201
+    except Exception as e:
+        print(f"Error adding question: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/api/admin/questions/<int:question_id>', methods=['PUT'])
+@check_session(required_type=1)  # Admin only
+def update_question_route(question_id):
+    try:
+        data = request.get_json()
+        question_text = data.get('question')
+        
+        # Validate question
+        is_valid, error_message = validate_question(question_text)
+        if not is_valid:
+            return jsonify({'error': error_message}), 400
+            
+        result = update_question(question_id, question_text)
+        if "error" in result:
+            if result["error"] == "Question not found":
+                return jsonify({'error': result["error"]}), 404
+            return jsonify({'error': result["error"]}), 500
+            
+        return jsonify({'question': result})
+    except Exception as e:
+        print(f"Error updating question: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/api/admin/questions/<int:question_id>', methods=['DELETE'])
+@check_session(required_type=1)  # Admin only
+def delete_question_route(question_id):
+    try:
+        result = delete_question(question_id)
+        if "error" in result:
+            if result["error"] == "Question not found":
+                return jsonify({'error': result["error"]}), 404
+            return jsonify({'error': result["error"]}), 500
+            
+        return jsonify({'message': result["message"]})
+    except Exception as e:
+        print(f"Error deleting question: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # Protect user routes  
@@ -345,12 +414,7 @@ def get_user_profile():
         print(f"Error in get_user_profile: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Protect developer routes
-@api.route('/api/developer/apps', methods=['GET'])
-@check_session(required_type=3)  # Developer type_id = 3
-def get_developer_apps():
-    # Implementation...
-    pass
+
 
 @api.route('/api/check-session', methods=['POST', 'OPTIONS'])
 def check_session_status():
@@ -381,24 +445,6 @@ def server_info_route():
 
 
 
-@api.route('/api/admin/complaints/<int:complaint_id>/reply', methods=['PUT'])
-@check_session(required_type=1)
-def admin_reply_complaint_route(complaint_id):
-    try:
-        data = request.get_json()
-        reply = data.get('reply')
-        replier_login_id = session.get('login_id')
-
-        if not reply:
-            return jsonify({'error': 'Reply is required'}), 400
-
-        result = reply_to_developer_complaints(complaint_id, reply, replier_login_id)
-        if "error" in result:
-            return jsonify(result), 500
-        return jsonify({'complaint': result})
-    except Exception as e:
-        print(f"Error in admin_reply_complaint_route: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
 # Add these new routes for user complaints
 @api.route('/api/admin/user-complaints', methods=['GET'])
@@ -827,160 +873,9 @@ def get_user_complaint_details_route(complaint_id):
     except Exception as e:
         print(f"Error in get_user_complaint_details_route: {str(e)}")
         return jsonify({"error": str(e)}), 500
-    
-    
-from db.db_models import db, APIs, Users, Login, UserType
-from services.face_lock import check_user_face
-from datetime import datetime, timedelta
-import jwt
-import os
-    
-    
-from services.client_services import (
-    client_register_user, 
-    client_validate_api_key,
-    handle_client_authentication,
-    client_register_user,
-    client_verify_user_type,
-    client_verify_user_face,
-    verify_client_password,
-)
 
 
-@api.route('/api/client/verify', methods=['POST'])
-def verify_client():
-    try:
-        data = request.json
-        api_key = data.get('api_key')
-        username = data.get('username')
 
-        print(f"Received verification request:")
-        print(f"API Key: {api_key}")
-        print(f"Username: {username}")
-
-        if not api_key or not username:
-            return jsonify({
-                "error": "Missing required parameters"
-            }), 400
-
-        result = client_validate_api_key(api_key, username)
-        return jsonify(result)
-
-    except Exception as e:
-        print(f"Error in verify_client route: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-    
-    
-@api.route('/api/client/register', methods=['POST'])
-def register_client():
-    api_key = request.form.get('api_key')
-    username = request.form.get('username')
-    video = request.files.get('video')
-    password = request.form.get('password')
-    
-    user_data = {
-        'username': username,
-        'full_name': request.form.get('fullname'),
-        'email': request.form.get('email'),
-        'phone': request.form.get('phone'),
-        'address': request.form.get('address'),
-        'state': request.form.get('state'), 
-        'district': request.form.get('district'),
-        'pincode': request.form.get('pincode')
-    }
-
-    return jsonify(client_register_user(
-        api_key,
-        username, 
-        user_data,
-        video,
-        password
-    ))
-    
-    
-@api.route('/api/client/verify-face', methods=['POST'])
-def verify_face_route():
-    try:
-        username = request.form.get('username')
-        api_key = request.form.get('api_key')
-        video = request.files.get('video')
-
-        # Process face verification
-        result = client_verify_user_face(api_key, video, username)
-        if "error" in result:
-            return jsonify(result), 400
-
-        # Fetch login record and join Users record
-        from db.db_models import Login, Users  # Ensure these imports are available
-        login_user = Login.query.filter_by(username=username).first()
-        if not login_user:
-            return jsonify({"error": "Login record not found"}), 404
-
-        user = Users.query.filter_by(login_id=login_user.login_id).first()
-        if not user:
-            return jsonify({"error": "User details not found"}), 404
-
-        # Build user provided data for response
-        user_data = {
-            'full_name': user.full_name,
-            'email': user.email,
-            'phone': user.phone,
-            'address': user.address,
-            'state': user.state,
-            'district': user.district,
-            'pincode': user.postalPinCode,
-            'username': login_user.username,
-            'password': login_user.password  # Consider not sending password in production
-        }
-        return jsonify({"success": True, "user_data": user_data})
-    
-    except Exception as e:
-        print(f"Error in verify_face_route: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-    
-
-@api.route('/api/client/verify-face-password', methods=['POST'])
-def verify_client_password_route():
-    try:
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
-        api_key = data.get('api_key')
-        
-        if not all([username, password, api_key]):
-            return jsonify({"error": "Missing required parameters"}), 400
-        
-        from services.client_services import verify_client_password  # Ensure correct import
-        result = verify_client_password(api_key, username, password)
-        if "error" in result:
-            return jsonify(result), 400
-        
-        if result.get('success'):
-            from db.db_models import Login, Users  # Ensure these imports are available
-            login_user = Login.query.filter_by(username=username).first()
-            if login_user:
-                user_detail = Users.query.filter_by(login_id=login_user.login_id).first()
-                if user_detail:
-                    user_data = {
-                        'full_name': user_detail.full_name,
-                        'email': user_detail.email,
-                        'phone': user_detail.phone,
-                        'address': user_detail.address,
-                        'state': user_detail.state,
-                        'district': user_detail.district,
-                        'pincode': user_detail.postalPinCode,
-                        'username': login_user.username,
-                        'password': login_user.password  # Consider not returning the password in production
-                    }
-                    return jsonify({"success": True, "user_data": user_data})
-                else:
-                    return jsonify({"error": "User details not found"}), 404
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        print(f"Error in verify_client_password_route: {str(e)}")
-        return jsonify({"error": str(e)}), 500
 
 
 

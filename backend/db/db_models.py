@@ -43,40 +43,6 @@ class Users(db.Model):
     profilePicture = db.Column(db.String(200))
 
 
-    
-class Developers(db.Model):
-    __tablename__ = 'developers'
-    login_id = db.Column(db.Integer, db.ForeignKey('login.login_id'), primary_key=True)  # Unique by default due to being a primary key
-    full_name = db.Column(db.String(80), nullable=False)  # Removed unique=True, as multiple developers can share the same name
-    email = db.Column(db.String(120), unique=True, nullable=False)  # Email should be unique
-    phone = db.Column(db.String(20), unique=True, nullable=False)  # Consider adding unique=True if phone numbers must be unique
-    dateOfBirth = db.Column(db.Date, nullable=False)
-    gitHubUsername = db.Column(db.String(100), unique=True, nullable=False)  # GitHub usernames should be unique
-    linkedInUsername = db.Column(db.String(100), unique=True, nullable=False)  # LinkedIn usernames should be unique
-    typeOfDeveloper = db.Column(db.String(50), nullable=False)  # Removed unique=True, as multiple developers can have the same type
-    companyName = db.Column(db.String(100), nullable=False)  # Removed unique=True, as multiple developers can work for the same company
-    address = db.Column(db.String(200), nullable=False)
-    state = db.Column(db.String(50), nullable=False)
-    district = db.Column(db.String(50), nullable=False)
-    postalPinCode = db.Column(db.String(10), nullable=False)
-    profilePicture = db.Column(db.String(200))  # No unique constraint needed here
-    
-    # Add settings relationship (optional since we already defined it in DeveloperSettings)
-    # settings = db.relationship("DeveloperSettings", back_populates="developer", uselist=False)
-
-class APIs(db.Model):
-    __tablename__ = 'APIs'
-    api_id = db.Column(db.Integer, primary_key=True)
-    login_id = db.Column(db.Integer, db.ForeignKey('login.login_id'))
-    api_key = db.Column(db.String(80), nullable=False)
-    api_name = db.Column(db.String(80), nullable=False)
-    website_app = db.Column(db.String(80), nullable=False)
-    website_app_logo = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(80), nullable=False)
-
-
-
 class Complaints(db.Model):
     __tablename__ = 'complaints'
     complaint_id = db.Column(db.Integer, primary_key=True)
@@ -91,3 +57,10 @@ class Complaints(db.Model):
 
     sender = db.relationship('Login', foreign_keys=[sender_login_id], backref='sent_complaints')
     replier = db.relationship('Login', foreign_keys=[replier_login_id], backref='replied_complaints')
+    
+class Questions(db.Model):
+    __tablename__ = 'questions'
+    question_id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

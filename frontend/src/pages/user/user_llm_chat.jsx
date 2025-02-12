@@ -12,7 +12,8 @@ import {
   HeaderName,
   Content,
 } from '@carbon/react';
-import { Send, Portfolio, Microphone, MicrophoneOff } from '@carbon/icons-react';
+import { Send, Portfolio, Microphone, MicrophoneOff, AiGenerate, Close } from '@carbon/icons-react';
+import { WatsonxAi } from '@carbon/pictograms-react';
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import "github-markdown-css/github-markdown.css";
@@ -47,8 +48,13 @@ const UserLLMChat = () => {
 
   useEffect(() => {
     if (!hasWelcomeMessage && messages.length === 0) {
+      const hour = new Date().getHours();
+      let greeting = "Good evening";
+      if (hour < 12) greeting = "Good morning";
+      else if (hour < 18) greeting = "Good afternoon";
+      
       const welcomeMessage = {
-        text: "Hello! I'm your Career Guidance AI assistant. How can I help you today?",
+        text: `${greeting}! I'm your Career Guidance AI assistant. How can I help you today?`,
         sender: 'bot',
         timestamp: new Date().toLocaleTimeString()
       };
@@ -154,9 +160,13 @@ const UserLLMChat = () => {
       padding: '0.5rem',
       fontSize: '0.875rem',
       color: 'var(--cds-text-helper)',
-      fontStyle: 'italic'
+      fontStyle: 'italic',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem'
     }}>
-      AI is thinking...
+      <AiGenerate size={16} />
+      <span>AI is thinking...</span>
     </div>
   );
 
@@ -335,14 +345,23 @@ const UserLLMChat = () => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem'
+              marginBottom: '1rem',
+              padding: '1rem'
             }}>
-              <h2>Career Guidance AI</h2>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem'
+              }}>
+                <AiGenerate size={24} />
+                <span style={{ fontSize: '1rem', fontWeight: '600' }}>Career Guidance AI</span>
+              </div>
               <Button
                 kind="ghost"
                 size="sm"
                 onClick={handleClearChat}
                 disabled={messages.length === 0}
+                renderIcon={Close}
               >
                 Clear Chat
               </Button>
@@ -373,6 +392,7 @@ const UserLLMChat = () => {
                   textAlign: 'center',
                   color: 'var(--cds-text-helper)'
                 }}>
+                  <WatsonxAi size={32} />
                   <h4>Start a Conversation</h4>
                   <p>Ask me anything about career guidance!</p>
                 </div>
