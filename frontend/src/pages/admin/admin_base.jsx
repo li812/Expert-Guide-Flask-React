@@ -24,6 +24,7 @@ import AdminManageUsers from './admin_manage_users.jsx';
 import AdminSettings from './admin_settings.jsx';
 import AdminManageUserComplaints from './admin_manage_users_complaints.jsx';
 import AdminManageQuestions from './admin_manage_questions';
+import AdminManageCareers from './admin_manage_careers';
 import './admin.css'; // Import the CSS file for styling
 
 function AdminBase() {
@@ -182,8 +183,16 @@ function AdminBase() {
                     >
                       Settings
                     </SideNavLink>
-
-
+                    <SideNavLink
+                      renderIcon={() => <Api size={40} />}
+                      isActive={location.pathname === "/admin/careers"}
+                      as={Link}
+                      to="/admin/careers"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Career Options
+                    </SideNavLink>
                   </SideNavItems>
                 </SideNav>
               </Header>
@@ -195,6 +204,7 @@ function AdminBase() {
                   <Route path="settings" element={<AdminSettings username={username} />} />
                   <Route path="manage-user-complaints" element={<AdminManageUserComplaints username={username} />} />
                   <Route path="questions" element={<AdminManageQuestions username={username} />} />
+                  <Route path="careers" element={<AdminManageCareers username={username} />} />
                  <Route path="*" element={<AdminHome username={username} />} />
                 </Routes>
               </Content>

@@ -31,7 +31,11 @@ from services.admin_services import (
     get_server_info,
     get_all_user_complaints,
     reply_to_user_complaints,
-    update_admin_password# Ensure this import is present
+    update_admin_password,  # Ensure this import is present
+    get_all_careers,
+    add_career,
+    update_career,
+    delete_career
 )
 from services.question_services import (
     get_all_questions,
@@ -887,6 +891,89 @@ def get_user_complaint_details_route(complaint_id):
     except Exception as e:
         print(f"Error in get_user_complaint_details_route: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@api.route('/api/admin/careers', methods=['GET'])
+@check_session(required_type=1)  # Admin only
+def get_all_careers_route():
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        sort_key = request.args.get('sort', 'career_id')
+        sort_direction = request.args.get('direction', 'asc')
+
+        # Get paginated careers
+        result = get_all_careers(
+            page=page,
+            per_page=per_page,
+            sort_key=sort_key,
+            sort_direction=sort_direction
+        )
+
+        if "error" in result:
+            print(f"Error in get_all_careers_route: {result['error']}")  # Add logging
+            return jsonify({'error': result["error"]}), 500
+
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error fetching careers: {str(e)}")  # Add logging
+        return jsonify({'error': str(e)}), 500
+    
+    
+@api.route('/api/admin/careers', methods=['POST'])
+@check_session(required_type=1)  # Admin only
+def add_career_route():
+    try:
+        data = request.get_json()
+        career_text = data.get('career')
+        
+        if not career_text:
+            return jsonify({'error': 'Career text is required'}), 400
+
+        result = add_career(career_text)
+        if "error" in result:
+            return jsonify({'error': result["error"]}), 400
+            
+        return jsonify({'career': result}), 201
+    except Exception as e:
+        print(f"Error adding career: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/api/admin/careers/<int:career_id>', methods=['PUT'])
+@check_session(required_type=1)  # Admin only
+def update_career_route(career_id):
+    try:
+        data = request.get_json()
+        career_text = data.get('career')
+        
+        if not career_text:
+            return jsonify({'error': 'Career text is required'}), 400
+
+        result = update_career(career_id, career_text)
+        if "error" in result:
+            if result["error"] == "Career not found":
+                return jsonify({'error': result["error"]}), 404
+            return jsonify({'error': result["error"]}), 400
+            
+        return jsonify({'career': result})
+    except Exception as e:
+        print(f"Error updating career: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/api/admin/careers/<int:career_id>', methods=['DELETE'])
+@check_session(required_type=1)  # Admin only
+def delete_career_route(career_id):
+    try:
+        result = delete_career(career_id)
+        if "error" in result:
+            if result["error"] == "Career not found":
+                return jsonify({'error': result["error"]}), 404
+            return jsonify({'error': result["error"]}), 500
+            
+        return jsonify({'message': 'Career deleted successfully'})
+    except Exception as e:
+        print(f"Error deleting career: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 

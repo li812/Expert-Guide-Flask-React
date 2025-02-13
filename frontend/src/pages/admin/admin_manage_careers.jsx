@@ -17,8 +17,6 @@ import {
     TableToolbar,
     TableToolbarContent,
     TableToolbarSearch,
-    TableToolbarAction,
-    Tag,
     Stack,
     Modal,
     TextArea,
@@ -26,33 +24,34 @@ import {
     FormGroup,
     Pagination
 } from '@carbon/react';
-import { Add, TrashCan, Edit, Save, View } from '@carbon/icons-react';
+import { Add, TrashCan, Edit } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 
-const AdminManageQuestions = ({ username }) => {
-    const [questions, setQuestions] = useState([]);
+const AdminManageCareers = ({ username }) => {
+    const [careers, setCareers] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [successMessage, setSuccessMessage] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [selectedQuestion, setSelectedQuestion] = useState(null);
-    const [newQuestion, setNewQuestion] = useState('');
+    const [selectedCareer, setSelectedCareer] = useState(null);
+    const [newCareer, setNewCareer] = useState('');
     const [totalItems, setTotalItems] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [sortKey, setSortKey] = useState('question_id');
+    const [sortKey, setSortKey] = useState('career_id');
     const [sortDirection, setSortDirection] = useState('asc');
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchQuestions();
+        fetchCareers();
     }, [currentPage, pageSize, sortKey, sortDirection]);
 
-    const fetchQuestions = async () => {
+    const fetchCareers = async () => {
         try {
+            setLoading(true);
             const response = await fetch(
-                `http://localhost:5001/api/admin/questions?page=${currentPage}&per_page=${pageSize}&sort=${sortKey}&direction=${sortDirection}`, 
+                `http://localhost:5001/api/admin/careers?page=${currentPage}&per_page=${pageSize}&sort=${sortKey}&direction=${sortDirection}`, 
                 {
                     method: 'GET',
                     credentials: 'include',
@@ -68,80 +67,78 @@ const AdminManageQuestions = ({ username }) => {
             }
             
             if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Server error:', errorData); // Add detailed error logging
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
-            setQuestions(data.questions || []);
+            console.log('Received careers:', data); // Debug logging
+            setCareers(data.careers || []);
             setTotalItems(data.total || 0);
-            setLoading(false);
         } catch (error) {
-            console.error('Error fetching questions:', error);
-            setError('Error fetching questions');
+            console.error('Error fetching careers:', error);
+            setError('Error fetching careers');
+        } finally {
             setLoading(false);
         }
     };
 
     const handleAdd = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/admin/questions', {
+            const response = await fetch('http://localhost:5001/api/admin/careers', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ question: newQuestion }),
+                body: JSON.stringify({ career: newCareer }),
             });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const data = await response.json();
-            setQuestions([...questions, data.question]);
-            setSuccessMessage('Question added successfully');
+            await fetchCareers();
+            setSuccessMessage('Career added successfully');
             setShowAddModal(false);
-            setNewQuestion('');
+            setNewCareer('');
         } catch (error) {
-            console.error('Error adding question:', error);
-            setError('Error adding question');
+            console.error('Error adding career:', error);
+            setError('Error adding career');
         }
     };
 
     const handleEdit = async () => {
         try {
-            const response = await fetch(`http://localhost:5001/api/admin/questions/${selectedQuestion.question_id}`, {
+            const response = await fetch(`http://localhost:5001/api/admin/careers/${selectedCareer.career_id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ question: newQuestion }),
+                body: JSON.stringify({ career: newCareer }),
             });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            setQuestions(questions.map(q => 
-                q.question_id === selectedQuestion.question_id 
-                    ? { ...q, question: newQuestion }
-                    : q
-            ));
-            setSuccessMessage('Question updated successfully');
+            await fetchCareers();
+            setSuccessMessage('Career updated successfully');
             setShowEditModal(false);
-            setSelectedQuestion(null);
-            setNewQuestion('');
+            setSelectedCareer(null);
+            setNewCareer('');
         } catch (error) {
-            console.error('Error updating question:', error);
-            setError('Error updating question');
+            console.error('Error updating career:', error);
+            setError('Error updating career');
         }
     };
 
-    const handleDelete = async (question_id) => {
-        if (window.confirm('Are you sure you want to delete this question?')) {
+    const handleDelete = async (career_id) => {
+        if (window.confirm('Are you sure you want to delete this career?')) {
             try {
-                const response = await fetch(`http://localhost:5001/api/admin/questions/${question_id}`, {
+                const response = await fetch(`http://localhost:5001/api/admin/careers/${career_id}`, {
                     method: 'DELETE',
                     credentials: 'include',
                     headers: {
@@ -153,11 +150,11 @@ const AdminManageQuestions = ({ username }) => {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                setQuestions(questions.filter(q => q.question_id !== question_id));
-                setSuccessMessage('Question deleted successfully');
+                await fetchCareers();
+                setSuccessMessage('Career deleted successfully');
             } catch (error) {
-                console.error('Error deleting question:', error);
-                setError('Error deleting question');
+                console.error('Error deleting career:', error);
+                setError('Error deleting career');
             }
         }
     };
@@ -171,7 +168,7 @@ const AdminManageQuestions = ({ username }) => {
         setCurrentPage(page);
         if (pageSize !== newPageSize) {
             setPageSize(newPageSize);
-            setCurrentPage(1); // Reset to first page when changing page size
+            setCurrentPage(1);
         }
     };
 
@@ -186,14 +183,14 @@ const AdminManageQuestions = ({ username }) => {
                         marginBottom: '1rem'
                     }}>
                         <div>
-                            <h2>Career Guidance Questions</h2>
-                            <p className="subtitle">Manage assessment questions</p>
+                            <h2>Career Options</h2>
+                            <p className="subtitle">Manage career options</p>
                         </div>
                         <Button
                             renderIcon={Add}
                             onClick={() => setShowAddModal(true)}
                         >
-                            Add Question
+                            Add Career
                         </Button>
                     </div>
 
@@ -224,10 +221,10 @@ const AdminManageQuestions = ({ username }) => {
                         />
                     ) : (
                         <DataTable
-                            rows={questions.map(q => ({
-                                id: String(q.question_id),
-                                question_id: String(q.question_id),
-                                question: q.question,
+                            rows={careers.map(c => ({
+                                id: String(c.career_id),
+                                career_id: String(c.career_id),
+                                career: c.career,
                                 actions: (
                                     <Stack orientation="horizontal" gap={4}>
                                         <Button
@@ -235,8 +232,8 @@ const AdminManageQuestions = ({ username }) => {
                                             size="sm"
                                             renderIcon={Edit}
                                             onClick={() => {
-                                                setSelectedQuestion(q);
-                                                setNewQuestion(q.question);
+                                                setSelectedCareer(c);
+                                                setNewCareer(c.career);
                                                 setShowEditModal(true);
                                             }}
                                         >
@@ -246,7 +243,7 @@ const AdminManageQuestions = ({ username }) => {
                                             kind="danger"
                                             size="sm"
                                             renderIcon={TrashCan}
-                                            onClick={() => handleDelete(q.question_id)}
+                                            onClick={() => handleDelete(c.career_id)}
                                         >
                                             Delete
                                         </Button>
@@ -254,13 +251,13 @@ const AdminManageQuestions = ({ username }) => {
                                 )
                             }))}
                             headers={[
-                                { key: 'question_id', header: 'ID' },
-                                { key: 'question', header: 'Question' },
+                                { key: 'career_id', header: 'ID' },
+                                { key: 'career', header: 'Career' },
                                 { key: 'actions', header: 'Actions' }
                             ]}
                             isSortable
                             sortRow={(a, b, { sortDirection, sortKey }) => {
-                                if (sortKey === 'question_id') {
+                                if (sortKey === 'career_id') {
                                     return sortDirection === 'asc' 
                                         ? parseInt(a[sortKey]) - parseInt(b[sortKey])
                                         : parseInt(b[sortKey]) - parseInt(a[sortKey]);
@@ -285,7 +282,7 @@ const AdminManageQuestions = ({ username }) => {
                                             <TableToolbarContent>
                                                 <TableToolbarSearch 
                                                     onChange={onInputChange}
-                                                    placeholder="Search questions..."
+                                                    placeholder="Search careers..."
                                                 />
                                             </TableToolbarContent>
                                         </TableToolbar>
@@ -340,53 +337,53 @@ const AdminManageQuestions = ({ username }) => {
                 </Tile>
             </Column>
 
-            {/* Add Question Modal */}
+            {/* Add Career Modal */}
             <Modal
                 open={showAddModal}
-                modalHeading="Add New Question"
+                modalHeading="Add New Career"
                 primaryButtonText="Add"
                 secondaryButtonText="Cancel"
                 preventCloseOnClickOutside
                 onRequestClose={() => {
                     setShowAddModal(false);
-                    setNewQuestion('');
+                    setNewCareer('');
                 }}
                 onRequestSubmit={handleAdd}
             >
                 <Form>
-                    <FormGroup legendText="Question">
+                    <FormGroup legendText="Career">
                         <TextArea
-                            id="newQuestion"
-                            labelText="Question text"
-                            value={newQuestion}
-                            onChange={(e) => setNewQuestion(e.target.value)}
+                            id="newCareer"
+                            labelText="Career option"
+                            value={newCareer}
+                            onChange={(e) => setNewCareer(e.target.value)}
                             rows={4}
                         />
                     </FormGroup>
                 </Form>
             </Modal>
 
-            {/* Edit Question Modal */}
+            {/* Edit Career Modal */}
             <Modal
                 open={showEditModal}
-                modalHeading="Edit Question"
+                modalHeading="Edit Career"
                 primaryButtonText="Save"
                 secondaryButtonText="Cancel"
                 preventCloseOnClickOutside
                 onRequestClose={() => {
                     setShowEditModal(false);
-                    setSelectedQuestion(null);
-                    setNewQuestion('');
+                    setSelectedCareer(null);
+                    setNewCareer('');
                 }}
                 onRequestSubmit={handleEdit}
             >
                 <Form>
-                    <FormGroup legendText="Question">
+                    <FormGroup legendText="Career">
                         <TextArea
-                            id="editQuestion"
-                            labelText="Question text"
-                            value={newQuestion}
-                            onChange={(e) => setNewQuestion(e.target.value)}
+                            id="editCareer"
+                            labelText="Career option"
+                            value={newCareer}
+                            onChange={(e) => setNewCareer(e.target.value)}
                             rows={4}
                         />
                     </FormGroup>
@@ -396,4 +393,7 @@ const AdminManageQuestions = ({ username }) => {
     );
 };
 
-export default AdminManageQuestions;
+export default AdminManageCareers;
+
+
+

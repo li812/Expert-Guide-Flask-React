@@ -1,4 +1,4 @@
-from db.db_models import db, Users, Login, Complaints
+from db.db_models import db, Users, Login, Complaints, Careers
 import platform
 import psutil
 import socket
@@ -25,11 +25,6 @@ def delete_user(login_id):
     if login:
         db.session.delete(login)
     db.session.commit()
-
-
-
-
-
 
 def get_server_info():
     try:
@@ -68,7 +63,6 @@ def get_server_info():
     except Exception as e:
         print(f"Error fetching server info: {str(e)}")
         return {'error': str(e)}
-
 
 def get_all_user_complaints():
     try:
@@ -132,7 +126,115 @@ def update_admin_password(login_id, current_password, new_password):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}
-    
-    
-    
-    
+
+def get_all_careers(page=1, per_page=10, sort_key='career_id', sort_direction='asc'):
+    try:
+        # Create base query
+        query = Careers.query
+
+        # Apply sorting
+        if sort_key == 'career_id':
+            sort_column = Careers.career_id
+        else:
+            sort_column = Careers.career
+
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        paginated = query.paginate(
+            page=page, 
+            per_page=per_page, 
+            error_out=False
+        )
+
+        # Format the response with safe datetime handling
+        careers_list = []
+        for c in paginated.items:
+            career_dict = {
+                'career_id': c.career_id,
+                'career': c.career,
+                'created_at': c.created_at.isoformat() if c.created_at else None,
+                'updated_at': c.updated_at.isoformat() if c.updated_at else None
+            }
+            careers_list.append(career_dict)
+
+        return {
+            'careers': careers_list,
+            'total': total
+        }
+    except Exception as e:
+        print(f"Error in get_all_careers: {str(e)}")
+        return {"error": str(e)}
+
+def validate_career(career_text):
+    """Validate career text"""
+    if not career_text or len(career_text.strip()) == 0:
+        return False, "Career text cannot be empty"
+    if len(career_text) > 500:
+        return False, "Career text is too long (max 500 characters)"
+    return True, None
+
+def add_career(career_text):
+    try:
+        # Validate career text
+        is_valid, error_message = validate_career(career_text)
+        if not is_valid:
+            return {"error": error_message}
+
+        new_career = Careers(career=career_text)
+        db.session.add(new_career)
+        db.session.commit()
+        
+        return {
+            'career_id': new_career.career_id,
+            'career': new_career.career
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def update_career(career_id, career_text):
+    try:
+        # Validate career text
+        is_valid, error_message = validate_career(career_text)
+        if not is_valid:
+            return {"error": error_message}
+
+        career = Careers.query.get(career_id)
+        if not career:
+            return {"error": "Career not found"}
+            
+        career.career = career_text
+        db.session.commit()
+        
+        return {
+            'career_id': career.career_id,
+            'career': career.career
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def delete_career(career_id):
+    try:
+        career = Careers.query.get(career_id)
+        if not career:
+            return {"error": "Career not found"}
+            
+        db.session.delete(career)
+        db.session.commit()
+        
+        return {"message": "Career deleted successfully"}
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+
+
+
