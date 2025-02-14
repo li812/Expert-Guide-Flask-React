@@ -27,10 +27,8 @@ const UserProfile = () => {
         state: '',
         district: '',
         postalPinCode: '',
-        aadhaar: '',
-        pan: '',
-        passport: '',
-        profilePicture: null
+        profilePicture: null,
+        profilePicturePreview: null  // Add this for preview
     });
 
     const [error, setError] = useState(null);
@@ -89,13 +87,33 @@ const UserProfile = () => {
         }
     };
 
+    // Add this function before the return statement
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            setProfile(prev => ({
+                ...prev,
+                profilePicturePreview: previewUrl
+            }));
+        }
+    };
+
+    // Clean up preview URL when component unmounts
+    useEffect(() => {
+        return () => {
+            if (profile.profilePicturePreview) {
+                URL.revokeObjectURL(profile.profilePicturePreview);
+            }
+        };
+    }, [profile.profilePicturePreview]);
+
     return (
         <Grid className="profile-page">
             <Column lg={16} md={8} sm={4}>
                 <ContentSwitcher onChange={({ index }) => setSelectedSection(index)} selectedIndex={selectedSection}>
                     <Switch name="personal" text="Personal Information" />
                     <Switch name="location" text="Location Information" />
-                    <Switch name="identity" text="Identity Information" />
                 </ContentSwitcher>
 
                 <Tile className="profile-section-tile">
@@ -203,36 +221,6 @@ const UserProfile = () => {
                         </Form>
                     )}
 
-                    {selectedSection === 2 && (
-                        <Form onSubmit={handleProfileUpdate}>
-                            <Stack gap={7}>
-                                <TextInput
-                                    id="aadhaar"
-                                    labelText="Aadhaar Number"
-                                    value={profile.aadhaar || ''}
-                                    onChange={(e) => setProfile({ ...profile, aadhaar: e.target.value })}
-                                    helperText="12-digit Unique Identification Number"
-                                />
-                                <TextInput
-                                    id="pan"
-                                    labelText="PAN Number"
-                                    value={profile.pan || ''}
-                                    onChange={(e) => setProfile({ ...profile, pan: e.target.value })}
-                                    helperText="10-character Permanent Account Number"
-                                />
-                                <TextInput
-                                    id="passport"
-                                    labelText="Passport Number"
-                                    value={profile.passport || ''}
-                                    onChange={(e) => setProfile({ ...profile, passport: e.target.value })}
-                                    helperText="8-character Passport Number"
-                                />
-                                <Button type="submit" renderIcon={Save} disabled={isLoading}>
-                                    Save Personal Information
-                                </Button>
-                            </Stack>
-                        </Form>
-                    )}
 
                 </Tile>
 

@@ -12,8 +12,8 @@ SECURITY = {
     'MAX_LOGIN_ATTEMPTS': 3,
     'LOCKOUT_TIME': 30,
     'MIN_FACE_CONFIDENCE': 0.95,
-    'MATCH_TOLERANCE': 0.40,  # Adjusted for better accuracy
-    'LIVENESS_CHECK': False,   # Disabled by default
+    'MATCH_TOLERANCE': 0.40,  
+    'LIVENESS_CHECK': False,   
     'REQUIRE_EYES_OPEN': True,
     'MIN_FACE_SIZE': 100,
 }

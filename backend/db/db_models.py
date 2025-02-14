@@ -37,9 +37,6 @@ class Users(db.Model):
     state = db.Column(db.String(50), nullable=False)
     district = db.Column(db.String(50), nullable=False)
     postalPinCode = db.Column(db.String(10), nullable=False)
-    aadhaar = db.Column(db.String(12), unique=True, nullable=True)
-    pan = db.Column(db.String(10), unique=True, nullable=True)
-    passport = db.Column(db.String(8), unique=True, nullable=True)
     profilePicture = db.Column(db.String(200))
 
 

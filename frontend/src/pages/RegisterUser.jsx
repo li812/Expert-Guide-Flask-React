@@ -35,24 +35,7 @@ const FACE_REGISTRATION_STEPS = {
 
 // Update validation rules
 const VALIDATION_RULES = {
-  aadhaar: {
-    length: 12,
-    pattern: /^(\d{12})?$/,
-    message: "Must be 12 digits (e.g., 444433332222)",
-    format: "444433332222",
-  },
-  pan: {
-    length: 10,
-    pattern: /^([A-Z]{5}[0-9]{4}[A-Z])?$/,
-    message: "Format: XXXXX9999X (e.g., ABCDE1234F)",
-    format: "ABCDE1234F",
-  },
-  passport: {
-    length: 8,
-    pattern: /^([A-Z][0-9]{7})?$/,
-    message: "Format: A9999999 (e.g., M1234567)",
-    format: "M1234567",
-  },
+  // Remove aadhaar, pan, passport validation rules
 };
 
 // 1. Update DATE_CONFIG
@@ -131,9 +114,6 @@ function RegisterUser() {
     state: "",
     district: "",
     postalPinCode: "",
-    aadhaar: "",
-    pan: "",
-    passport: "",
     profilePicture: null,
     gender: "",
   });
@@ -174,7 +154,7 @@ function RegisterUser() {
   const face_lock = false;
 
   useEffect(() => {
-    if (step === 6) {
+    if (step === 5) {
       navigator.mediaDevices
         .getUserMedia({ video: true })
         .then((stream) => {
@@ -407,7 +387,7 @@ function RegisterUser() {
       if (response.ok) {
         if (face_lock) {
           // If face_lock is enabled, proceed to face registration
-          setStep(6);
+          setStep(5);
         } else {
           // If face_lock is disabled, skip face registration and go to login
           alert("Registration successful!");
@@ -425,24 +405,7 @@ function RegisterUser() {
   };
 
   // Improved validation function
-  const validateIdentification = (formData) => {
-    // Return true if at least one valid ID is provided
-    if (!formData.aadhaar && !formData.pan && !formData.passport) {
-      return true; // All fields empty is valid
-    }
-
-    const validations = {
-      aadhaar:
-        !formData.aadhaar ||
-        VALIDATION_RULES.aadhaar.pattern.test(formData.aadhaar),
-      pan: !formData.pan || VALIDATION_RULES.pan.pattern.test(formData.pan),
-      passport:
-        !formData.passport ||
-        VALIDATION_RULES.passport.pattern.test(formData.passport),
-    };
-
-    return validations.aadhaar && validations.pan && validations.passport;
-  };
+  const validateIdentification = () => true; // No longer needed
 
   // Update date validation
   const validateDateOfBirth = (dateString) => {
@@ -831,90 +794,6 @@ function RegisterUser() {
         </>
       )}
       {step === 4 && (
-        <Column lg={6} md={5} sm={5}>
-          <Tile className="register-tile" style={{ padding: "42px" }}>
-            <h2>Identification Information</h2>
-            <br></br>
-            <br></br>
-            <Form onSubmit={handleNextStep}>
-              <Stack gap={7}>
-                <TextInput
-                  id="aadhaar"
-                  name="aadhaar"
-                  labelText="Aadhaar Number (optional)"
-                  helperText={`Format: ${VALIDATION_RULES.aadhaar.format} - You can provide any one ID`}
-                  value={formData.aadhaar || ""}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, "");
-                    setFormData({ ...formData, aadhaar: value });
-                  }}
-                  invalid={Boolean(
-                    formData.aadhaar &&
-                    !VALIDATION_RULES.aadhaar.pattern.test(formData.aadhaar)
-                  )}
-                  invalidText={VALIDATION_RULES.aadhaar.message}
-                  maxLength={12}
-                />
-                <TextInput
-                  id="pan"
-                  name="pan"
-                  labelText="PAN Number (optional)"
-                  helperText={`Format: ${VALIDATION_RULES.pan.format} - You can provide any one ID`}
-                  value={formData.pan || ""}
-                  onChange={(e) => {
-                    const value = e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9]/g, "");
-                    setFormData({ ...formData, pan: value });
-                  }}
-                  invalid={Boolean(
-                    formData.pan &&
-                    !VALIDATION_RULES.pan.pattern.test(formData.pan)
-                  )}
-                  invalidText={VALIDATION_RULES.pan.message}
-                  maxLength={10}
-                />
-
-                <TextInput
-                  id="passport"
-                  name="passport"
-                  labelText="Passport Number (optional)"
-                  helperText={`Format: ${VALIDATION_RULES.passport.format} - You can provide any one ID`}
-                  value={formData.passport || ""}
-                  onChange={(e) => {
-                    const value = e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9]/g, "");
-                    setFormData({ ...formData, passport: value });
-                  }}
-                  invalid={Boolean(
-                    formData.passport &&
-                    !VALIDATION_RULES.passport.pattern.test(formData.passport)
-                  )}
-                  invalidText={VALIDATION_RULES.passport.message}
-                  maxLength={8}
-                />
-
-                <div className="button-group">
-                  <Button
-                    type="submit"
-                    disabled={!validateIdentification(formData)}
-                  >
-                    Next
-                  </Button>
-                  <Button
-                    kind="secondary"
-                    onClick={handlePrevStep}
-                  >
-                    Back
-                  </Button>
-                </div>
-              </Stack>
-            </Form>
-          </Tile>
-        </Column>
-      )}
-      {step === 5 && (
         <>
           <Column lg={6} md={5} sm={5}>
             <Tile className="register-tile" style={{ padding: "42px" }}>
@@ -954,7 +833,7 @@ function RegisterUser() {
           </Column>
         </>
       )}
-      {step === 6 && (
+      {step === 5 && (
         <Tile className="register-tile" style={{ padding: "42px" }}>
           <div className="face-rec-container">
             <div className="face-rec-content">

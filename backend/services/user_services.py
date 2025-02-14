@@ -74,14 +74,12 @@ def user_update_password(old_password, new_password, login_id):
 
 def get_user_profile(login_id):
     try:
-        print(f"Fetching profile for login_id: {login_id}")
         user = Users.query.filter_by(login_id=login_id).first()
         
         if not user:
-            print("User not found")
             return {"error": "User not found"}
 
-        # Return only updatable fields
+        # Remove ID fields from response
         return {
             "full_name": user.full_name,
             "email": user.email,
@@ -90,13 +88,9 @@ def get_user_profile(login_id):
             "state": user.state,
             "district": user.district,
             "postalPinCode": user.postalPinCode,
-            "aadhaar": user.aadhaar,    
-            "pan": user.pan,            
-            "passport": user.passport,   
             "profilePicture": f"/user_data/user_profile_picture/{user.login_id}.jpg" if user.profilePicture else None
         }
     except Exception as e:
-        print(f"Error in get_user_profile: {str(e)}")
         return {"error": str(e)}
 
 def update_user_profile(login_id, profile_data, profile_picture=None):
