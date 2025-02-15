@@ -24,7 +24,7 @@ import {
     Education,
     Result,
     Analytics,
-    ResetAlt
+    ResetAlt, ThumbsUpDouble, ThumbsUp, ThumbsDown, CloseOutline,AiGenerate
 } from '@carbon/icons-react';
 import {
     PredictiveAnalytics,
@@ -95,7 +95,7 @@ const UserCareerAssessment = () => {
             });
 
             if (!response.ok) throw new Error('Failed to submit assessment');
-            
+
             const data = await response.json();
             setResult(data.career);
             setStep(3);
@@ -251,12 +251,12 @@ const UserCareerAssessment = () => {
     // Update the render methods to use the new styles
     const renderIntroContent = () => (
         <div className="intro-section">
-                <PredictiveAnalytics className="intro-pictogram" />
+            <PredictiveAnalytics className="intro-pictogram" />
 
             <h1 className="title">Discover Your Ideal Career Path</h1>
             <br></br><br></br>
             <p className="subtitle">
-                Our AI-powered assessment analyzes your responses to {questions.length} carefully crafted questions 
+                Our AI-powered assessment analyzes your responses to {questions.length} carefully crafted questions
                 to provide personalized career recommendations.
             </p>
 
@@ -287,7 +287,7 @@ const UserCareerAssessment = () => {
             </Grid>
 
             <Button
-                
+
                 className="start-button"
                 onClick={() => setStep(2)}
                 style={{ marginTop: '3rem' }}
@@ -301,30 +301,39 @@ const UserCareerAssessment = () => {
 
     const renderQuestionContent = () => (
         <div className="question-section">
-        
-
             <div className="question-card">
                 <Stack gap={7}>
                     <div>
                         <Tag type="blue" size="sm">Question {currentQuestion + 1} of {questions.length}</Tag>
                         <h2 className="question-text">
+                            <br></br>
                             {questions[currentQuestion]?.text}
                         </h2>
                     </div>
 
-                    <RadioButtonGroup
-                        legendText="Select your answer"
-                        name={`question-${currentQuestion}`}
-                        valueSelected={answers[questions[currentQuestion]?.id]?.answer}
-                        onChange={handleAnswer}
-                        orientation="vertical"
-                        className="radio-group"
-                    >
-                        <RadioButton labelText="High" value="High" id="high" />
-                        <RadioButton labelText="Yes" value="Yes" id="yes" />
-                        <RadioButton labelText="Low" value="Low" id="low" />
-                        <RadioButton labelText="No" value="No" id="no" />
-                    </RadioButtonGroup>
+                    <div className="answer-buttons">
+                        <Grid>
+                            {[
+                                { value: 'High', label: 'High', icon: ThumbsUpDouble },
+                                { value: 'Yes', label: 'Yes', icon: ThumbsUp },
+                                { value: 'Low', label: 'Low', icon: ThumbsDown },
+                                { value: 'No', label: 'No', icon: CloseOutline }
+                            ].map((option) => (
+                                <Column sm={10} md={3} lg={3} key={option.value}>
+                                    <Button
+                                        className={`answer-button ${answers[questions[currentQuestion]?.id]?.answer === option.value ? 'selected' : ''}`}
+                                        onClick={() => handleAnswer(option.value)}
+                                        kind={answers[questions[currentQuestion]?.id]?.answer === option.value ? 'primary' : 'tertiary'}
+                                        size="lg"
+                                        renderIcon={option.icon}
+                                        style={{ width: '100%' }}
+                                    >
+                                        {option.label}
+                                    </Button>
+                                </Column>
+                            ))}
+                        </Grid>
+                    </div>
 
                     <div className="button-group">
                         <Button
@@ -343,6 +352,7 @@ const UserCareerAssessment = () => {
                                 disabled={submitting}
                                 renderIcon={Send}
                                 size="lg"
+                                kind="primary"
                             >
                                 {submitting ? 'Analyzing Responses...' : 'Get Career Recommendation'}
                             </Button>
@@ -352,6 +362,7 @@ const UserCareerAssessment = () => {
                                 disabled={!answers[questions[currentQuestion]?.id]}
                                 renderIcon={ArrowRight}
                                 size="lg"
+                                kind="primary"
                             >
                                 Next Question
                             </Button>
@@ -366,23 +377,53 @@ const UserCareerAssessment = () => {
         <div className="result-section">
             <CheckmarkOutline size={64} className="success-icon" />
             <h1>Assessment Complete!</h1>
-            
+
             <div className="result-card">
                 <Result size={32} />
-                <br></br>
-                <h2><br></br>Recommended Career Path</h2><br></br><br></br>
-                <h3>{result}</h3><br></br><br></br>
+                <h2>Recommended Career Path</h2>
                 
-                
-                    <Button
-                        size="lg"
-                        onClick={() => window.location.reload()}
-                        kind="primary"
-                        renderIcon={ResetAlt}
-                    >
-                        Take Assessment Again
-                    </Button>
+                {/* Updated grid container */}
+                <Grid style={{ 
+                    width: '100%',
+                    maxWidth: '800px',
+                    margin: '2rem auto'
+                }}>
+                    <Column sm={4} md={8} lg={16}>
+                    
+                        <Tile className="result-tile" style={{
+                            padding: '2rem',
+                            backgroundColor: 'var(--cds-layer-02)',
+                            border: '1px solid var(--cds-border-subtle)',
+                            borderRadius: '8px',
+                            transition: 'transform 0.3s ease',
+                        }}>
 
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '1rem'
+                            }}>
+                                
+                                <h3 style={{
+                                    fontSize: '1.75rem',
+                                    color: 'var(--cds-text-primary)',
+                                    margin: 0
+                                }}>{result}</h3>
+                            </div>
+                        </Tile>
+                    </Column>
+                </Grid>
+
+                <Button
+                    size="lg"
+                    onClick={() => window.location.reload()}
+                    kind="primary"
+                    renderIcon={ResetAlt}
+                    style={{ marginTop: '2rem' }}
+                >
+                    Take Assessment Again
+                </Button>
             </div>
         </div>
     );
@@ -406,9 +447,9 @@ const UserCareerAssessment = () => {
 
     return (
         <div className="career-assessment">
-            <Grid style={{ margin: '4rem 0' }}>  {/* Replace br tags with proper margin */}
+            <Grid style={{ margin: '3rem 0' }}>  {/* Replace br tags with proper margin */}
                 <Column lg={15} md={8} sm={4}>
-                    <Tile style={{ 
+                    <Tile style={{
                         borderRadius: '12px',
                         backgroundColor: 'var(--cds-layer-01)',
                         border: '1px solid var(--cds-border-subtle)',

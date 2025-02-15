@@ -3,7 +3,7 @@ VALUES
     ('Engineering & Technology', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('Medical & Healthcare', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('Pure Sciences & Research', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Commerce, Finance & Business', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Commerce & Finance', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('Law & Government Services', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('Media, Design & Communication', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('Hotel Management & Tourism', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

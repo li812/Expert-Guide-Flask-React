@@ -28,7 +28,8 @@ import {
   Report,         // Add these
   Email,          // Add these
   FaceMask,       // Add this icon
-  Chat
+  Chat,
+  ScisTransparentSupply
 } from '@carbon/icons-react';
 import UserHome from './user_home';
 import UserSettings from './user_settings';
@@ -240,7 +241,7 @@ function UserBase() {
 
 
                   <SideNavLink
-                    renderIcon={() => <Chat size={40} style={{ fontSize: "3rem" }} />}
+                    renderIcon={() => <ScisTransparentSupply size={40} style={{ fontSize: "3rem" }} />}
                     isActive={location.pathname === "/user/career-assessment"}
                     as={Link}
                     to="/user/career-assessment"

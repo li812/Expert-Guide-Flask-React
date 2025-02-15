@@ -430,3 +430,87 @@
   transform: translateY(-4px);
   box-shadow: var(--cds-shadow-hover);
 }
+
+/* Answer Button Styles */
+.answer-buttons {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.answer-button {
+    width: 100% !important;
+    /* min-height: 4rem !important; */
+    transition: all 0.2s ease !important;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+/* Light Mode Styles */
+[data-carbon-theme="white"] .answer-button:not(.selected) {
+    background-color: var(--cds-layer-01) !important;
+    border: 1px solid var(--cds-border-subtle) !important;
+    color: var(--cds-text-primary) !important;
+}
+
+[data-carbon-theme="white"] .answer-button:not(.selected):hover {
+    background-color: var(--cds-layer-hover) !important;
+    transform: translateY(-2px);
+}
+
+[data-carbon-theme="white"] .answer-button.selected {
+    background-color: var(--cds-interactive-01) !important;
+    color: var(--cds-text-on-color) !important;
+    border-color: var(--cds-interactive-01) !important;
+    transform: scale(1.02);
+}
+
+/* Dark Mode Styles */
+[data-carbon-theme="g100"] .answer-button:not(.selected) {
+    background-color: var(--cds-layer-01) !important;
+    border: 1px solid var(--cds-border-subtle) !important;
+    color: var(--cds-text-primary) !important;
+}
+
+[data-carbon-theme="g100"] .answer-button:not(.selected):hover {
+    background-color: var(--cds-layer-hover) !important;
+    transform: translateY(-2px);
+}
+
+[data-carbon-theme="g100"] .answer-button.selected {
+    background-color: var(--cds-interactive-01) !important;
+    color: var (--cds-text-on-color) !important;
+    border-color: var(--cds-interactive-01) !important;
+    transform: scale(1.02);
+}
+
+/* Focus States */
+.answer-button:focus {
+    outline: 2px solid var(--cds-focus) !important;
+    outline-offset: -2px;
+}
+
+/* Disabled States */
+.answer-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Animation */
+@keyframes selectAnswer {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1.02);
+    }
+}
+
+.answer-button.selected {
+    animation: selectAnswer 0.3s ease forwards;
+}

@@ -28,7 +28,7 @@ def process_assessment(answers):
         # Format answers in the required format
         formatted_answers = []
         for qid, answer_data in answers.items():
-            formatted_answers.append(f"{qid}: {answer_data['text']} {answer_data['answer']}")
+            formatted_answers.append(f"{answer_data['text']} {answer_data['answer']}")
         
         answers_text = "\n".join(formatted_answers)
         
