@@ -12,10 +12,12 @@ import {
     SelectItem,
     Button,
     InlineNotification,
-    Tile
+    Tile,
+    Dropdown
 } from '@carbon/react';
 import { UserAvatar, Save } from '@carbon/icons-react';
 import './user.css';
+import statesAndDistricts from '../../components/StatesAndDistricts';
 
 const UserProfile = () => {
     const [selectedSection, setSelectedSection] = useState(0);
@@ -108,6 +110,22 @@ const UserProfile = () => {
         };
     }, [profile.profilePicturePreview]);
 
+    // Add these handlers for state and district changes
+    const handleStateChange = ({ selectedItem }) => {
+        setProfile(prev => ({
+            ...prev,
+            state: selectedItem,
+            district: '' // Reset district when state changes
+        }));
+    };
+
+    const handleDistrictChange = ({ selectedItem }) => {
+        setProfile(prev => ({
+            ...prev,
+            district: selectedItem
+        }));
+    };
+
     return (
         <Grid className="profile-page">
             <Column lg={16} md={8} sm={4}>
@@ -188,33 +206,34 @@ const UserProfile = () => {
                                     value={profile.address || ''}
                                     onChange={(e) => setProfile({ ...profile, address: e.target.value })}
                                 />
-                                <Select
+                                <Dropdown
                                     id="state"
-                                    labelText="State"
-                                    value={profile.state || ''}
-                                    onChange={(e) => setProfile({ ...profile, state: e.target.value })}
-                                >
-                                    <SelectItem value="Kerala" text="Kerala" />
-                                    <SelectItem value="Tamil Nadu" text="Tamil Nadu" />
-                                    <SelectItem value="Karnataka" text="Karnataka" />
-                                </Select>
-                                <Select
+                                    titleText="State"
+                                    label="Select State"
+                                    items={Object.keys(statesAndDistricts)}
+                                    selectedItem={profile.state}
+                                    onChange={handleStateChange}
+                                />
+                                <Dropdown
                                     id="district"
-                                    labelText="District"
-                                    value={profile.district || ''}
-                                    onChange={(e) => setProfile({ ...profile, district: e.target.value })}
-                                >
-                                    <SelectItem value="Kollam" text="Kollam" />
-                                    <SelectItem value="Trivandrum" text="Trivandrum" />
-                                    <SelectItem value="Kochi" text="Kochi" />
-                                </Select>
+                                    titleText="District"
+                                    label="Select District"
+                                    items={profile.state ? statesAndDistricts[profile.state] : []}
+                                    selectedItem={profile.district}
+                                    onChange={handleDistrictChange}
+                                    disabled={!profile.state}
+                                />
                                 <TextInput
                                     id="postalPinCode"
                                     labelText="Postal Code"
                                     value={profile.postalPinCode || ''}
                                     onChange={(e) => setProfile({ ...profile, postalPinCode: e.target.value })}
                                 />
-                                <Button type="submit" renderIcon={Save} disabled={isLoading}>
+                                <Button 
+                                    type="submit" 
+                                    renderIcon={Save} 
+                                    disabled={isLoading}
+                                >
                                     Save Location Information
                                 </Button>
                             </Stack>
