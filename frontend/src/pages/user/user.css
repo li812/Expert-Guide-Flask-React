@@ -333,3 +333,100 @@
   .markdown-body th {
     background: var(--cds-background-selected-hover);
   }
+
+/* Add these styles to your existing user.css */
+.career-assessment {
+  --assessment-primary: var(--cds-interactive-01);
+  --assessment-secondary: var(--cds-interactive-02);
+  --assessment-text: var(--cds-text-primary);
+  --assessment-bg: var(--cds-layer-01);
+  --assessment-card: var(--cds-layer-02);
+  --assessment-border: var(--cds-border-subtle);
+}
+
+.intro-section {
+  text-align: center;
+  padding: 3rem;
+  background-color: var(--assessment-bg);
+  border-radius: 8px;
+}
+
+.intro-pictogram {
+  margin-bottom: 2rem;
+  color: var(--assessment-primary);
+  transition: transform 0.3s ease;
+}
+
+.intro-pictogram:hover {
+  transform: scale(1.05);
+}
+
+.step-tile {
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--assessment-card);
+  border: 1px solid var(--assessment-border);
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-tile:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--cds-shadow-hover);
+}
+
+.question-section {
+  position: relative;
+  padding: 2rem;
+}
+
+.progress-wrapper {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--assessment-card);
+  border-radius: 8px;
+  border: 1px solid var (--assessment-border);
+}
+
+.question-card {
+  padding: 2.5rem;
+  background-color: var(--assessment-card);
+  border: 1px solid var(--assessment-border);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.question-number {
+  margin-bottom: 1rem;
+  color: var(--assessment-primary);
+}
+
+.radio-group {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--cds-layer-03);
+  border-radius: 8px;
+}
+
+.result-section {
+  text-align: center;
+  padding: 3rem;
+  background-color: var(--assessment-bg);
+  border-radius: 8px;
+}
+
+.result-card {
+  padding: 3rem;
+  margin-top: 2rem;
+  background-color: var(--assessment-card);
+  border: 1px solid var(--assessment-border);
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.result-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--cds-shadow-hover);
+}
