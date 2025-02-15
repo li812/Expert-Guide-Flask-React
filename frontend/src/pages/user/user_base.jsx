@@ -37,6 +37,7 @@ import UserManageFacialData from './user_manage_facial_data'; // Add this
 import UserSendComplaints from './user_send_complaints';
 import UserManageComplaints from './user_manage_complaints';
 import UserLLMChat from './user_llm_chat';
+import UserCareerAssessment from './user_career_assessment';  // Corrected import
 
 function UserBase() {
   const navigate = useNavigate();
@@ -240,6 +241,17 @@ function UserBase() {
 
                   <SideNavLink
                     renderIcon={() => <Chat size={40} style={{ fontSize: "3rem" }} />}
+                    isActive={location.pathname === "/user/career-assessment"}
+                    as={Link}
+                    to="/user/career-assessment"
+                    className="side-nav-link"
+                  >
+                    Career Assessment
+                  </SideNavLink>
+
+
+                  <SideNavLink
+                    renderIcon={() => <Chat size={40} style={{ fontSize: "3rem" }} />}
                     isActive={location.pathname === "/user/llm-chat"}
                     as={Link}
                     to="/user/llm-chat"
@@ -318,6 +330,7 @@ function UserBase() {
                 <Route path="/complaints" element={<UserSendComplaints />} />
                 <Route path="/manage-complaints" element={<UserManageComplaints />} />
                 <Route path="/llm-chat" element={<UserLLMChat />} /> {/* Add this route */}
+                <Route path="/career-assessment" element={<UserCareerAssessment />} /> {/* Add this route */}
                 <Route path="*" element={<UserHome username={username} />} />
               </Routes>
             </Content>

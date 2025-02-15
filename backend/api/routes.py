@@ -55,8 +55,13 @@ from services.user_services import (
     delete_user_facial_data
 )
 
+from services.assesment_services import (
+    get_assessment_questions,
+    process_assessment
+)
+
 # Database models
-from db.db_models import Users, Login, UserType, Complaints
+from db.db_models import Users, Login, UserType, Complaints, Questions, Careers
 
 api = Blueprint('api', __name__)
 
@@ -190,6 +195,7 @@ def user_registration_api():
         # Register user
         result = register_user(user_data, profile_picture)
         
+
         if "error" in result:
             return jsonify(result), 400
 
@@ -977,6 +983,34 @@ def delete_career_route(career_id):
 
 
 
+@api.route('/api/assessment/questions', methods=['GET'])
+@check_session(required_type=2)  # User only
+def get_assessment_questions_route():
+    try:
+        result = get_assessment_questions()
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 500
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+@api.route('/api/assessment/submit', methods=['POST'])
+@check_session(required_type=2)
+def submit_assessment_route():
+    try:
+        data = request.json
+        answers = data.get('answers')
+        
+        if not answers:
+            return jsonify({"error": "No answers provided"}), 400
+            
+        result = process_assessment(answers)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 500
+            
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
