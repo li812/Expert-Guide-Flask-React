@@ -399,11 +399,11 @@ def delete_question_route(question_id):
 @check_session(required_type=2)  # User type_id = 2 
 def get_user_profile():
     try:
-        print("Fetching user profile...")
+        # print("Fetching user profile...")
         
         # Get login_id from session
         login_id = session.get('login_id')
-        print(f"Login ID from session: {login_id}")
+        # print(f"Login ID from session: {login_id}")
 
         if not login_id:
             print("No login_id in session")
@@ -411,7 +411,7 @@ def get_user_profile():
 
         # Query user data
         user = Users.query.filter_by(login_id=login_id).first()
-        print(f"Found user: {user}")
+        # print(f"Found user: {user}")
 
         if not user:
             print("User not found")
