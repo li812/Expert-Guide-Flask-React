@@ -1,4 +1,4 @@
-from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course
+from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course, InstitutionType, Institution
 import platform
 import psutil
 import socket
@@ -519,6 +519,133 @@ def delete_course(course_id):
         db.session.commit()
         
         return {"message": "Course deleted successfully"}
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+    
+    
+def get_all_institute_types(page=1, per_page=10, sort_key='institution_type_id', sort_direction='asc'):
+    """Get all institution types with pagination and sorting"""
+    try:
+        # Create base query
+        query = InstitutionType.query
+
+        # Apply sorting
+        if sort_key == 'institution_type_id':
+            sort_column = InstitutionType.institution_type_id
+        else:
+            sort_column = InstitutionType.institution_type
+
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Format response
+        institute_types_list = [{
+            'institution_type_id': it.institution_type_id,
+            'institution_type': it.institution_type,
+            'created_at': it.created_at.isoformat() if it.created_at else None,
+            'updated_at': it.updated_at.isoformat() if it.updated_at else None
+        } for it in paginated.items]
+
+        return {
+            'instituteTypes': institute_types_list,
+            'total': total
+        }
+    except Exception as e:
+        print(f"Error in get_all_institute_types: {str(e)}")
+        return {"error": str(e)}
+
+def validate_institute_type(institute_type_text):
+    """Validate institution type text"""
+    if not institute_type_text or len(institute_type_text.strip()) == 0:
+        return False, "Institution type cannot be empty"
+    if len(institute_type_text) > 120:
+        return False, "Institution type must be less than 120 characters"
+    return True, None
+
+def add_institute_type(institute_type_text):
+    """Add a new institution type"""
+    try:
+        # Validate institution type text
+        is_valid, error_message = validate_institute_type(institute_type_text)
+        if not is_valid:
+            return {"error": error_message}
+
+        # Check if institution type already exists
+        existing = InstitutionType.query.filter_by(institution_type=institute_type_text).first()
+        if existing:
+            return {"error": "Institution type already exists"}
+
+        new_institute_type = InstitutionType(institution_type=institute_type_text)
+        db.session.add(new_institute_type)
+        db.session.commit()
+        
+        return {
+            'institution_type_id': new_institute_type.institution_type_id,
+            'institution_type': new_institute_type.institution_type,
+            'created_at': new_institute_type.created_at.isoformat(),
+            'updated_at': new_institute_type.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def update_institute_type(institute_type_id, institute_type_text):
+    """Update an existing institution type"""
+    try:
+        # Validate institution type text
+        is_valid, error_message = validate_institute_type(institute_type_text)
+        if not is_valid:
+            return {"error": error_message}
+
+        institute_type = InstitutionType.query.get(institute_type_id)
+        if not institute_type:
+            return {"error": "Institution type not found"}
+
+        # Check if new name already exists for different institution type
+        existing = InstitutionType.query.filter(
+            InstitutionType.institution_type == institute_type_text,
+            InstitutionType.institution_type_id != institute_type_id
+        ).first()
+        if existing:
+            return {"error": "Institution type name already exists"}
+            
+        institute_type.institution_type = institute_type_text
+        db.session.commit()
+        
+        return {
+            'institution_type_id': institute_type.institution_type_id,
+            'institution_type': institute_type.institution_type,
+            'created_at': institute_type.created_at.isoformat(),
+            'updated_at': institute_type.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def delete_institute_type(institute_type_id):
+    """Delete an institution type"""
+    try:
+        institute_type = InstitutionType.query.get(institute_type_id)
+        if not institute_type:
+            return {"error": "Institution type not found"}
+
+        # Check if institution type is being used by any institutions
+        if Institution.query.filter_by(institution_type_id=institute_type_id).first():
+            return {"error": "Cannot delete institution type that has associated institutions"}
+            
+        db.session.delete(institute_type)
+        db.session.commit()
+        
+        return {"message": "Institution type deleted successfully"}
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}

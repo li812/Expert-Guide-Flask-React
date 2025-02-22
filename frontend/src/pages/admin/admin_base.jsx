@@ -18,15 +18,18 @@ import {
   Theme,
   SideNavLink
 } from '@carbon/react';
-import { Search, Logout, Light, Asleep, UserAvatar, Settings, Api, UserAdmin, Dashboard, Email, Add, TrashCan, Edit, Save, View, QuestionAnswering, Course } from '@carbon/icons-react';
+import { Search, Logout, Light, Asleep, UserAvatar, Settings, Api, UserAdmin, Dashboard, Email, Add, TrashCan, Edit, Save, View, QuestionAnswering, Course, Education, DocumentSubject } from '@carbon/icons-react';
 import AdminHome from './admin_home';
-import AdminManageUsers from './admin_manage_users.jsx';
-import AdminSettings from './admin_settings.jsx';
-import AdminManageUserComplaints from './admin_manage_users_complaints.jsx';
+import AdminManageUsers from './admin_manage_users';
+import AdminSettings from './admin_settings';
+import AdminManageUserComplaints from './admin_manage_users_complaints';
 import AdminManageQuestions from './admin_manage_questions';
 import AdminManageCareers from './admin_manage_careers';
 import AdminManageCourseType from './admin_manage_course_type';
-import AdminManageCourses from './admin_manage_courses';  
+import AdminManageCourses from './admin_manage_courses';
+import AdminManageInstitute from './admin_manage_institute';
+import AdminManageInstituteType from './admin_manage_institute_type';
+import AdminCourseMapping from './admin_course_mapping';
 import './admin.css'; // Import the CSS file for styling
 
 function AdminBase() {
@@ -185,6 +188,36 @@ function AdminBase() {
                       Manage Courses
                     </SideNavLink>
                     <SideNavLink
+                      renderIcon={() => <Education size={40} />}
+                      isActive={location.pathname === "/admin/institute-types"}
+                      as={Link}
+                      to="/admin/institute-types"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Institution Types
+                    </SideNavLink>
+                    <SideNavLink
+                      renderIcon={() => <Education size={40} />}
+                      isActive={location.pathname === "/admin/institutes"}
+                      as={Link}
+                      to="/admin/institutes"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Manage Institutions
+                    </SideNavLink>
+                    <SideNavLink
+                      renderIcon={() => <DocumentSubject size={40} />}
+                      isActive={location.pathname === "/admin/course-mapping"}
+                      as={Link}
+                      to="/admin/course-mapping"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Course Mapping
+                    </SideNavLink>
+                    <SideNavLink
                       renderIcon={() => <UserAdmin size={40} />}
                       isActive={location.pathname === "/admin/users"}
                       as={Link}
@@ -229,6 +262,9 @@ function AdminBase() {
                   <Route path="careers" element={<AdminManageCareers username={username} />} />
                   <Route path="course-types" element={<AdminManageCourseType username={username} />} />
                   <Route path="courses" element={<AdminManageCourses username={username} />} />
+                  <Route path="institute-types" element={<AdminManageInstituteType username={username} />} />
+                  <Route path="institutes" element={<AdminManageInstitute username={username} />} />
+                  <Route path="course-mapping" element={<AdminCourseMapping username={username} />} />
                   <Route path="*" element={<AdminHome username={username} />} />
                 </Routes>
               </Content>

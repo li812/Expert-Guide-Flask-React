@@ -43,7 +43,11 @@ from services.admin_services import (
     get_all_courses,
     add_course,
     update_course,
-    delete_course
+    delete_course,
+    get_all_institute_types,
+    add_institute_type,
+    update_institute_type,
+    delete_institute_type
 )
 from services.question_services import (
     get_all_questions,
@@ -1173,3 +1177,81 @@ def delete_course_route(course_id):
     except Exception as e:
         print(f"Error deleting course: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+
+
+@api.route('/api/admin/institute-types', methods=['GET'])
+@check_session(required_type=1)  # Admin only
+def get_all_institute_types_route():
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        sort_key = request.args.get('sort', 'institution_type_id')
+        sort_direction = request.args.get('direction', 'asc')
+
+        # Get paginated institution types
+        result = get_all_institute_types(
+            page=page,
+            per_page=per_page,
+            sort_key=sort_key,
+            sort_direction=sort_direction
+        )
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error fetching institution types: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/institute-types', methods=['POST'])
+@check_session(required_type=1)  # Admin only
+def add_institute_type_route():
+    try:
+        data = request.get_json()
+        if not data or 'institution_type' not in data:
+            return jsonify({"error": "Missing institution type"}), 400
+            
+        result = add_institute_type(data['institution_type'])
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"instituteType": result}), 201
+    except Exception as e:
+        print(f"Error adding institution type: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/institute-types/<int:institute_type_id>', methods=['PUT'])
+@check_session(required_type=1)  # Admin only
+def update_institute_type_route(institute_type_id):
+    try:
+        data = request.get_json()
+        if not data or 'institution_type' not in data:
+            return jsonify({"error": "Missing institution type"}), 400
+            
+        result = update_institute_type(institute_type_id, data['institution_type'])
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"instituteType": result})
+    except Exception as e:
+        print(f"Error updating institution type: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/institute-types/<int:institute_type_id>', methods=['DELETE'])
+@check_session(required_type=1)  # Admin only
+def delete_institute_type_route(institute_type_id):
+    try:
+        result = delete_institute_type(institute_type_id)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"message": result["message"]})
+    except Exception as e:
+        print(f"Error deleting institution type: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+    
