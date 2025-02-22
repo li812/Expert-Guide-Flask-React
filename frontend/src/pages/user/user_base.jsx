@@ -90,7 +90,7 @@ function UserBase() {
         setUsername(sessionData.username);
 
         // Fetch user profile
-        console.log("Fetching user profile...");
+        // console.log("Fetching user profile...");
         const profileResponse = await fetch('http://localhost:5001/api/user/profile', {
           method: 'GET',
           credentials: 'include',
@@ -100,14 +100,14 @@ function UserBase() {
           }
         });
 
-        console.log("Profile response status:", profileResponse.status);
+        // console.log("Profile response status:", profileResponse.status);
 
         if (!profileResponse.ok) {
           throw new Error('Failed to fetch profile');
         }
 
         const profileData = await profileResponse.json();
-        console.log("Profile data:", profileData);
+        // console.log("Profile data:", profileData);
 
         setProfile({
           fullName: profileData.full_name || '',

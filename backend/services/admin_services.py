@@ -4,6 +4,8 @@ import psutil
 import socket
 import uuid
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
 
 def get_all_users():
     users = Users.query.join(Login, Users.login_id == Login.login_id).all()
@@ -646,6 +648,247 @@ def delete_institute_type(institute_type_id):
         db.session.commit()
         
         return {"message": "Institution type deleted successfully"}
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def get_all_institutes(page=1, per_page=10, sort_key='institution_id', sort_direction='asc'):
+    """Get all institutions with pagination and sorting"""
+    try:
+        # Create base query
+        query = Institution.query
+
+        # Apply sorting
+        if sort_key == 'institution_id':
+            sort_column = Institution.institution_id
+        elif sort_key == 'institution':
+            sort_column = Institution.institution
+        elif sort_key == 'email':
+            sort_column = Institution.email
+        elif sort_key == 'state':
+            sort_column = Institution.state
+        else:
+            sort_column = Institution.institution_id
+
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Format response
+        institutes_list = [{
+            'institution_id': inst.institution_id,
+            'institution': inst.institution,
+            'institution_type_id': inst.institution_type_id,
+            'description': inst.description,
+            'accreditation': inst.accreditation,
+            'since_date': inst.since_date.isoformat() if inst.since_date else None,
+            'website': inst.website,
+            'email': inst.email,
+            'phone': inst.phone,
+            'address': inst.address,
+            'state': inst.state,
+            'district': inst.district,
+            'postalPinCode': inst.postalPinCode,
+            'logoPicture': inst.logoPicture,
+            'created_at': inst.created_at.isoformat() if inst.created_at else None,
+            'updated_at': inst.updated_at.isoformat() if inst.updated_at else None
+        } for inst in paginated.items]
+
+        return {
+            'institutes': institutes_list,
+            'total': total
+        }
+    except Exception as e:
+        print(f"Error in get_all_institutes: {str(e)}")
+        return {"error": str(e)}
+
+def validate_institute(institute_data):
+    """Validate institution data"""
+    if not institute_data.get('institution') or len(institute_data['institution'].strip()) == 0:
+        return False, "Institution name is required"
+    if not institute_data.get('institution_type_id'):
+        return False, "Institution type is required"
+    if not institute_data.get('description') or len(institute_data['description'].strip()) == 0:
+        return False, "Description is required"
+    if not institute_data.get('since_date'):
+        return False, "Since date is required"
+    if not institute_data.get('website') or len(institute_data['website'].strip()) == 0:
+        return False, "Website is required"
+    if not institute_data.get('email') or len(institute_data['email'].strip()) == 0:
+        return False, "Email is required"
+    if not institute_data.get('phone') or len(institute_data['phone'].strip()) == 0:
+        return False, "Phone is required"
+    if not institute_data.get('address') or len(institute_data['address'].strip()) == 0:
+        return False, "Address is required"
+    if not institute_data.get('state') or len(institute_data['state'].strip()) == 0:
+        return False, "State is required"
+    if not institute_data.get('district') or len(institute_data['district'].strip()) == 0:
+        return False, "District is required"
+    if not institute_data.get('postalPinCode') or len(institute_data['postalPinCode'].strip()) == 0:
+        return False, "Postal/Pin code is required"
+    return True, None
+
+def add_institute(institute_data, logo_file=None):
+    """Add a new institution"""
+    try:
+        # Validate institution data
+        is_valid, error_message = validate_institute(institute_data)
+        if not is_valid:
+            return {"error": error_message}
+
+        # Check if institution already exists
+        existing = Institution.query.filter_by(institution=institute_data['institution']).first()
+        if existing:
+            return {"error": "Institution already exists"}
+
+        # Handle logo file if provided
+        logo_path = None
+        if logo_file:
+            filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            logo_path = f"/institution_logos/{filename}"
+            logo_file.save(os.path.join('static', 'institution_logos', filename))
+
+        new_institute = Institution(
+            institution=institute_data['institution'],
+            institution_type_id=institute_data['institution_type_id'],
+            description=institute_data['description'],
+            accreditation=institute_data.get('accreditation'),
+            since_date=datetime.strptime(institute_data['since_date'], '%Y-%m-%d').date(),
+            website=institute_data['website'],
+            email=institute_data['email'],
+            phone=institute_data['phone'],
+            address=institute_data['address'],
+            state=institute_data['state'],
+            district=institute_data['district'],
+            postalPinCode=institute_data['postalPinCode'],
+            logoPicture=logo_path
+        )
+        
+        db.session.add(new_institute)
+        db.session.commit()
+        
+        return {
+            'institution_id': new_institute.institution_id,
+            'institution': new_institute.institution,
+            'institution_type_id': new_institute.institution_type_id,
+            'description': new_institute.description,
+            'accreditation': new_institute.accreditation,
+            'since_date': new_institute.since_date.isoformat(),
+            'website': new_institute.website,
+            'email': new_institute.email,
+            'phone': new_institute.phone,
+            'address': new_institute.address,
+            'state': new_institute.state,
+            'district': new_institute.district,
+            'postalPinCode': new_institute.postalPinCode,
+            'logoPicture': new_institute.logoPicture,
+            'created_at': new_institute.created_at.isoformat(),
+            'updated_at': new_institute.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def update_institute(institute_id, institute_data, logo_file=None):
+    """Update an existing institution"""
+    try:
+        # Validate institution data
+        is_valid, error_message = validate_institute(institute_data)
+        if not is_valid:
+            return {"error": error_message}
+
+        institute = Institution.query.get(institute_id)
+        if not institute:
+            return {"error": "Institution not found"}
+
+        # Check if new name already exists for different institution
+        existing = Institution.query.filter(
+            Institution.institution == institute_data['institution'],
+            Institution.institution_id != institute_id
+        ).first()
+        if existing:
+            return {"error": "Institution name already exists"}
+
+        # Handle logo file if provided
+        if logo_file:
+            # Delete old logo if exists
+            if institute.logoPicture:
+                old_logo_path = os.path.join('static', institute.logoPicture.lstrip('/'))
+                if os.path.exists(old_logo_path):
+                    os.remove(old_logo_path)
+
+            # Save new logo
+            filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            logo_path = f"/institution_logos/{filename}"
+            logo_file.save(os.path.join('static', 'institution_logos', filename))
+            institute.logoPicture = logo_path
+
+        # Update fields
+        institute.institution = institute_data['institution']
+        institute.institution_type_id = institute_data['institution_type_id']
+        institute.description = institute_data['description']
+        institute.accreditation = institute_data.get('accreditation')
+        institute.since_date = datetime.strptime(institute_data['since_date'], '%Y-%m-%d').date()
+        institute.website = institute_data['website']
+        institute.email = institute_data['email']
+        institute.phone = institute_data['phone']
+        institute.address = institute_data['address']
+        institute.state = institute_data['state']
+        institute.district = institute_data['district']
+        institute.postalPinCode = institute_data['postalPinCode']
+        
+        db.session.commit()
+        
+        return {
+            'institution_id': institute.institution_id,
+            'institution': institute.institution,
+            'institution_type_id': institute.institution_type_id,
+            'description': institute.description,
+            'accreditation': institute.accreditation,
+            'since_date': institute.since_date.isoformat(),
+            'website': institute.website,
+            'email': institute.email,
+            'phone': institute.phone,
+            'address': institute.address,
+            'state': institute.state,
+            'district': institute.district,
+            'postalPinCode': institute.postalPinCode,
+            'logoPicture': institute.logoPicture,
+            'created_at': institute.created_at.isoformat(),
+            'updated_at': institute.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def delete_institute(institute_id):
+    """Delete an institution"""
+    try:
+        institute = Institution.query.get(institute_id)
+        if not institute:
+            return {"error": "Institution not found"}
+
+        # Check if institution has any course mappings
+        if institute.course_mappings:
+            return {"error": "Cannot delete institution that has course mappings"}
+
+        # Delete logo file if exists
+        if institute.logoPicture:
+            logo_path = os.path.join('static', institute.logoPicture.lstrip('/'))
+            if os.path.exists(logo_path):
+                os.remove(logo_path)
+            
+        db.session.delete(institute)
+        db.session.commit()
+        
+        return {"message": "Institution deleted successfully"}
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}

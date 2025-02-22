@@ -120,6 +120,7 @@ class Institution(db.Model):
     since_date = db.Column(db.Date, nullable=False)
     website = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    phone = db.Column(db.String(20), unique=True, nullable=False)
     address = db.Column(db.String(200), nullable=False)
     state = db.Column(db.String(50), nullable=False)
     district = db.Column(db.String(50), nullable=False)

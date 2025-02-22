@@ -47,7 +47,11 @@ from services.admin_services import (
     get_all_institute_types,
     add_institute_type,
     update_institute_type,
-    delete_institute_type
+    delete_institute_type,
+    get_all_institutes,
+    add_institute,
+    update_institute,
+    delete_institute
 )
 from services.question_services import (
     get_all_questions,
@@ -821,13 +825,13 @@ def create_user_complaint():
 def get_user_complaints_route():
     try:
         login_id = session.get('login_id')
-        print(f"Fetching complaints for login_id: {login_id}")
+        # print(f"Fetching complaints for login_id: {login_id}")
         
         complaints = get_user_complaints(login_id)
         if "error" in complaints:
             return jsonify(complaints), 400
             
-        print(f"Returning complaints data: {complaints}")
+        # print(f"Returning complaints data: {complaints}")
         return jsonify({'complaints': complaints})
         
     except Exception as e:
@@ -950,7 +954,7 @@ def add_career_route():
 
         result = add_career(career_text)
         if "error" in result:
-            return jsonify({'error': result["error"]}), 400
+            return jsonify({'error': result["error"]}), 500
             
         return jsonify({'career': result}), 201
     except Exception as e:
@@ -971,7 +975,7 @@ def update_career_route(career_id):
         if "error" in result:
             if result["error"] == "Career not found":
                 return jsonify({'error': result["error"]}), 404
-            return jsonify({'error': result["error"]}), 400
+            return jsonify({'error': result["error"]}), 500
             
         return jsonify({'career': result})
     except Exception as e:
@@ -1255,3 +1259,78 @@ def delete_institute_type_route(institute_type_id):
         print(f"Error deleting institution type: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
     
+@api.route('/api/admin/institutes', methods=['GET'])
+@check_session(required_type=1)  # Admin only
+def get_all_institutes_route():
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        sort_key = request.args.get('sort', 'institution_id')
+        sort_direction = request.args.get('direction', 'asc')
+
+        # Get paginated institutions
+        result = get_all_institutes(
+            page=page,
+            per_page=per_page,
+            sort_key=sort_key,
+            sort_direction=sort_direction
+        )
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error fetching institutions: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/institutes', methods=['POST'])
+@check_session(required_type=1)  # Admin only
+def add_institute_route():
+    try:
+        # Get form data and files
+        institute_data = request.form.to_dict()
+        logo_file = request.files.get('logoPicture')
+        
+        result = add_institute(institute_data, logo_file)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"institute": result}), 201
+    except Exception as e:
+        print(f"Error adding institution: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/institutes/<int:institute_id>', methods=['PUT'])
+@check_session(required_type=1)  # Admin only
+def update_institute_route(institute_id):
+    try:
+        # Get form data and files
+        institute_data = request.form.to_dict()
+        logo_file = request.files.get('logoPicture')
+        
+        result = update_institute(institute_id, institute_data, logo_file)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"institute": result})
+    except Exception as e:
+        print(f"Error updating institution: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/institutes/<int:institute_id>', methods=['DELETE'])
+@check_session(required_type=1)  # Admin only
+def delete_institute_route(institute_id):
+    try:
+        result = delete_institute(institute_id)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"message": result["message"]})
+    except Exception as e:
+        print(f"Error deleting institution: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500

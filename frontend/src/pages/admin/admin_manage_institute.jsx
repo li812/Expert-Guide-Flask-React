@@ -31,6 +31,24 @@ import {
 } from '@carbon/react';
 import { Add, TrashCan, Edit, Upload } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
+import statesAndDistricts from '../../components/StatesAndDistricts';
+
+const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+};
+
+const formatDateForApi = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+};
 
 const AdminManageInstitute = ({ username }) => {
     const [institutes, setInstitutes] = useState([]);
@@ -49,6 +67,7 @@ const AdminManageInstitute = ({ username }) => {
         since_date: '',
         website: '',
         email: '',
+        phone: '',
         address: '',
         state: '',
         district: '',
@@ -60,6 +79,7 @@ const AdminManageInstitute = ({ username }) => {
     const [pageSize, setPageSize] = useState(10);
     const [sortKey, setSortKey] = useState('institution_id');
     const [sortDirection, setSortDirection] = useState('asc');
+    const [districts, setDistricts] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -75,9 +95,7 @@ const AdminManageInstitute = ({ username }) => {
                 {
                     method: 'GET',
                     credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                 }
             );
 
@@ -115,6 +133,7 @@ const AdminManageInstitute = ({ username }) => {
         if (!institute.since_date) return 'Since date is required';
         if (!institute.website?.trim()) return 'Website is required';
         if (!institute.email?.trim()) return 'Email is required';
+        if (!institute.phone?.trim()) return 'Phone number is required';
         if (!institute.address?.trim()) return 'Address is required';
         if (!institute.state?.trim()) return 'State is required';
         if (!institute.district?.trim()) return 'District is required';
@@ -167,6 +186,7 @@ const AdminManageInstitute = ({ username }) => {
                 since_date: '',
                 website: '',
                 email: '',
+                phone: '',
                 address: '',
                 state: '',
                 district: '',
@@ -217,6 +237,7 @@ const AdminManageInstitute = ({ username }) => {
                 since_date: '',
                 website: '',
                 email: '',
+                phone: '',
                 address: '',
                 state: '',
                 district: '',
@@ -262,6 +283,24 @@ const AdminManageInstitute = ({ username }) => {
             setPageSize(newPageSize);
             setCurrentPage(1);
         }
+    };
+
+    const handleStateChange = (e) => {
+        const selectedState = e.target.value;
+        setNewInstitute({
+            ...newInstitute,
+            state: selectedState,
+            district: '' // Reset district when state changes
+        });
+        // Update districts based on selected state
+        setDistricts(statesAndDistricts[selectedState] || []);
+    };
+
+    const handleDistrictChange = (e) => {
+        setNewInstitute({
+            ...newInstitute,
+            district: e.target.value
+        });
     };
 
     return (
@@ -333,6 +372,7 @@ const AdminManageInstitute = ({ username }) => {
                                                     ...inst,
                                                     logoPicture: null
                                                 });
+                                                setDistricts(statesAndDistricts[inst.state] || []);
                                                 setShowEditModal(true);
                                             }}
                                         >
@@ -450,6 +490,7 @@ const AdminManageInstitute = ({ username }) => {
                         since_date: '',
                         website: '',
                         email: '',
+                        phone: '',
                         address: '',
                         state: '',
                         district: '',
@@ -502,13 +543,32 @@ const AdminManageInstitute = ({ username }) => {
                             onChange={(e) => setNewInstitute({...newInstitute, accreditation: e.target.value})}
                         />
 
-                        <DatePicker datePickerType="single" dateFormat="Y-m-d">
+                        <DatePicker 
+                            datePickerType="single" 
+                            dateFormat="Y-m-d"
+                            value={newInstitute.since_date ? [new Date(newInstitute.since_date)] : []}
+                            maxDate={new Date().toISOString()}
+                            onChange={(dates) => {
+                                if (dates && dates.length > 0) {
+                                    const formattedDate = formatDateForApi(dates[0]);
+                                    setNewInstitute({
+                                        ...newInstitute, 
+                                        since_date: formattedDate
+                                    });
+                                }
+                            }}
+                        >
                             <DatePickerInput
                                 id="since_date"
                                 placeholder="YYYY-MM-DD"
                                 labelText="Since Date"
-                                value={newInstitute.since_date}
-                                onChange={(e) => setNewInstitute({...newInstitute, since_date: e.target.value})}
+                                value={formatDateForInput(newInstitute.since_date)}
+                                onChange={(e) => setNewInstitute({
+                                    ...newInstitute,
+                                    since_date: e.target.value
+                                })}
+                                invalid={!newInstitute.since_date}
+                                invalidText="Since date is required"
                                 required
                             />
                         </DatePicker>
@@ -529,6 +589,14 @@ const AdminManageInstitute = ({ username }) => {
                             required
                         />
 
+                        <TextInput
+                            id="phone"
+                            labelText="Phone"
+                            value={newInstitute.phone}
+                            onChange={(e) => setNewInstitute({...newInstitute, phone: e.target.value})}
+                            required
+                        />
+
                         <TextArea
                             id="address"
                             labelText="Address"
@@ -538,21 +606,40 @@ const AdminManageInstitute = ({ username }) => {
                             required
                         />
 
-                        <TextInput
+                        <Select
                             id="state"
                             labelText="State"
                             value={newInstitute.state}
-                            onChange={(e) => setNewInstitute({...newInstitute, state: e.target.value})}
+                            onChange={handleStateChange}
                             required
-                        />
+                        >
+                            <SelectItem value="" text="Choose a state" />
+                            {Object.keys(statesAndDistricts).map(state => (
+                                <SelectItem
+                                    key={state}
+                                    value={state}
+                                    text={state}
+                                />
+                            ))}
+                        </Select>
 
-                        <TextInput
+                        <Select
                             id="district"
                             labelText="District"
                             value={newInstitute.district}
-                            onChange={(e) => setNewInstitute({...newInstitute, district: e.target.value})}
+                            onChange={handleDistrictChange}
+                            disabled={!newInstitute.state}
                             required
-                        />
+                        >
+                            <SelectItem value="" text="Choose a district" />
+                            {districts.map(district => (
+                                <SelectItem
+                                    key={district}
+                                    value={district}
+                                    text={district}
+                                />
+                            ))}
+                        </Select>
 
                         <TextInput
                             id="postalPinCode"

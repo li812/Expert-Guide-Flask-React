@@ -1,12 +1,12 @@
 INSERT INTO careers (career, created_at, updated_at) 
 VALUES 
-    ('Engineering & Technology', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Medical & Healthcare', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Pure Sciences & Research', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Commerce & Finance', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Law & Government Services', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Media, Design & Communication', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Hotel Management & Tourism', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Defence & Aviation', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Education & Teaching', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('Business & Entrepreneurship', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('Medical Field', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Computer Science', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Pure Science', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Mechanical', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Electrical', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Civil', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Commerce', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Arts & Humanities', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Social Sciences', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Law', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
