@@ -65,6 +65,75 @@ class Questions(db.Model):
 class Careers(db.Model):
     __tablename__ = 'careers'
     career_id = db.Column(db.Integer, primary_key=True)
-    career = db.Column(db.Text, nullable=False)
+    career = db.Column(db.String(120), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    courses = db.relationship('Course', backref='career', lazy=True)
+
+class CourseType(db.Model):
+    __tablename__ = 'course_type'
+    course_type_id = db.Column(db.Integer, primary_key=True)
+    course_type = db.Column(db.String(120), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    courses = db.relationship('Course', backref='course_type', lazy=True)
+
+class Course(db.Model):
+    __tablename__ = 'course'
+    course_id = db.Column(db.Integer, primary_key=True)
+    course = db.Column(db.String(120), unique=True, nullable=False)
+    course_description = db.Column(db.Text, nullable=False)
+    course_type_id = db.Column(db.Integer, db.ForeignKey('course_type.course_type_id'), nullable=False, index=True)
+    career_id = db.Column(db.Integer, db.ForeignKey('careers.career_id'), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    career = db.relationship('Careers', backref='courses', lazy=True)
+
+class InstitutionType(db.Model):
+    __tablename__ = 'institution_type'
+    institution_type_id = db.Column(db.Integer, primary_key=True)
+    institution_type = db.Column(db.String(120), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Institution(db.Model):
+    __tablename__ = 'institution'  # Fixed tablename
+    institution_id = db.Column(db.Integer, primary_key=True)
+    institution = db.Column(db.String(120), unique=True, nullable=False)
+    institution_type_id = db.Column(db.Integer, db.ForeignKey('institution_type.institution_type_id'), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    accreditation = db.Column(db.String(100))
+    since_date = db.Column(db.Date, nullable=False)
+    website = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    address = db.Column(db.String(200), nullable=False)
+    state = db.Column(db.String(50), nullable=False)
+    district = db.Column(db.String(50), nullable=False)
+    postalPinCode = db.Column(db.String(10), nullable=False)
+    logoPicture = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class CourseMapping(db.Model):
+    __tablename__ = 'course_mapping'
+    course_mapping_id = db.Column(db.Integer, primary_key=True)
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.course_id'), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    fees = db.Column(db.Float, nullable=False)
+    student_qualification = db.Column(db.String(200), nullable=False)
+    course_affliation = db.Column(db.String(200), nullable=False)
+    duration = db.Column(db.String(200), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='active', server_default='active')
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    institution = db.relationship('Institution', backref='course_mappings')
+    course = db.relationship('Course', backref='institution_mappings')
+    
+    __table_args__ = (
+        db.UniqueConstraint('institution_id', 'course_id', name='uix_institution_course'),
+    )
