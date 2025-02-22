@@ -652,63 +652,6 @@ def delete_institute_type(institute_type_id):
         db.session.rollback()
         return {"error": str(e)}
 
-def get_all_institutes(page=1, per_page=10, sort_key='institution_id', sort_direction='asc'):
-    """Get all institutions with pagination and sorting"""
-    try:
-        # Create base query
-        query = Institution.query
-
-        # Apply sorting
-        if sort_key == 'institution_id':
-            sort_column = Institution.institution_id
-        elif sort_key == 'institution':
-            sort_column = Institution.institution
-        elif sort_key == 'email':
-            sort_column = Institution.email
-        elif sort_key == 'state':
-            sort_column = Institution.state
-        else:
-            sort_column = Institution.institution_id
-
-        if sort_direction == 'desc':
-            query = query.order_by(sort_column.desc())
-        else:
-            query = query.order_by(sort_column.asc())
-
-        # Get total count before pagination
-        total = query.count()
-
-        # Apply pagination
-        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-
-        # Format response
-        institutes_list = [{
-            'institution_id': inst.institution_id,
-            'institution': inst.institution,
-            'institution_type_id': inst.institution_type_id,
-            'description': inst.description,
-            'accreditation': inst.accreditation,
-            'since_date': inst.since_date.isoformat() if inst.since_date else None,
-            'website': inst.website,
-            'email': inst.email,
-            'phone': inst.phone,
-            'address': inst.address,
-            'state': inst.state,
-            'district': inst.district,
-            'postalPinCode': inst.postalPinCode,
-            'logoPicture': inst.logoPicture,
-            'created_at': inst.created_at.isoformat() if inst.created_at else None,
-            'updated_at': inst.updated_at.isoformat() if inst.updated_at else None
-        } for inst in paginated.items]
-
-        return {
-            'institutes': institutes_list,
-            'total': total
-        }
-    except Exception as e:
-        print(f"Error in get_all_institutes: {str(e)}")
-        return {"error": str(e)}
-
 def validate_institute(institute_data):
     """Validate institution data"""
     if not institute_data.get('institution') or len(institute_data['institution'].strip()) == 0:
@@ -891,4 +834,61 @@ def delete_institute(institute_id):
         return {"message": "Institution deleted successfully"}
     except Exception as e:
         db.session.rollback()
+        return {"error": str(e)}
+
+def get_all_institutes(page=1, per_page=10, sort_key='institution_id', sort_direction='asc'):
+    """Get all institutions with pagination and sorting"""
+    try:
+        # Create base query
+        query = Institution.query
+
+        # Apply sorting
+        if sort_key == 'institution_id':
+            sort_column = Institution.institution_id
+        elif sort_key == 'institution':
+            sort_column = Institution.institution
+        elif sort_key == 'email':
+            sort_column = Institution.email
+        elif sort_key == 'state':
+            sort_column = Institution.state
+        else:
+            sort_column = Institution.institution_id
+
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Format response
+        institutes_list = [{
+            'institution_id': inst.institution_id,
+            'institution': inst.institution,
+            'institution_type_id': inst.institution_type_id,
+            'description': inst.description,
+            'accreditation': inst.accreditation,
+            'since_date': inst.since_date.isoformat() if inst.since_date else None,
+            'website': inst.website,
+            'email': inst.email,
+            'phone': inst.phone,
+            'address': inst.address,
+            'state': inst.state,
+            'district': inst.district,
+            'postalPinCode': inst.postalPinCode,
+            'logoPicture': inst.logoPicture,
+            'created_at': inst.created_at.isoformat() if inst.created_at else None,
+            'updated_at': inst.updated_at.isoformat() if inst.updated_at else None
+        } for inst in paginated.items]
+
+        return {
+            'institutes': institutes_list,
+            'total': total
+        }
+    except Exception as e:
+        print(f"Error in get_all_institutes: {str(e)}")
         return {"error": str(e)}
