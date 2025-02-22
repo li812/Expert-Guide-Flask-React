@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from .db_models import db, UserType, Login, Users, Questions, Careers
+from .db_models import db, UserType, Login, Users, Complaints , Questions, Careers, CourseType, Course, InstitutionType, Institution, CourseMapping
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime
@@ -53,11 +53,9 @@ def init_db(app, run_env):
         # Add default users if not exists
         if not Login.query.first():
             print("Adding default users...")
-            default_users = [
-                Login(login_id=1, username='admin', password='admin', type_id=1),
-                Login(login_id=2, username='user', password='user', type_id=2)
-            ]
-            db.session.add_all(default_users)
+            admin = Login(login_id=1, username='admin', type_id=1)
+            admin.set_password('admin')
+            db.session.add_all([admin])
             db.session.commit()
     print("Database initialization complete.")
 
@@ -65,7 +63,7 @@ def ensure_database(run_env):
     """Ensure database exists"""
     DB_CONFIG = get_db_config(run_env)
     print("Ensuring database exists...")
-    retries = 10  # Increased retries
+    retries = 10 
     while retries > 0:
         try:
             print(f"Attempting to connect to MySQL (retries left: {retries})...")

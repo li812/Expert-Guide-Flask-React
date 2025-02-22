@@ -15,6 +15,7 @@ flask-limiter==3.5.0
 flask_sockets
 colorama==0.4.6
 requests
+werkzeug
 
 # Testing and db
 pytest==7.4.3

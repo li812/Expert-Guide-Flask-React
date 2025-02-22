@@ -30,47 +30,14 @@ def get_user_stats(login_id):
         print(f"Error in get_user_stats: {str(e)}")
         return {"error": str(e)}
 
-def user_update_password(old_password, new_password, login_id):
-    try:
-        print("=== Password Update Debug ===")
-        print(f"Starting password update for login_id: {login_id}")
-        print(f"Old password received: {old_password}")
-        print(f"New password received: {new_password}")
-        
-        # Get user login record
-        user_login = Login.query.filter_by(login_id=login_id).first()
-        print(f"Found user_login object: {user_login}")
-        print(f"User login details - ID: {user_login.login_id if user_login else 'Not found'}")
-        
-        if not user_login:
-            print("ERROR: User login not found")
-            return {"error": "User login not found"}
-
-        # Direct password comparison
-        print(f"Stored password hash: {user_login.password}")
-        print(f"Comparing with provided password: {old_password}")
-        
-        if user_login.password != old_password:
-            print("ERROR: Password mismatch")
-            print(f"Stored: {user_login.password}")
-            print(f"Provided: {old_password}")
-            return {"error": "Current password is incorrect"}
-
-        # Update password
-        print("Updating password...")
-        user_login.password = new_password
-        db.session.commit()
-        
-        print("Password updated successfully")
-        return {"success": "Password updated successfully"}
-
-    except Exception as e:
-        db.session.rollback()
-        print("=== Password Update Error ===")
-        print(f"Exception type: {type(e)}")
-        print(f"Exception message: {str(e)}")
-        print(f"Full error: {e}")
-        return {"error": str(e)}
+def user_update_password(current_password, new_password, login_id):
+    user = Login.query.get(login_id)
+    if not user or not user.check_password(current_password):
+        return {"error": "Current password is incorrect"}
+    
+    user.set_password(new_password)
+    db.session.commit()
+    return {"message": "Password updated successfully"}
 
 def get_user_profile(login_id):
     try:

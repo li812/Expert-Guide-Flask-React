@@ -6,15 +6,12 @@ from sqlalchemy import or_
 from db.db_models import db, Login, Users
 
 def authenticate_user(username, password):
-    print(f"Authenticating user: {username}")
-    user = Login.query.filter_by(username=username, password=password).first()
-    if user:
-        print(f"User authenticated: {user.username}")
+    user = Login.query.filter_by(username=username).first()
+    if user and user.check_password(password):
         return {
             'login_id': user.login_id,
             'type_id': user.type_id
         }
-    print("Authentication failed")
     return None
 
 def get_user_type(type_id):
@@ -55,9 +52,9 @@ def register_user(user_data, profile_picture):
         # Create login record
         login = Login(
             username=user_data.get('username'),
-            password=user_data.get('password'),
             type_id=user_data.get('type_id', 2)
         )
+        login.set_password(user_data.get('password'))
         db.session.add(login)
         db.session.flush()
 
@@ -143,8 +140,8 @@ def verify_password(identifier, password):
         user = Login.query.filter_by(username=identifier).first()
         if user:
             print(f"Found user by username")
-            # Verify password immediately
-            if user.password == password:
+            # Use check_password method instead of direct comparison
+            if user.check_password(password):
                 print("Password verified successfully")
                 return {
                     "success": True,
@@ -158,13 +155,13 @@ def verify_password(identifier, password):
                     "error": "Invalid credentials"
                 }
 
-        # Try email lookups for Users if not found by username
+        # Try email lookups for Users
         user = db.session.query(Login).join(Users).filter(
             Users.email == identifier
         ).first()
         if user:
             print(f"Found user by Users email")
-            if user.password == password:
+            if user.check_password(password):  # Use check_password here too
                 print("Password verified successfully")
                 return {
                     "success": True,

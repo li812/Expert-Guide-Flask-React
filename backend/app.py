@@ -36,7 +36,21 @@ ensure_database(run_env)
 # Initialize database
 init_db(app, run_env)
 
-show_registered_user_face()
+# show_registered_user_face()
+
+
+print("""
+  ______                      _       _____       _     _      
+ |  ____|                    | |     / ____|     (_)   | |     
+ | |__  __  ___ __   ___ _ __| |_   | |  __ _   _ _  __| | ___ 
+ |  __| \ \/ / '_ \ / _ \ '__| __|  | | |_ | | | | |/ _` |/ _ \\
+ | |____ >  <| |_) |  __/ |  | |_   | |__| | |_| | | (_| |  __/
+ |______/_/\_\ .__/ \___|_|   \__|   \_____|\__,_|_|\__,_|\___|
+             | |                                               
+             |_|                                               
+        
+                                          Started Successfully!
+""")
 
 app.register_blueprint(api)
 

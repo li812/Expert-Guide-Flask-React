@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from utils.password_utils import hash_password, verify_password_hash
 
 db = SQLAlchemy()
 
@@ -24,6 +25,13 @@ class Login(db.Model):
     last_login = db.Column(db.DateTime, default=datetime.utcnow)
     login_count = db.Column(db.Integer, default=0)
     
+    def set_password(self, password):
+        """Hash and set password"""
+        self.password = hash_password(password)
+    
+    def check_password(self, password):
+        """Check password against hash"""
+        return verify_password_hash(self.password, password)
     
 class Users(db.Model):
     __tablename__ = 'users'
@@ -69,7 +77,8 @@ class Careers(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    courses = db.relationship('Course', backref='career', lazy=True)
+    # Remove the backref here since it's defined in Course
+    courses = db.relationship('Course', back_populates='career', lazy=True)
 
 class CourseType(db.Model):
     __tablename__ = 'course_type'
@@ -78,7 +87,7 @@ class CourseType(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    courses = db.relationship('Course', backref='course_type', lazy=True)
+    courses = db.relationship('Course', back_populates='course_type', lazy=True)
 
 class Course(db.Model):
     __tablename__ = 'course'
@@ -90,7 +99,9 @@ class Course(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    career = db.relationship('Careers', backref='courses', lazy=True)
+    # Update the relationship definition here
+    career = db.relationship('Careers', back_populates='courses', lazy=True)
+    course_type = db.relationship('CourseType', back_populates='courses', lazy=True)
 
 class InstitutionType(db.Model):
     __tablename__ = 'institution_type'
