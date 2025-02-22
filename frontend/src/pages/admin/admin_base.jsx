@@ -26,6 +26,7 @@ import AdminManageUserComplaints from './admin_manage_users_complaints.jsx';
 import AdminManageQuestions from './admin_manage_questions';
 import AdminManageCareers from './admin_manage_careers';
 import AdminManageCourseType from './admin_manage_course_type';
+import AdminManageCourses from './admin_manage_courses';  
 import './admin.css'; // Import the CSS file for styling
 
 function AdminBase() {
@@ -174,6 +175,16 @@ function AdminBase() {
                       Course Types
                     </SideNavLink>
                     <SideNavLink
+                      renderIcon={() => <Course size={40} />}
+                      isActive={location.pathname === "/admin/courses"}
+                      as={Link}
+                      to="/admin/courses"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Manage Courses
+                    </SideNavLink>
+                    <SideNavLink
                       renderIcon={() => <UserAdmin size={40} />}
                       isActive={location.pathname === "/admin/users"}
                       as={Link}
@@ -217,6 +228,7 @@ function AdminBase() {
                   <Route path="questions" element={<AdminManageQuestions username={username} />} />
                   <Route path="careers" element={<AdminManageCareers username={username} />} />
                   <Route path="course-types" element={<AdminManageCourseType username={username} />} />
+                  <Route path="courses" element={<AdminManageCourses username={username} />} />
                   <Route path="*" element={<AdminHome username={username} />} />
                 </Routes>
               </Content>

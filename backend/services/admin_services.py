@@ -1,4 +1,4 @@
-from db.db_models import db, Users, Login, Complaints, Careers, CourseType
+from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course
 import platform
 import psutil
 import socket
@@ -357,6 +357,168 @@ def delete_course_type(course_type_id):
         db.session.commit()
         
         return {"message": "Course type deleted successfully"}
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+    
+    
+    
+def get_all_courses(page=1, per_page=10, sort_key='course_id', sort_direction='asc'):
+    """Get all courses with pagination and sorting"""
+    try:
+        # Create base query
+        query = Course.query
+
+        # Apply sorting
+        if sort_key == 'course_id':
+            sort_column = Course.course_id
+        elif sort_key == 'course':
+            sort_column = Course.course
+        elif sort_key == 'course_type':
+            sort_column = CourseType.course_type
+        elif sort_key == 'career':
+            sort_column = Careers.career
+        else:
+            sort_column = Course.course_id
+
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Format response
+        courses_list = [{
+            'course_id': c.course_id,
+            'course': c.course,
+            'course_description': c.course_description,
+            'course_type_id': c.course_type_id,
+            'career_id': c.career_id,
+            'course_type': c.course_type.course_type,
+            'career': c.career.career,
+            'created_at': c.created_at.isoformat() if c.created_at else None,
+            'updated_at': c.updated_at.isoformat() if c.updated_at else None
+        } for c in paginated.items]
+
+        return {
+            'courses': courses_list,
+            'total': total
+        }
+    except Exception as e:
+        print(f"Error in get_all_courses: {str(e)}")
+        return {"error": str(e)}
+
+def validate_course(course_data):
+    """Validate course data"""
+    if not course_data.get('course') or len(course_data['course'].strip()) == 0:
+        return False, "Course name cannot be empty"
+    if not course_data.get('course_description') or len(course_data['course_description'].strip()) == 0:
+        return False, "Course description cannot be empty"
+    if not course_data.get('course_type_id'):
+        return False, "Course type must be selected"
+    if not course_data.get('career_id'):
+        return False, "Career must be selected"
+    return True, None
+
+def add_course(course_data):
+    """Add a new course"""
+    try:
+        # Validate course data
+        is_valid, error_message = validate_course(course_data)
+        if not is_valid:
+            return {"error": error_message}
+
+        # Check if course already exists
+        existing = Course.query.filter_by(course=course_data['course']).first()
+        if existing:
+            return {"error": "Course already exists"}
+
+        new_course = Course(
+            course=course_data['course'],
+            course_description=course_data['course_description'],
+            course_type_id=course_data['course_type_id'],
+            career_id=course_data['career_id']
+        )
+        db.session.add(new_course)
+        db.session.commit()
+        
+        return {
+            'course_id': new_course.course_id,
+            'course': new_course.course,
+            'course_description': new_course.course_description,
+            'course_type_id': new_course.course_type_id,
+            'career_id': new_course.career_id,
+            'course_type': new_course.course_type.course_type,
+            'career': new_course.career.career,
+            'created_at': new_course.created_at.isoformat(),
+            'updated_at': new_course.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def update_course(course_id, course_data):
+    """Update an existing course"""
+    try:
+        # Validate course data
+        is_valid, error_message = validate_course(course_data)
+        if not is_valid:
+            return {"error": error_message}
+
+        course = Course.query.get(course_id)
+        if not course:
+            return {"error": "Course not found"}
+
+        # Check if new name already exists for different course
+        existing = Course.query.filter(
+            Course.course == course_data['course'],
+            Course.course_id != course_id
+        ).first()
+        if existing:
+            return {"error": "Course name already exists"}
+            
+        course.course = course_data['course']
+        course.course_description = course_data['course_description']
+        course.course_type_id = course_data['course_type_id']
+        course.career_id = course_data['career_id']
+        
+        db.session.commit()
+        
+        return {
+            'course_id': course.course_id,
+            'course': course.course,
+            'course_description': course.course_description,
+            'course_type_id': course.course_type_id,
+            'career_id': course.career_id,
+            'course_type': course.course_type.course_type,
+            'career': course.career.career,
+            'created_at': course.created_at.isoformat(),
+            'updated_at': course.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def delete_course(course_id):
+    """Delete a course"""
+    try:
+        course = Course.query.get(course_id)
+        if not course:
+            return {"error": "Course not found"}
+
+        # Check if course has any mappings
+        if course.institution_mappings:
+            return {"error": "Cannot delete course that has institution mappings"}
+            
+        db.session.delete(course)
+        db.session.commit()
+        
+        return {"message": "Course deleted successfully"}
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}

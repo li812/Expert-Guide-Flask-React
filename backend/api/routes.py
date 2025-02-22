@@ -31,7 +31,7 @@ from services.admin_services import (
     get_server_info,
     get_all_user_complaints,
     reply_to_user_complaints,
-    update_admin_password,  # Ensure this import is present
+    update_admin_password,  
     get_all_careers,
     add_career,
     update_career,
@@ -39,7 +39,11 @@ from services.admin_services import (
     get_all_course_types,
     add_course_type,
     update_course_type,
-    delete_course_type
+    delete_course_type,
+    get_all_courses,
+    add_course,
+    update_course,
+    delete_course
 )
 from services.question_services import (
     get_all_questions,
@@ -1094,4 +1098,78 @@ def delete_course_type_route(course_type_id):
         return jsonify({"message": "Course type deleted successfully"})
     except Exception as e:
         print(f"Error deleting course type: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+    
+    
+    
+    
+
+@api.route('/api/admin/courses', methods=['GET'])
+@check_session(required_type=1)  # Admin only
+def get_all_courses_route():
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        sort_key = request.args.get('sort', 'course_id')
+        sort_direction = request.args.get('direction', 'asc')
+
+        # Get paginated courses
+        result = get_all_courses(
+            page=page,
+            per_page=per_page,
+            sort_key=sort_key,
+            sort_direction=sort_direction
+        )
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error fetching courses: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/courses', methods=['POST'])
+@check_session(required_type=1)  # Admin only
+def add_course_route():
+    try:
+        data = request.get_json()
+        result = add_course(data)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"course": result}), 201
+    except Exception as e:
+        print(f"Error adding course: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/courses/<int:course_id>', methods=['PUT'])
+@check_session(required_type=1)  # Admin only
+def update_course_route(course_id):
+    try:
+        data = request.get_json()
+        result = update_course(course_id, data)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"course": result})
+    except Exception as e:
+        print(f"Error updating course: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/courses/<int:course_id>', methods=['DELETE'])
+@check_session(required_type=1)  # Admin only
+def delete_course_route(course_id):
+    try:
+        result = delete_course(course_id)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify({"message": result["message"]})
+    except Exception as e:
+        print(f"Error deleting course: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
