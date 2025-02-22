@@ -5,16 +5,16 @@ services:
       dockerfile: Dockerfile
     container_name: Expert_Guide_Backend
     ports:
-      - "5001:5001"  # Update port to match WebSocket server
+      - "5001:5001"  
     volumes:
       - ./backend:/app
-      - user_data:/app/user_data  # Add persistent volume for user data
+      - user_data:/app/user_data  
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - PYTHONUNBUFFERED=1  # Enable real-time logging
-    command: python app.py  # Use direct Python execution instead of Flask run
+      - PYTHONUNBUFFERED=1  
+    command: python app.py  
     depends_on:
       db:
         condition: service_healthy
@@ -30,14 +30,14 @@ services:
       dockerfile: Dockerfile
     container_name: Expert_Guide_Frontend
     ports:
-      - "3000:5173"  # Change to Vite dev server port
+      - "3000:5173"  
     volumes:
-      - ./frontend:/app  # Mount frontend code
-      - /app/node_modules  # Exclude node_modules
+      - ./frontend:/app  
+      - /app/node_modules  
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:5001
-    command: npm run dev -- --host  # Run in dev mode
+    command: npm run dev -- --host 
     depends_on:
       - backend
 
@@ -61,4 +61,4 @@ services:
 
 volumes:
   db_data:
-  user_data:  # Define persistent volume
+  user_data:  

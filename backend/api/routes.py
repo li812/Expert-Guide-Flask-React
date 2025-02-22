@@ -35,7 +35,11 @@ from services.admin_services import (
     get_all_careers,
     add_career,
     update_career,
-    delete_career
+    delete_career,
+    get_all_course_types,
+    add_course_type,
+    update_course_type,
+    delete_course_type
 )
 from services.question_services import (
     get_all_questions,
@@ -1014,3 +1018,80 @@ def submit_assessment_route():
         return jsonify({"error": str(e)}), 500
 
 
+
+
+@api.route('/api/admin/course-types', methods=['GET'])
+@check_session(required_type=1)  # Admin only
+def get_all_course_types_route():
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        sort_key = request.args.get('sort', 'course_type_id')
+        sort_direction = request.args.get('direction', 'asc')
+
+        result = get_all_course_types(
+            page=page,
+            per_page=per_page,
+            sort_key=sort_key,
+            sort_direction=sort_direction
+        )
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error fetching course types: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/course-types', methods=['POST'])
+@check_session(required_type=1)  # Admin only
+def add_course_type_route():
+    try:
+        data = request.get_json()
+        course_type_text = data.get('course_type')
+        
+        if not course_type_text:
+            return jsonify({"error": "Course type text is required"}), 400
+
+        result = add_course_type(course_type_text)
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+
+        return jsonify(result), 201
+    except Exception as e:
+        print(f"Error adding course type: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/course-types/<int:course_type_id>', methods=['PUT'])
+@check_session(required_type=1)  # Admin only
+def update_course_type_route(course_type_id):
+    try:
+        data = request.get_json()
+        course_type_text = data.get('course_type')
+        
+        if not course_type_text:
+            return jsonify({"error": "Course type text is required"}), 400
+
+        result = update_course_type(course_type_id, course_type_text)
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error updating course type: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@api.route('/api/admin/course-types/<int:course_type_id>', methods=['DELETE'])
+@check_session(required_type=1)  # Admin only
+def delete_course_type_route(course_type_id):
+    try:
+        result = delete_course_type(course_type_id)
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+
+        return jsonify({"message": "Course type deleted successfully"})
+    except Exception as e:
+        print(f"Error deleting course type: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500

@@ -18,13 +18,14 @@ import {
   Theme,
   SideNavLink
 } from '@carbon/react';
-import { Search, Logout, Light, Asleep, UserAvatar, Settings, Api, UserAdmin, Dashboard, Email, Add, TrashCan, Edit, Save, View, QuestionAnswering } from '@carbon/icons-react';
+import { Search, Logout, Light, Asleep, UserAvatar, Settings, Api, UserAdmin, Dashboard, Email, Add, TrashCan, Edit, Save, View, QuestionAnswering, Course } from '@carbon/icons-react';
 import AdminHome from './admin_home';
 import AdminManageUsers from './admin_manage_users.jsx';
 import AdminSettings from './admin_settings.jsx';
 import AdminManageUserComplaints from './admin_manage_users_complaints.jsx';
 import AdminManageQuestions from './admin_manage_questions';
 import AdminManageCareers from './admin_manage_careers';
+import AdminManageCourseType from './admin_manage_course_type';
 import './admin.css'; // Import the CSS file for styling
 
 function AdminBase() {
@@ -76,7 +77,7 @@ function AdminBase() {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         navigate('/login');
       } else {
@@ -101,12 +102,12 @@ function AdminBase() {
                   isActive={isSideNavExpanded}
                   aria-expanded={isSideNavExpanded}
                 />
-                <HeaderName href="#" prefix="Welcome"  style={{ fontSize: "2rem" }}>
+                <HeaderName href="#" prefix="Welcome" style={{ fontSize: "2rem" }}>
                   {username}
                 </HeaderName>
                 <HeaderNavigation aria-label="HumanID Platform">
-                <HeaderMenuItem ><UserAdmin /></HeaderMenuItem>
-                <HeaderMenuItem >Admin</HeaderMenuItem>
+                  <HeaderMenuItem ><UserAdmin /></HeaderMenuItem>
+                  <HeaderMenuItem >Admin</HeaderMenuItem>
                   <HeaderMenuItem as={Link} to="/admin/settings">Settings</HeaderMenuItem>
                 </HeaderNavigation>
                 <HeaderGlobalBar>
@@ -139,7 +140,7 @@ function AdminBase() {
                       className="side-nav-link"
                       style={{ fontSize: "1.5rem" }}
                     >
-                      
+
                       Dashboard
                     </SideNavLink>
                     <SideNavLink
@@ -151,6 +152,26 @@ function AdminBase() {
                       style={{ fontSize: "1.5rem" }}
                     >
                       Career Questions
+                    </SideNavLink>
+                    <SideNavLink
+                      renderIcon={() => <Api size={40} />}
+                      isActive={location.pathname === "/admin/careers"}
+                      as={Link}
+                      to="/admin/careers"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Career Options
+                    </SideNavLink>
+                    <SideNavLink
+                      renderIcon={() => <Course size={40} />}
+                      isActive={location.pathname === "/admin/course-types"}
+                      as={Link}
+                      to="/admin/course-types"
+                      className="side-nav-link"
+                      style={{ fontSize: "1.5rem" }}
+                    >
+                      Course Types
                     </SideNavLink>
                     <SideNavLink
                       renderIcon={() => <UserAdmin size={40} />}
@@ -183,16 +204,6 @@ function AdminBase() {
                     >
                       Settings
                     </SideNavLink>
-                    <SideNavLink
-                      renderIcon={() => <Api size={40} />}
-                      isActive={location.pathname === "/admin/careers"}
-                      as={Link}
-                      to="/admin/careers"
-                      className="side-nav-link"
-                      style={{ fontSize: "1.5rem" }}
-                    >
-                      Career Options
-                    </SideNavLink>
                   </SideNavItems>
                 </SideNav>
               </Header>
@@ -205,7 +216,8 @@ function AdminBase() {
                   <Route path="manage-user-complaints" element={<AdminManageUserComplaints username={username} />} />
                   <Route path="questions" element={<AdminManageQuestions username={username} />} />
                   <Route path="careers" element={<AdminManageCareers username={username} />} />
-                 <Route path="*" element={<AdminHome username={username} />} />
+                  <Route path="course-types" element={<AdminManageCourseType username={username} />} />
+                  <Route path="*" element={<AdminHome username={username} />} />
                 </Routes>
               </Content>
             </>

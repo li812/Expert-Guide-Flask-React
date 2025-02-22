@@ -1,4 +1,4 @@
-from db.db_models import db, Users, Login, Complaints, Careers
+from db.db_models import db, Users, Login, Complaints, Careers, CourseType
 import platform
 import psutil
 import socket
@@ -235,6 +235,128 @@ def delete_career(career_id):
         db.session.rollback()
         return {"error": str(e)}
 
+def get_all_course_types(page=1, per_page=10, sort_key='course_type_id', sort_direction='asc'):
+    """Get all course types with pagination and sorting"""
+    try:
+        # Create base query
+        query = CourseType.query
 
+        # Apply sorting
+        if sort_key == 'course_type_id':
+            sort_column = CourseType.course_type_id
+        else:
+            sort_column = CourseType.course_type
 
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
 
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Format response
+        course_types_list = [{
+            'course_type_id': ct.course_type_id,
+            'course_type': ct.course_type,
+            'created_at': ct.created_at.isoformat() if ct.created_at else None,
+            'updated_at': ct.updated_at.isoformat() if ct.updated_at else None
+        } for ct in paginated.items]
+
+        return {
+            'courseTypes': course_types_list,
+            'total': total
+        }
+    except Exception as e:
+        print(f"Error in get_all_course_types: {str(e)}")
+        return {"error": str(e)}
+
+def validate_course_type(course_type_text):
+    """Validate course type text"""
+    if not course_type_text or len(course_type_text.strip()) == 0:
+        return False, "Course type text cannot be empty"
+    if len(course_type_text) > 120:
+        return False, "Course type text is too long (max 120 characters)"
+    return True, None
+
+def add_course_type(course_type_text):
+    """Add a new course type"""
+    try:
+        # Validate course type text
+        is_valid, error_message = validate_course_type(course_type_text)
+        if not is_valid:
+            return {"error": error_message}
+
+        # Check if course type already exists
+        existing = CourseType.query.filter_by(course_type=course_type_text).first()
+        if existing:
+            return {"error": "Course type already exists"}
+
+        new_course_type = CourseType(course_type=course_type_text)
+        db.session.add(new_course_type)
+        db.session.commit()
+        
+        return {
+            'course_type_id': new_course_type.course_type_id,
+            'course_type': new_course_type.course_type,
+            'created_at': new_course_type.created_at.isoformat(),
+            'updated_at': new_course_type.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def update_course_type(course_type_id, course_type_text):
+    """Update an existing course type"""
+    try:
+        # Validate course type text
+        is_valid, error_message = validate_course_type(course_type_text)
+        if not is_valid:
+            return {"error": error_message}
+
+        course_type = CourseType.query.get(course_type_id)
+        if not course_type:
+            return {"error": "Course type not found"}
+
+        # Check if new name already exists for different course type
+        existing = CourseType.query.filter(
+            CourseType.course_type == course_type_text,
+            CourseType.course_type_id != course_type_id
+        ).first()
+        if existing:
+            return {"error": "Course type name already exists"}
+            
+        course_type.course_type = course_type_text
+        db.session.commit()
+        
+        return {
+            'course_type_id': course_type.course_type_id,
+            'course_type': course_type.course_type,
+            'created_at': course_type.created_at.isoformat(),
+            'updated_at': course_type.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def delete_course_type(course_type_id):
+    """Delete a course type"""
+    try:
+        course_type = CourseType.query.get(course_type_id)
+        if not course_type:
+            return {"error": "Course type not found"}
+
+        # Check if course type is being used
+        if course_type.courses:
+            return {"error": "Cannot delete course type that has associated courses"}
+            
+        db.session.delete(course_type)
+        db.session.commit()
+        
+        return {"message": "Course type deleted successfully"}
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
