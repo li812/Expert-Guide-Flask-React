@@ -32,6 +32,15 @@ import {
 import ViewInstituteDetailsModal from '../ViewInstituteDetailsModal/ViewInstituteDetailsModal';
 import './ViewCourseDetailsModal.css';
 
+// Add this utility function at the top of your component
+const formatUrl = (url) => {
+    if (!url) return '#';
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+    return `https://${url}`;
+};
+
 const ViewCourseDetailsModal = ({ open, onClose, mappingId }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -56,13 +65,30 @@ const ViewCourseDetailsModal = ({ open, onClose, mappingId }) => {
             if (!response.ok) throw new Error('Failed to fetch mapping details');
 
             const data = await response.json();
+            console.log("Received mapping details:", data); // Debug log
             setMappingDetails(data);
-            // Store complete institution details
+            
+            // Set complete institute details
             if (data.institution) {
-                setInstituteDetails({
-                    ...data.institution,
-                    institution_type: data.institution.institution_type // Make sure this is included in API response
-                });
+                const completeInstituteDetails = {
+                    institution_id: data.institution.institution_id,
+                    institution: data.institution.institution,
+                    institution_type: data.institution.institution_type,
+                    institution_type_id: data.institution.institution_type_id,
+                    description: data.institution.description,
+                    accreditation: data.institution.accreditation,
+                    since_date: data.institution.since_date,
+                    website: data.institution.website,
+                    email: data.institution.email,
+                    phone: data.institution.phone,
+                    address: data.institution.address,
+                    state: data.institution.state,
+                    district: data.institution.district,
+                    postalPinCode: data.institution.postalPinCode,
+                    logoPicture: data.institution.logoPicture
+                };
+                setInstituteDetails(completeInstituteDetails);
+                console.log("Setting institute details:", completeInstituteDetails);
             }
             setError(null);
         } catch (error) {
@@ -181,7 +207,7 @@ const ViewCourseDetailsModal = ({ open, onClose, mappingId }) => {
                                                 <StructuredListCell>Course Website</StructuredListCell>
                                                 <StructuredListCell>
                                                     <Link 
-                                                        href={mappingDetails.website} 
+                                                        href={formatUrl(mappingDetails.website)} 
                                                         target="_blank" 
                                                         rel="noopener noreferrer"
                                                     >
@@ -209,12 +235,15 @@ const ViewCourseDetailsModal = ({ open, onClose, mappingId }) => {
                                                         kind="ghost"
                                                         size="sm"
                                                         onClick={() => {
-                                                            if (instituteDetails) {
+                                                            if (instituteDetails && instituteDetails.institution_type) {
+                                                                console.log("Opening institute modal with details:", instituteDetails);
                                                                 setShowInstituteModal(true);
+                                                            } else {
+                                                                console.error("Missing institution details:", instituteDetails);
                                                             }
                                                         }}
                                                         renderIcon={Education}
-                                                        disabled={!instituteDetails}
+                                                        disabled={!instituteDetails || !instituteDetails.institution_type}
                                                     >
                                                         {mappingDetails.institution?.institution || 'N/A'}
                                                     </Button>
@@ -276,7 +305,7 @@ const ViewCourseDetailsModal = ({ open, onClose, mappingId }) => {
                     open={showInstituteModal}
                     onClose={() => setShowInstituteModal(false)}
                     institute={instituteDetails}
-                    instituteType={instituteDetails.institution_type}
+                    instituteType={instituteDetails.institution_type} // Pass the institution type directly
                 />
             )}
         </>
@@ -284,3 +313,6 @@ const ViewCourseDetailsModal = ({ open, onClose, mappingId }) => {
 };
 
 export default ViewCourseDetailsModal;
+
+
+

@@ -1103,9 +1103,7 @@ def get_course_mapping_details(mapping_id):
     """Get detailed information for a specific course mapping"""
     try:
         mapping = CourseMapping.query.get_or_404(mapping_id)
-        
-        # Get institution type
-        institution = mapping.institution
+        institution = Institution.query.get(mapping.institution_id)
         institution_type = InstitutionType.query.get(institution.institution_type_id)
         
         return {
@@ -1129,8 +1127,7 @@ def get_course_mapping_details(mapping_id):
             },
             'course': {
                 'course_id': mapping.course.course_id,
-                'course': mapping.course.course,
-                'course_description': mapping.course.course_description
+                'course': mapping.course.course
             },
             'description': mapping.description,
             'fees': mapping.fees,

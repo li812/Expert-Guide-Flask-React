@@ -2,7 +2,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    background-color: #f4f4f4;
+    background-color: var(--cds-ui-background);
     border-radius: 4px;
     overflow: hidden;
     transition: all 0.3s ease;
@@ -16,8 +16,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    color: #525252;
-    background-color: #f4f4f4;
+    color: var(--cds-text-05);
+    background-color: var(--cds-ui-background);
 }
 
 .cds--tab-content {
@@ -87,4 +87,32 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+/* Add these new styles */
+.institute-details-section {
+    margin-top: 1rem;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.contact-info a {
+    display: inline-flex;
+    align-items: center;
+    color: var(--cds-link-01);
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+}
+
+.location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }

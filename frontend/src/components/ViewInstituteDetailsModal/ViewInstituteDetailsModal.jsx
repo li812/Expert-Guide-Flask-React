@@ -16,7 +16,8 @@ import {
     Column,
     Tile,
     AspectRatio,
-    Loading
+    Loading,
+    InlineNotification
 } from '@carbon/react';
 import {
     Calendar,
@@ -31,13 +32,28 @@ import {
     Information
 } from '@carbon/icons-react';
 
+
+
 import './ViewInstituteDetailsModal.css';
 
 const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) => {
     const [imageLoading, setImageLoading] = React.useState(true);
     const [selectedTab, setSelectedTab] = React.useState(0);
 
-    if (!institute) return null;
+    // Enhanced validation with detailed logging
+    React.useEffect(() => {
+        console.log("ViewInstituteDetailsModal received props:", {
+            open,
+            institute: JSON.stringify(institute, null, 2),
+            instituteType
+        });
+    }, [open, institute, instituteType]);
+
+    // Validate required data
+    if (!institute || !instituteType) {
+        console.warn("Missing required data:", { institute, instituteType });
+        return null;
+    }
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -92,14 +108,15 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
     return (
         <Modal
             open={open}
+            onRequestClose={onClose}
             modalHeading={
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <Education size={24} />
-                    <span>{institute.institution} </span>
+                    <span>{institute.institution}</span>
+                    <Tag type="blue">{instituteType}</Tag>
                 </div>
             }
             passiveModal
-            onRequestClose={onClose}
             size="lg"
         >
             <Tabs 
