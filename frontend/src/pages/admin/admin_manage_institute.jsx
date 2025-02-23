@@ -32,7 +32,7 @@ import {
 import { Add, TrashCan, Edit, Upload, DataViewAlt } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 import statesAndDistricts from '../../components/StatesAndDistricts';
-import ViewInstituteDetailsModal from '../../components/ViewInstituteDetailsModal';
+import ViewInstituteDetailsModal from '../../components/ViewInstituteDetailsModal/ViewInstituteDetailsModal';
 
 const formatDateForInput = (dateString) => {
     if (!dateString) return '';
