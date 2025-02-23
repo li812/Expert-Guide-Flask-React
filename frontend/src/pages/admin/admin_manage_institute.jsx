@@ -355,6 +355,39 @@ const AdminManageInstitute = ({ username }) => {
                             rows={institutes.map(inst => ({
                                 id: String(inst.institution_id),
                                 institution_id: String(inst.institution_id),
+                                institution_Logo: (
+                                    <div className="institution-logo-container" style={{ width: '50px', height: '50px' }}>
+                                        {inst.logoPicture ? (
+                                            <img
+                                                src={`http://localhost:5001${inst.logoPicture}`}
+                                                alt={`${inst.institution} logo`}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'contain'
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "/default-institution-logo.png";
+                                                }}
+                                            />
+                                        ) : (
+                                            <div 
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    backgroundColor: '#f4f4f4',
+                                                    borderRadius: '4px'
+                                                }}
+                                            >
+                                                No Logo
+                                            </div>
+                                        )}
+                                    </div>
+                                ),
                                 institution: inst.institution,
                                 type: instituteTypes.find(t => t.institution_type_id === inst.institution_type_id)?.institution_type || '-',
                                 email: inst.email,
@@ -391,6 +424,7 @@ const AdminManageInstitute = ({ username }) => {
                             }))}
                             headers={[
                                 { key: 'institution_id', header: 'ID' },
+                                { key: 'institution_Logo', header: 'Logo' },
                                 { key: 'institution', header: 'Institution' },
                                 { key: 'type', header: 'Type' },
                                 { key: 'email', header: 'Email' },

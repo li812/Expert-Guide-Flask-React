@@ -511,3 +511,21 @@
   max-height: 200px;
   object-fit: contain;
 }
+
+/* Institution logo container styles */
+.institution-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;  /* Changed from 4px to 50% for circle shape */
+    overflow: hidden;
+    background-color: #f4f4f4;
+    width: 64px;         /* Added fixed width */
+    height: 64px;        /* Added fixed height to ensure circle shape */
+}
+
+.institution-logo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* Changed from contain to cover for better circle filling */
+}

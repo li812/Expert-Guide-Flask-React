@@ -686,18 +686,23 @@ def add_institute(institute_data, logo_file=None):
         if not is_valid:
             return {"error": error_message}
 
-        # Check if institution already exists
-        existing = Institution.query.filter_by(institution=institute_data['institution']).first()
-        if existing:
-            return {"error": "Institution already exists"}
-
-        # Handle logo file if provided
+        # Handle logo file
         logo_path = None
         if logo_file:
-            filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-            logo_path = f"/institution_logos/{filename}"
-            logo_file.save(os.path.join('static', 'institution_logos', filename))
+            try:
+                # Create directory if it doesn't exist
+                os.makedirs('institute_data/institute_logo', exist_ok=True)
+                
+                # Generate unique filename using timestamp
+                filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+                logo_path = f"/institute_data/institute_logo/{filename}"
+                
+                # Save the file
+                logo_file.save(os.path.join('institute_data/institute_logo', filename))
+            except Exception as e:
+                return {"error": f"Failed to save logo: {str(e)}"}
 
+        # Create new institute
         new_institute = Institution(
             institution=institute_data['institution'],
             institution_type_id=institute_data['institution_type_id'],
@@ -731,9 +736,7 @@ def add_institute(institute_data, logo_file=None):
             'state': new_institute.state,
             'district': new_institute.district,
             'postalPinCode': new_institute.postalPinCode,
-            'logoPicture': new_institute.logoPicture,
-            'created_at': new_institute.created_at.isoformat(),
-            'updated_at': new_institute.updated_at.isoformat()
+            'logoPicture': new_institute.logoPicture
         }
     except Exception as e:
         db.session.rollback()
@@ -751,27 +754,22 @@ def update_institute(institute_id, institute_data, logo_file=None):
         if not institute:
             return {"error": "Institution not found"}
 
-        # Check if new name already exists for different institution
-        existing = Institution.query.filter(
-            Institution.institution == institute_data['institution'],
-            Institution.institution_id != institute_id
-        ).first()
-        if existing:
-            return {"error": "Institution name already exists"}
-
         # Handle logo file if provided
         if logo_file:
-            # Delete old logo if exists
-            if institute.logoPicture:
-                old_logo_path = os.path.join('static', institute.logoPicture.lstrip('/'))
-                if os.path.exists(old_logo_path):
-                    os.remove(old_logo_path)
+            try:
+                # Delete old logo if exists
+                if institute.logoPicture:
+                    old_logo_path = os.path.join('institute_data', institute.logoPicture.lstrip('/'))
+                    if os.path.exists(old_logo_path):
+                        os.remove(old_logo_path)
 
-            # Save new logo
-            filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-            logo_path = f"/institution_logos/{filename}"
-            logo_file.save(os.path.join('static', 'institution_logos', filename))
-            institute.logoPicture = logo_path
+                # Save new logo
+                filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+                logo_path = f"/institute_data/institute_logo/{filename}"
+                logo_file.save(os.path.join('institute_data/institute_logo', filename))
+                institute.logoPicture = logo_path
+            except Exception as e:
+                return {"error": f"Failed to update logo: {str(e)}"}
 
         # Update fields
         institute.institution = institute_data['institution']
@@ -803,9 +801,7 @@ def update_institute(institute_id, institute_data, logo_file=None):
             'state': institute.state,
             'district': institute.district,
             'postalPinCode': institute.postalPinCode,
-            'logoPicture': institute.logoPicture,
-            'created_at': institute.created_at.isoformat(),
-            'updated_at': institute.updated_at.isoformat()
+            'logoPicture': institute.logoPicture
         }
     except Exception as e:
         db.session.rollback()
@@ -818,13 +814,13 @@ def delete_institute(institute_id):
         if not institute:
             return {"error": "Institution not found"}
 
-        # Check if institution has any course mappings
+# Check if institution has any course mappings
         if institute.course_mappings:
             return {"error": "Cannot delete institution that has course mappings"}
 
         # Delete logo file if exists
         if institute.logoPicture:
-            logo_path = os.path.join('static', institute.logoPicture.lstrip('/'))
+            logo_path = os.path.join('institute_data', institute.logoPicture.lstrip('/'))
             if os.path.exists(logo_path):
                 os.remove(logo_path)
             
