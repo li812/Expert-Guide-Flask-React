@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Grid, 
-    Column, 
+import {
+    Grid,
+    Column,
     Tile,
     DataTable,
     Table,
@@ -10,8 +10,8 @@ import {
     TableHeader,
     TableBody,
     TableCell,
-    TableContainer, 
-    Button, 
+    TableContainer,
+    Button,
     InlineNotification,
     DataTableSkeleton,
     TableToolbar,
@@ -346,9 +346,9 @@ const AdminManageInstitute = ({ username }) => {
                     )}
 
                     {loading ? (
-                        <DataTableSkeleton 
-                            columnCount={7} 
-                            rowCount={5} 
+                        <DataTableSkeleton
+                            columnCount={7}
+                            rowCount={5}
                         />
                     ) : (
                         <DataTable
@@ -372,7 +372,7 @@ const AdminManageInstitute = ({ username }) => {
                                                 }}
                                             />
                                         ) : (
-                                            <div 
+                                            <div
                                                 style={{
                                                     width: '100%',
                                                     height: '100%',
@@ -447,7 +447,7 @@ const AdminManageInstitute = ({ username }) => {
                                     <TableContainer {...getTableContainerProps()}>
                                         <TableToolbar>
                                             <TableToolbarContent>
-                                                <TableToolbarSearch 
+                                                <TableToolbarSearch
                                                     onChange={onInputChange}
                                                     placeholder="Search institutions..."
                                                 />
@@ -456,37 +456,43 @@ const AdminManageInstitute = ({ username }) => {
                                         <Table {...getTableProps()} size="lg">
                                             <TableHead>
                                                 <TableRow>
-                                                    {headers.map(header => (
-                                                        <TableHeader 
-                                                            key={header.key}  // Move key prop here
-                                                            {...getHeaderProps({ 
-                                                                header,
-                                                                onClick: () => {
-                                                                    if (header.key !== 'actions') {
-                                                                        handleSort(
-                                                                            header.key,
-                                                                            sortDirection === 'asc' ? 'desc' : 'asc'
-                                                                        );
-                                                                    }
+                                                    {headers.map(header => {
+                                                        const { key, ...headerProps } = getHeaderProps({
+                                                            header,
+                                                            onClick: () => {
+                                                                if (header.key !== 'actions') {
+                                                                    handleSort(
+                                                                        header.key,
+                                                                        sortDirection === 'asc' ? 'desc' : 'asc'
+                                                                    );
                                                                 }
-                                                            })}
-                                                        >
-                                                            {header.header}
-                                                        </TableHeader>
-                                                    ))}
+                                                            }
+                                                        });
+                                                        return (
+                                                            <TableHeader 
+                                                                key={header.key}
+                                                                {...headerProps}
+                                                            >
+                                                                {header.header}
+                                                            </TableHeader>
+                                                        );
+                                                    })}
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {rows.map(row => (
-                                                    <TableRow 
-                                                        key={row.id}  // Move key prop here
-                                                        {...getRowProps({ row })}
-                                                    >
-                                                        {row.cells.map(cell => (
-                                                            <TableCell key={cell.id}>{cell.value}</TableCell>
-                                                        ))}
-                                                    </TableRow>
-                                                ))}
+                                                {rows.map(row => {
+                                                    const { key, ...rowProps } = getRowProps({ row });
+                                                    return (
+                                                        <TableRow
+                                                            key={row.id}
+                                                            {...rowProps}
+                                                        >
+                                                            {row.cells.map(cell => (
+                                                                <TableCell key={cell.id}>{cell.value}</TableCell>
+                                                            ))}
+                                                        </TableRow>
+                                                    );
+                                                })}
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
@@ -543,7 +549,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="institution"
                             labelText="Institution Name"
                             value={newInstitute.institution}
-                            onChange={(e) => setNewInstitute({...newInstitute, institution: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, institution: e.target.value })}
                             required
                         />
 
@@ -551,7 +557,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="institutionType"
                             labelText="Institution Type"
                             value={newInstitute.institution_type_id}
-                            onChange={(e) => setNewInstitute({...newInstitute, institution_type_id: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, institution_type_id: e.target.value })}
                             required
                         >
                             <SelectItem value="" text="Choose a type" />
@@ -568,7 +574,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="description"
                             labelText="Description"
                             value={newInstitute.description}
-                            onChange={(e) => setNewInstitute({...newInstitute, description: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, description: e.target.value })}
                             rows={4}
                             required
                         />
@@ -577,11 +583,11 @@ const AdminManageInstitute = ({ username }) => {
                             id="accreditation"
                             labelText="Accreditation"
                             value={newInstitute.accreditation}
-                            onChange={(e) => setNewInstitute({...newInstitute, accreditation: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, accreditation: e.target.value })}
                         />
 
-                        <DatePicker 
-                            datePickerType="single" 
+                        <DatePicker
+                            datePickerType="single"
                             dateFormat="Y-m-d"
                             value={newInstitute.since_date ? [new Date(newInstitute.since_date)] : []}
                             maxDate={new Date().toISOString()}
@@ -589,7 +595,7 @@ const AdminManageInstitute = ({ username }) => {
                                 if (dates && dates.length > 0) {
                                     const formattedDate = formatDateForApi(dates[0]);
                                     setNewInstitute({
-                                        ...newInstitute, 
+                                        ...newInstitute,
                                         since_date: formattedDate
                                     });
                                 }
@@ -614,7 +620,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="website"
                             labelText="Website"
                             value={newInstitute.website}
-                            onChange={(e) => setNewInstitute({...newInstitute, website: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, website: e.target.value })}
                             required
                         />
 
@@ -622,7 +628,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="email"
                             labelText="Email"
                             value={newInstitute.email}
-                            onChange={(e) => setNewInstitute({...newInstitute, email: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, email: e.target.value })}
                             required
                         />
 
@@ -630,7 +636,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="phone"
                             labelText="Phone"
                             value={newInstitute.phone}
-                            onChange={(e) => setNewInstitute({...newInstitute, phone: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, phone: e.target.value })}
                             required
                         />
 
@@ -638,7 +644,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="address"
                             labelText="Address"
                             value={newInstitute.address}
-                            onChange={(e) => setNewInstitute({...newInstitute, address: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, address: e.target.value })}
                             rows={3}
                             required
                         />
@@ -682,7 +688,7 @@ const AdminManageInstitute = ({ username }) => {
                             id="postalPinCode"
                             labelText="Postal/Pin Code"
                             value={newInstitute.postalPinCode}
-                            onChange={(e) => setNewInstitute({...newInstitute, postalPinCode: e.target.value})}
+                            onChange={(e) => setNewInstitute({ ...newInstitute, postalPinCode: e.target.value })}
                             required
                         />
 
