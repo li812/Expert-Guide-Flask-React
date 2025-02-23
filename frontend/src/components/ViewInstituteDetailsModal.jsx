@@ -33,7 +33,7 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
     return (
         <Modal
             open={open}
-            modalHeading={`${institute.institution} Details`}
+            modalHeading={`${institute.institution} `}
             passiveModal
             onRequestClose={onClose}
             size="lg"
@@ -55,8 +55,8 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
                                             src={`http://localhost:5001${institute.logoPicture}`}
                                             alt={`${institute.institution} logo`}
                                             style={{
-                                                width: '100%',
-                                                height: '100%',
+                                                width: '250px',
+                                                height: 'auto',
                                                 objectFit: 'contain'
                                             }}
                                             onError={(e) => {
