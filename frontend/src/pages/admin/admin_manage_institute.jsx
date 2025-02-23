@@ -29,7 +29,7 @@ import {
     DatePickerInput,
     Pagination
 } from '@carbon/react';
-import { Add, TrashCan, Edit, Upload } from '@carbon/icons-react';
+import { Add, TrashCan, Edit, Upload, DataViewAlt } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 import statesAndDistricts from '../../components/StatesAndDistricts';
 
@@ -395,6 +395,22 @@ const AdminManageInstitute = ({ username }) => {
                                 state: inst.state,
                                 actions: (
                                     <Stack orientation="horizontal" gap={4}>
+
+                                        <Button
+                                            kind="primary"
+                                            size="sm"
+                                            renderIcon={DataViewAlt}
+                                            onClick={() => {
+                                                setSelectedInstitute(inst);
+                                                setNewInstitute({
+                                                    ...inst,
+                                                    logoPicture: null
+                                                });
+                                            }}
+                                        >
+                                            View
+                                        </Button>
+
                                         <Button
                                             kind="ghost"
                                             size="sm"
@@ -469,7 +485,7 @@ const AdminManageInstitute = ({ username }) => {
                                                             }
                                                         });
                                                         return (
-                                                            <TableHeader 
+                                                            <TableHeader
                                                                 key={header.key}
                                                                 {...headerProps}
                                                             >
