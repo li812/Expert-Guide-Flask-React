@@ -1,0 +1,77 @@
+.institute-logo-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.no-logo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #525252;
+    background-color: #f4f4f4;
+}
+
+.cds--tab-content {
+    padding: 1rem;
+}
+
+.cds--structured-list {
+    margin-bottom: 1rem;
+}
+
+.cds--structured-list-row:hover {
+    background-color: #f4f4f4;
+}
+
+.cds--link {
+    display: inline-flex;
+    align-items: center;
+}
+
+.cds--tag {
+    display: inline-flex;
+    align-items: center;
+}
+
+.cds--modal-header {
+    margin-bottom: 1rem;
+}
+
+.institute-logo-container img {
+    transition: transform 0.3s ease;
+}
+
+.institute-logo-container:hover img {
+    transform: scale(1.05);
+}
+
+/* Tab specific styles */
+.cds--tabs--scrollable {
+    max-width: 100%;
+}
+
+/* Grid and layout styles */
+.course-details-grid {
+    margin-top: 1rem;
+}
+
+/* Icon styles */
+.icon-with-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Tag styles */
+.status-tag {
+    text-transform: capitalize;
+}

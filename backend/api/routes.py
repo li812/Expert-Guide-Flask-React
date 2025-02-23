@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify, session
 from functools import wraps
 import time
 import os
-from db.db_models import Complaints, db, Questions
+from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course, InstitutionType, Institution, CourseMapping
+
 from datetime import datetime
 
 # Service imports
@@ -51,7 +52,12 @@ from services.admin_services import (
     get_all_institutes,
     add_institute,
     update_institute,
-    delete_institute
+    delete_institute,
+    delete_course_mapping,
+    update_course_mapping,
+    add_course_mapping,
+    get_all_course_mappings,
+    get_course_mapping_details
 )
 from services.question_services import (
     get_all_questions,
@@ -1334,3 +1340,98 @@ def delete_institute_route(institute_id):
     except Exception as e:
         print(f"Error deleting institution: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+    
+    
+@api.route('/api/admin/course-mappings', methods=['GET'])
+@check_session(required_type=1)  # Admin only
+def get_all_course_mappings_route():
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        sort_key = request.args.get('sort', 'course_mapping_id')
+        sort_direction = request.args.get('direction', 'asc')
+
+        result = get_all_course_mappings(
+            page=page,
+            per_page=per_page,
+            sort_key=sort_key,
+            sort_direction=sort_direction
+        )
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/admin/course-mappings', methods=['POST'])
+@check_session(required_type=1)  # Admin only
+def add_course_mapping_route():
+    try:
+        mapping_data = request.json
+        result = add_course_mapping(mapping_data)
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify(result), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/admin/course-mappings/<int:mapping_id>', methods=['PUT'])
+@check_session(required_type=1)  # Admin only
+def update_course_mapping_route(mapping_id):
+    try:
+        mapping_data = request.json
+        result = update_course_mapping(mapping_id, mapping_data)
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/admin/course-mappings/<int:mapping_id>', methods=['DELETE'])
+@check_session(required_type=1)  # Admin only
+def delete_course_mapping_route(mapping_id):
+    try:
+        result = delete_course_mapping(mapping_id)
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+@api.route('/api/admin/course-mappings/<int:mapping_id>', methods=['GET'])
+@check_session(required_type=1)
+def get_course_mapping_details(mapping_id):
+    try:
+        mapping = CourseMapping.query.get_or_404(mapping_id)
+        return jsonify({
+            'course_mapping_id': mapping.course_mapping_id,
+            'institution': {
+                'institution_id': mapping.institution.institution_id,
+                'institution': mapping.institution.institution
+            },
+            'course': {
+                'course_id': mapping.course.course_id,
+                'course': mapping.course.course
+            },
+            'description': mapping.description,
+            'fees': mapping.fees,
+            'website': mapping.website,
+            'student_qualification': mapping.student_qualification,
+            'course_affliation': mapping.course_affliation,
+            'duration': mapping.duration,
+            'status': mapping.status,
+            'created_at': mapping.created_at.isoformat(),
+            'updated_at': mapping.updated_at.isoformat()
+        })
+    except Exception as e:
+        print(f"Error fetching course mapping details: {str(e)}")
+        return jsonify({'error': str(e)}), 500

@@ -1,4 +1,4 @@
-from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course, InstitutionType, Institution
+from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course, InstitutionType, Institution, CourseMapping
 import platform
 import psutil
 import socket
@@ -910,4 +910,246 @@ def get_all_institutes(page=1, per_page=10, sort_key='institution_id', sort_dire
         }
     except Exception as e:
         print(f"Error in get_all_institutes: {str(e)}")
+        return {"error": str(e)}
+    
+def get_all_course_mappings(page=1, per_page=10, sort_key='course_mapping_id', sort_direction='asc'):
+    """Get all course mappings with pagination and sorting"""
+    try:
+        # Create base query
+        query = CourseMapping.query
+
+        # Apply sorting
+        if sort_key == 'course_mapping_id':
+            sort_column = CourseMapping.course_mapping_id
+        elif sort_key == 'institution_id':
+            sort_column = CourseMapping.institution_id
+        elif sort_key == 'course_id':
+            sort_column = CourseMapping.course_id
+        elif sort_key == 'fees':
+            sort_column = CourseMapping.fees
+        else:
+            sort_column = getattr(CourseMapping, sort_key, CourseMapping.course_mapping_id)
+
+        if sort_direction == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        # Get total count before pagination
+        total = query.count()
+
+        # Apply pagination
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Format response
+        mappings_list = [{
+            'course_mapping_id': cm.course_mapping_id,
+            'institution_id': cm.institution_id,
+            'course_id': cm.course_id,
+            'description': cm.description,
+            'fees': cm.fees,
+            'website': cm.website,
+            'student_qualification': cm.student_qualification,
+            'course_affliation': cm.course_affliation,
+            'duration': cm.duration,
+            'status': cm.status,
+            'created_at': cm.created_at.isoformat() if cm.created_at else None,
+            'updated_at': cm.updated_at.isoformat() if cm.updated_at else None
+        } for cm in paginated.items]
+
+        return {
+            'mappings': mappings_list,
+            'total': total
+        }
+    except Exception as e:
+        print(f"Error in get_all_course_mappings: {str(e)}")
+        return {"error": str(e)}
+
+def validate_course_mapping(mapping_data):
+    """Validate course mapping data"""
+    if not mapping_data.get('institution_id'):
+        return False, "Institution ID is required"
+    if not mapping_data.get('course_id'):
+        return False, "Course ID is required"
+    if not mapping_data.get('description'):
+        return False, "Description is required"
+    if not mapping_data.get('fees') or float(mapping_data['fees']) <= 0:
+        return False, "Valid fees amount is required"
+    if not mapping_data.get('website'):
+        return False, "Website is required"
+    if not mapping_data.get('student_qualification'):
+        return False, "Student qualification is required"
+    if not mapping_data.get('course_affliation'):
+        return False, "Course affiliation is required"
+    if not mapping_data.get('duration'):
+        return False, "Duration is required"
+    return True, None
+
+def add_course_mapping(mapping_data):
+    """Add a new course mapping"""
+    try:
+        # Validate mapping data
+        is_valid, error_message = validate_course_mapping(mapping_data)
+        if not is_valid:
+            return {"error": error_message}
+
+        # Check if mapping already exists
+        existing = CourseMapping.query.filter_by(
+            institution_id=mapping_data['institution_id'],
+            course_id=mapping_data['course_id']
+        ).first()
+        if existing:
+            return {"error": "This course mapping already exists"}
+
+        new_mapping = CourseMapping(
+            institution_id=mapping_data['institution_id'],
+            course_id=mapping_data['course_id'],
+            description=mapping_data['description'],
+            fees=float(mapping_data['fees']),
+            website=mapping_data['website'],
+            student_qualification=mapping_data['student_qualification'],
+            course_affliation=mapping_data['course_affliation'],
+            duration=mapping_data['duration'],
+            status=mapping_data.get('status', 'active')
+        )
+        db.session.add(new_mapping)
+        db.session.commit()
+        
+        return {
+            'course_mapping_id': new_mapping.course_mapping_id,
+            'institution_id': new_mapping.institution_id,
+            'course_id': new_mapping.course_id,
+            'description': new_mapping.description,
+            'fees': new_mapping.fees,
+            'website': new_mapping.website,
+            'student_qualification': new_mapping.student_qualification,
+            'course_affliation': new_mapping.course_affliation,
+            'duration': new_mapping.duration,
+            'status': new_mapping.status,
+            'created_at': new_mapping.created_at.isoformat(),
+            'updated_at': new_mapping.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def update_course_mapping(mapping_id, mapping_data):
+    """Update an existing course mapping"""
+    try:
+        # Validate mapping data
+        is_valid, error_message = validate_course_mapping(mapping_data)
+        if not is_valid:
+            return {"error": error_message}
+
+        mapping = CourseMapping.query.get(mapping_id)
+        if not mapping:
+            return {"error": "Course mapping not found"}
+
+        # Check if new mapping combination already exists
+        existing = CourseMapping.query.filter(
+            CourseMapping.institution_id == mapping_data['institution_id'],
+            CourseMapping.course_id == mapping_data['course_id'],
+            CourseMapping.course_mapping_id != mapping_id
+        ).first()
+        if existing:
+            return {"error": "This course mapping already exists"}
+
+        mapping.institution_id = mapping_data['institution_id']
+        mapping.course_id = mapping_data['course_id']
+        mapping.description = mapping_data['description']
+        mapping.fees = float(mapping_data['fees'])
+        mapping.website = mapping_data['website']
+        mapping.student_qualification = mapping_data['student_qualification']
+        mapping.course_affliation = mapping_data['course_affliation']
+        mapping.duration = mapping_data['duration']
+        mapping.status = mapping_data.get('status', mapping.status)
+
+        db.session.commit()
+        
+        return {
+            'course_mapping_id': mapping.course_mapping_id,
+            'institution_id': mapping.institution_id,
+            'course_id': mapping.course_id,
+            'description': mapping.description,
+            'fees': mapping.fees,
+            'website': mapping.website,
+            'student_qualification': mapping.student_qualification,
+            'course_affliation': mapping.course_affliation,
+            'duration': mapping.duration,
+            'status': mapping.status,
+            'created_at': mapping.created_at.isoformat(),
+            'updated_at': mapping.updated_at.isoformat()
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}
+
+def delete_course_mapping(mapping_id):
+    """Delete a course mapping"""
+    try:
+        mapping = CourseMapping.query.get(mapping_id)
+        if not mapping:
+            return {"error": "Course mapping not found"}
+
+        db.session.delete(mapping)
+        db.session.commit()
+        
+        return {"message": "Course mapping deleted successfully"}
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}    
+
+def get_course_mapping_details(mapping_id):
+    """Get detailed information for a specific course mapping"""
+    try:
+        mapping = CourseMapping.query.get(mapping_id)
+        
+        if not mapping:
+            return {"error": "Course mapping not found"}
+
+        # Get associated institution and course details
+        institution = Institution.query.get(mapping.institution_id)
+        course = Course.query.get(mapping.course_id)
+        
+        if not institution or not course:
+            return {"error": "Associated institution or course not found"}
+
+        return {
+            "mapping": {
+                'course_mapping_id': mapping.course_mapping_id,
+                'institution_id': mapping.institution_id,
+                'course_id': mapping.course_id,
+                'description': mapping.description,
+                'fees': mapping.fees,
+                'website': mapping.website,
+                'student_qualification': mapping.student_qualification,
+                'course_affliation': mapping.course_affliation,
+                'duration': mapping.duration,
+                'status': mapping.status,
+                'created_at': mapping.created_at.isoformat(),
+                'updated_at': mapping.updated_at.isoformat()
+            },
+            "institution": {
+                'institution_id': institution.institution_id,
+                'institution': institution.institution,
+                'description': institution.description,
+                'website': institution.website,
+                'email': institution.email,
+                'phone': institution.phone,
+                'address': institution.address,
+                'state': institution.state,
+                'district': institution.district,
+                'postalPinCode': institution.postalPinCode,
+                'logoPicture': institution.logoPicture
+            },
+            "course": {
+                'course_id': course.course_id,
+                'course': course.course,
+                'course_description': course.course_description,
+                'course_type_id': course.course_type_id,
+                'career_id': course.career_id
+            }
+        }
+    except Exception as e:
+        print(f"Error in get_course_mapping_details: {str(e)}")
         return {"error": str(e)}
