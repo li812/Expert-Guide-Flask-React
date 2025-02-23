@@ -363,7 +363,6 @@ const AdminManageCourseType = ({ username }) => {
                     <FormGroup legendText="Course Type">
                         <TextArea
                             id="newCourseType"
-                            labelText="Course type"
                             value={newCourseType}
                             onChange={(e) => setNewCourseType(e.target.value)}
                             rows={4}

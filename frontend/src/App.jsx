@@ -8,9 +8,10 @@ import {
   HeaderMenuItem,
   HeaderGlobalBar,
   HeaderGlobalAction,
+  Button,
   Theme,
 } from "@carbon/react";
-import { Light, Asleep, IbmWatsonxCodeAssistantForZRefactor } from "@carbon/icons-react";
+import { Light, Asleep, IbmWatsonxCodeAssistantForZRefactor, ArrowRight, Login as LoginIcon } from "@carbon/icons-react";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Sum from "./pages/Sum";
@@ -64,13 +65,9 @@ function App() {
               <HeaderGlobalAction aria-label="Theme Toggle" onClick={() => setDarkMode(!darkMode)}>
                 {darkMode ? <Light size={25} /> : <Asleep size={25} />}
               </HeaderGlobalAction>
-              <HeaderMenuItem as={Link} to="/register-user" style={{ fontSize: "1rem" }}>
-                Register as User
-              </HeaderMenuItem>
+              <Button as={Link} to="/register-user" style={{ fontSize: "1rem" }} kind="tertiary" renderIcon={ArrowRight}>Register as User</Button>
+              <Button as={Link} to="/login" style={{ fontSize: "1rem" }} renderIcon={LoginIcon}>Login</Button>
 
-              <HeaderMenuItem as={Link} to="/login" style={{ fontSize: "1rem" }}>
-                Login
-              </HeaderMenuItem>
             </HeaderGlobalBar>
           </Header>
 

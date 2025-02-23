@@ -136,6 +136,7 @@ class CourseMapping(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('course.course_id'), nullable=False)
     description = db.Column(db.Text, nullable=False)
     fees = db.Column(db.Float, nullable=False)
+    website = db.Column(db.String(200), nullable=False)
     student_qualification = db.Column(db.String(200), nullable=False)
     course_affliation = db.Column(db.String(200), nullable=False)
     duration = db.Column(db.String(200), nullable=False)
