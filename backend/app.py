@@ -26,6 +26,9 @@ app.config.update(
     REMEMBER_COOKIE_SAMESITE='None' if ENV == "production" else 'Lax'  # For "Remember me" functionality
 )
 
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['UPLOAD_FOLDER'] = 'institute_data/institute_logo'
+
 # Configure CORS
 configure_cors(app)
 
@@ -70,21 +73,14 @@ def serve_user_profile_picture(filename):
     except:
         return '', 404
 
-# Add route for serving developer profile pictures
-@app.route('/developer_data/developer_profile_picture/<filename>')
-def serve_developer_profile_picture(filename):
+# Add route for institute logos
+@app.route('/institute_data/institute_logo/<filename>')
+def serve_institute_logo(filename):
     try:
-        return send_from_directory('developer_data/developer_profile_picture', filename)
+        return send_from_directory('institute_data/institute_logo', filename)
     except:
         return '', 404
 
-# Add route for serving API logos
-@app.route('/API_data/website_app_logo/<filename>')
-def serve_api_logo(filename):
-    try:
-        return send_from_directory('API_data/website_app_logo', filename)
-    except:
-        return '', 404
 
 if __name__ == '__main__':
     # Use WebSocket server instead of regular Flask server

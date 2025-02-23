@@ -678,6 +678,38 @@ def validate_institute(institute_data):
         return False, "Postal/Pin code is required"
     return True, None
 
+def handle_institute_logo(logo_file, institute_name):
+    """Handle institute logo upload"""
+    try:
+        if not logo_file:
+            return None, None
+            
+        # Validate file type
+        allowed_types = {'image/jpeg', 'image/png', 'image/gif'}
+        if logo_file.content_type not in allowed_types:
+            return None, "Invalid file type. Only JPEG, PNG and GIF allowed"
+            
+        # Create base directory
+        logo_dir = os.path.join('institute_data', 'institute_logo')
+        os.makedirs(logo_dir, exist_ok=True)
+        
+        # Generate unique filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = secure_filename(f"{institute_name}_{timestamp}.png")
+        
+        # Full file path
+        file_path = os.path.join(logo_dir, filename)
+        db_path = f"/institute_data/institute_logo/{filename}"
+        
+        # Save file
+        logo_file.save(file_path)
+        
+        return db_path, None
+        
+    except Exception as e:
+        print(f"Error handling logo: {str(e)}")
+        return None, str(e)
+
 def add_institute(institute_data, logo_file=None):
     """Add a new institution"""
     try:
@@ -686,21 +718,12 @@ def add_institute(institute_data, logo_file=None):
         if not is_valid:
             return {"error": error_message}
 
-        # Handle logo file
+        # Handle logo file if provided
         logo_path = None
         if logo_file:
-            try:
-                # Create directory if it doesn't exist
-                os.makedirs('institute_data/institute_logo', exist_ok=True)
-                
-                # Generate unique filename using timestamp
-                filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-                logo_path = f"/institute_data/institute_logo/{filename}"
-                
-                # Save the file
-                logo_file.save(os.path.join('institute_data/institute_logo', filename))
-            except Exception as e:
-                return {"error": f"Failed to save logo: {str(e)}"}
+            logo_path, error = handle_institute_logo(logo_file, institute_data['institution'])
+            if error:
+                return {"error": f"Logo upload failed: {error}"}
 
         # Create new institute
         new_institute = Institution(

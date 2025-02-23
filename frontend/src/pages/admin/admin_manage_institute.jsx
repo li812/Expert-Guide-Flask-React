@@ -458,7 +458,7 @@ const AdminManageInstitute = ({ username }) => {
                                                 <TableRow>
                                                     {headers.map(header => (
                                                         <TableHeader 
-                                                            key={header.key} 
+                                                            key={header.key}  // Move key prop here
                                                             {...getHeaderProps({ 
                                                                 header,
                                                                 onClick: () => {
@@ -478,7 +478,10 @@ const AdminManageInstitute = ({ username }) => {
                                             </TableHead>
                                             <TableBody>
                                                 {rows.map(row => (
-                                                    <TableRow key={row.id} {...getRowProps({ row })}>
+                                                    <TableRow 
+                                                        key={row.id}  // Move key prop here
+                                                        {...getRowProps({ row })}
+                                                    >
                                                         {row.cells.map(cell => (
                                                             <TableCell key={cell.id}>{cell.value}</TableCell>
                                                         ))}
