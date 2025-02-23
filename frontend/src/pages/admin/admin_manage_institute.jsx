@@ -32,6 +32,7 @@ import {
 import { Add, TrashCan, Edit, Upload, DataViewAlt } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 import statesAndDistricts from '../../components/StatesAndDistricts';
+import ViewInstituteDetailsModal from '../../components/ViewInstituteDetailsModal';
 
 const formatDateForInput = (dateString) => {
     if (!dateString) return '';
@@ -58,6 +59,7 @@ const AdminManageInstitute = ({ username }) => {
     const [successMessage, setSuccessMessage] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
     const [selectedInstitute, setSelectedInstitute] = useState(null);
     const [newInstitute, setNewInstitute] = useState({
         institution: '',
@@ -402,10 +404,7 @@ const AdminManageInstitute = ({ username }) => {
                                             renderIcon={DataViewAlt}
                                             onClick={() => {
                                                 setSelectedInstitute(inst);
-                                                setNewInstitute({
-                                                    ...inst,
-                                                    logoPicture: null
-                                                });
+                                                setShowViewModal(true);
                                             }}
                                         >
                                             View
@@ -732,6 +731,17 @@ const AdminManageInstitute = ({ username }) => {
                     </Stack>
                 </Form>
             </Modal>
+            <ViewInstituteDetailsModal
+                open={showViewModal}
+                onClose={() => {
+                    setShowViewModal(false);
+                    setSelectedInstitute(null);
+                }}
+                institute={selectedInstitute}
+                instituteType={instituteTypes.find(t => 
+                    t.institution_type_id === selectedInstitute?.institution_type_id
+                )?.institution_type}
+            />
         </Grid>
     );
 };
