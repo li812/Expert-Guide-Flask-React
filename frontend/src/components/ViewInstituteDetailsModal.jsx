@@ -7,18 +7,34 @@ import {
     TabPanels,
     TabPanel,
     StructuredListWrapper,
-    StructuredListHead,
+    StructuredListBody,
     StructuredListRow,
     StructuredListCell,
-    StructuredListBody,
     Tag,
     Link,
     Grid,
-    Column
+    Column,
+    Tile,
+    AspectRatio,
+    Loading
 } from '@carbon/react';
-import { Calendar, Email, Phone, Globe, Location, Education, Document } from '@carbon/icons-react';
+import {
+    Calendar,
+    Email,
+    Phone,
+    Globe,
+    Location,
+    Education,
+    Document,
+    Certificate,
+    Time,
+    Information
+} from '@carbon/icons-react';
 
 const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) => {
+    const [imageLoading, setImageLoading] = React.useState(true);
+    const [selectedTab, setSelectedTab] = React.useState(0);
+
     if (!institute) return null;
 
     const formatDate = (dateString) => {
@@ -33,82 +49,111 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
     return (
         <Modal
             open={open}
-            modalHeading={`${institute.institution} `}
+            modalHeading={
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Education size={24} />
+                    <span>{institute.institution} Details</span>
+                </div>
+            }
             passiveModal
             onRequestClose={onClose}
             size="lg"
         >
-            <Tabs>
-                <TabList aria-label="Institute details tabs">
-                    <Tab>Basic Info</Tab>
-                    <Tab>Contact Details</Tab>
-                    <Tab>Location</Tab>
+            <Tabs 
+                selectedIndex={selectedTab} 
+                onChange={({ selectedIndex }) => setSelectedTab(selectedIndex)}
+            >
+                <TabList aria-label="Institute details tabs" contained>
+                    <Tab>
+                        <Information size={16} /> Basic Info
+                    </Tab>
+                    <Tab>
+                        <Email size={16} /> Contact
+                    </Tab>
+                    <Tab>
+                        <Location size={16} /> Location
+                    </Tab>
                 </TabList>
+
                 <TabPanels>
                     {/* Basic Info Tab */}
                     <TabPanel>
-                        <Grid>
+                        <Grid narrow>
                             <Column lg={4} md={2} sm={4}>
-                                <div className="institute-logo-container" style={{ width: '100px', height: '100px', margin: '1rem 0' }}>
-                                    {institute.logoPicture ? (
-                                        <img
-                                            src={`http://localhost:5001${institute.logoPicture}`}
-                                            alt={`${institute.institution} logo`}
-                                            style={{
-                                                width: '250px',
-                                                height: 'auto',
-                                                objectFit: 'contain'
-                                            }}
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = "/default-institution-logo.png";
-                                            }}
-                                        />
-                                    ) : (
-                                        <div style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            backgroundColor: '#f4f4f4',
-                                            borderRadius: '4px'
-                                        }}>
-                                            No Logo
+                                <Tile style={{ height: '100%' }}>
+                                    <AspectRatio ratio="1x1">
+                                        <div className="institute-logo-container">
+                                            {imageLoading && (
+                                                <Loading 
+                                                    description="Loading image" 
+                                                    withOverlay={false}
+                                                    small 
+                                                />
+                                            )}
+                                            {institute.logoPicture ? (
+                                                <img
+                                                    src={`http://localhost:5001${institute.logoPicture}`}
+                                                    alt={`${institute.institution} logo`}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'contain'
+                                                    }}
+                                                    onLoad={() => setImageLoading(false)}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = "/default-institution-logo.png";
+                                                        setImageLoading(false);
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="no-logo-placeholder">
+                                                    <Education size={32} />
+                                                    <span>No Logo</span>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
+                                    </AspectRatio>
+                                </Tile>
                             </Column>
+
                             <Column lg={12} md={6} sm={4}>
                                 <StructuredListWrapper>
                                     <StructuredListBody>
                                         <StructuredListRow>
                                             <StructuredListCell>Institution Type</StructuredListCell>
                                             <StructuredListCell>
-                                                <Tag type="blue" title="Institution Type">
+                                                <Tag type="blue">
                                                     <Education style={{ marginRight: '0.5rem' }} />
                                                     {instituteType}
                                                 </Tag>
                                             </StructuredListCell>
                                         </StructuredListRow>
+
                                         <StructuredListRow>
                                             <StructuredListCell>Description</StructuredListCell>
                                             <StructuredListCell>{institute.description}</StructuredListCell>
                                         </StructuredListRow>
+
                                         <StructuredListRow>
-                                            <StructuredListCell>Accreditation</StructuredListCell>
                                             <StructuredListCell>
-                                                <Tag type="green" title="Accreditation">
-                                                    <Document style={{ marginRight: '0.5rem' }} />
+                                                <Certificate style={{ marginRight: '0.5rem' }} />
+                                                Accreditation
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                <Tag type="green" >
                                                     {institute.accreditation || 'N/A'}
                                                 </Tag>
                                             </StructuredListCell>
                                         </StructuredListRow>
+
                                         <StructuredListRow>
-                                            <StructuredListCell>Established Date</StructuredListCell>
                                             <StructuredListCell>
-                                                <Tag type="purple" title="Established Date">
-                                                    <Calendar style={{ marginRight: '0.5rem' }} />
+                                                <Calendar style={{ marginRight: '0.5rem' }} />
+                                                Established Date
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                <Tag type="purple" >
                                                     {formatDate(institute.since_date)}
                                                 </Tag>
                                             </StructuredListCell>
@@ -126,12 +171,17 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
                                 <StructuredListRow>
                                     <StructuredListCell>Email</StructuredListCell>
                                     <StructuredListCell>
-                                        <Link href={`mailto:${institute.email}`}>
+                                        <Link 
+                                            href={`mailto:${institute.email}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
                                             <Email style={{ marginRight: '0.5rem' }} />
                                             {institute.email}
                                         </Link>
                                     </StructuredListCell>
                                 </StructuredListRow>
+
                                 <StructuredListRow>
                                     <StructuredListCell>Phone</StructuredListCell>
                                     <StructuredListCell>
@@ -141,10 +191,15 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
                                         </Link>
                                     </StructuredListCell>
                                 </StructuredListRow>
+
                                 <StructuredListRow>
                                     <StructuredListCell>Website</StructuredListCell>
                                     <StructuredListCell>
-                                        <Link href={institute.website} target="_blank" rel="noopener noreferrer">
+                                        <Link 
+                                            href={institute.website} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                        >
                                             <Globe style={{ marginRight: '0.5rem' }} />
                                             {institute.website}
                                         </Link>
@@ -159,23 +214,35 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
                         <StructuredListWrapper>
                             <StructuredListBody>
                                 <StructuredListRow>
-                                    <StructuredListCell>Address</StructuredListCell>
+                                    <StructuredListCell>Full Address</StructuredListCell>
                                     <StructuredListCell>
                                         <Location style={{ marginRight: '0.5rem' }} />
                                         {institute.address}
                                     </StructuredListCell>
                                 </StructuredListRow>
+
                                 <StructuredListRow>
                                     <StructuredListCell>State</StructuredListCell>
-                                    <StructuredListCell>{institute.state}</StructuredListCell>
+                                    <StructuredListCell>
+                                        
+                                            {institute.state}
+                                        
+                                    </StructuredListCell>
                                 </StructuredListRow>
+
                                 <StructuredListRow>
                                     <StructuredListCell>District</StructuredListCell>
-                                    <StructuredListCell>{institute.district}</StructuredListCell>
+                                    <StructuredListCell>
+                                            {institute.district}
+                                        
+                                    </StructuredListCell>
                                 </StructuredListRow>
+
                                 <StructuredListRow>
                                     <StructuredListCell>Postal/Pin Code</StructuredListCell>
-                                    <StructuredListCell>{institute.postalPinCode}</StructuredListCell>
+                                    <StructuredListCell>
+                                            {institute.postalPinCode}
+                                    </StructuredListCell>
                                 </StructuredListRow>
                             </StructuredListBody>
                         </StructuredListWrapper>
