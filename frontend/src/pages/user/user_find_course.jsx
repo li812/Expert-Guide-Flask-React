@@ -354,7 +354,7 @@ const UserFindCourse = () => {
                             />
                         </Column>
 
-                        <Column lg={4} md={4} sm={4}>
+                        <Column lg={3} md={4} sm={4}>
                             <FilterableMultiSelect
                                 id="careers-filter"
                                 titleText="Careers"
@@ -365,7 +365,7 @@ const UserFindCourse = () => {
                             />
                         </Column>
 
-                        <Column lg={4} md={4} sm={4}>
+                        <Column lg={3} md={4} sm={4}>
                             <ComboBox
                                 id="state-filter"
                                 titleText="State"
@@ -376,7 +376,7 @@ const UserFindCourse = () => {
                             />
                         </Column>
 
-                        <Column lg={4} md={4} sm={4}>
+                        <Column lg={3} md={4} sm={4}>
                             <ComboBox
                                 id="district-filter"
                                 titleText="District"
@@ -388,7 +388,7 @@ const UserFindCourse = () => {
                             />
                         </Column>
 
-                        <Column lg={4} md={8} sm={4}>
+                        <Column lg={3} md={8} sm={4}>
                             <Select
                                 id="sort-by"
                                 labelText="Sort by"
@@ -434,15 +434,16 @@ const UserFindCourse = () => {
                 {/* Course Grid */}
                 <Grid narrow className="course-grid">
                     {courseMappings.map((mapping) => (
-                        <Column key={mapping.course_mapping_id} lg={4} md={4} sm={4}>
+                        <Column key={mapping.course_mapping_id} lg={5} md={4} sm={4}>
                             <ClickableTile className="course-tile">
                                 <AspectRatio ratio="16x9">
-                                    <div className="institution-logo-container">
+                                    <div className="institution-logo">
                                         <img
                                             src={`http://localhost:5001${mapping.institution.logoPicture}`}
                                             alt={mapping.institution.name}
-                                            className="institution-logo"
+                                            className="institution-logo-banner"
                                             onError={(e) => {
+                                                e.target.onerror = null;
                                                 e.target.src = '/placeholder-logo.png';
                                             }}
                                         />
