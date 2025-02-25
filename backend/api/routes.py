@@ -86,7 +86,7 @@ from services.course_services import (
     get_course_filters,
     get_course_likes,
     get_filtered_courses,
-    calculate_institution_rating
+    calculate_institution_rating,
     )
 
 # Database models
@@ -1495,53 +1495,44 @@ def get_course_filter_options():
         return jsonify({"error": str(e)}), 500
 
 @api.route('/api/courses/<int:mapping_id>/like', methods=['POST'])
-@check_session(required_type=2)  # User only
+@check_session(required_type=2)
 def like_course(mapping_id):
     """Like a course"""
     try:
-        likes = CourseLikesDislikes.query\
-            .filter_by(course_mapping_id=mapping_id)\
-            .first()
+        login_id = session.get('login_id')
+        result = update_course_rating(mapping_id, login_id, True)
+        
+        if "error" in result:
+            return jsonify(result), 400
             
-        if not likes:
-            likes = CourseLikesDislikes(
-                course_mapping_id=mapping_id,
-                likes=1,
-                dis_likes=0
-            )
-            db.session.add(likes)
-        else:
-            likes.likes += 1
-            
-        db.session.commit()
-        return jsonify({"success": True})
-
+        return jsonify({"message": "Course liked successfully"})
     except Exception as e:
         print(f"Error in like_course: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @api.route('/api/courses/<int:mapping_id>/dislike', methods=['POST'])
-@check_session(required_type=2)  # User only
+@check_session(required_type=2)
 def dislike_course(mapping_id):
     """Dislike a course"""
     try:
-        likes = CourseLikesDislikes.query\
-            .filter_by(course_mapping_id=mapping_id)\
-            .first()
+        login_id = session.get('login_id')
+        result = update_course_rating(mapping_id, login_id, False)
+        
+        if "error" in result:
+            return jsonify(result), 400
             
-        if not likes:
-            likes = CourseLikesDislikes(
-                course_mapping_id=mapping_id,
-                likes=0,
-                dis_likes=1
-            )
-            db.session.add(likes)
-        else:
-            likes.dis_likes += 1
-            
-        db.session.commit()
-        return jsonify({"success": True})
-
+        return jsonify({"message": "Course disliked successfully"})
     except Exception as e:
         print(f"Error in dislike_course: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/courses/<int:mapping_id>', methods=['GET'])
+def get_course_details(mapping_id):
+    """Get course mapping details - public route"""
+    try:
+        details = get_course_mapping_details(mapping_id)
+        if "error" in details:
+            return jsonify(details), 404
+        return jsonify(details)
+    except Exception as e:
         return jsonify({"error": str(e)}), 500

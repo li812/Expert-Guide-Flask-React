@@ -402,8 +402,8 @@ const UserFindCourse = () => {
                     onChange={handleSortChange}
                 >
                     <SelectItem value="relevance" text="Most Relevant" />
-                    <SelectItem value="fees_low" text="Fees: Low to High" />
-                    <SelectItem value="fees_high" text="Fees: High to Low" />
+                    <SelectItem value="fees_high" text="Fees: Low to High" />
+                    <SelectItem value="fees_low" text="Fees: High to Low" />
                     <SelectItem value="rating" text="Rating" />
                 </Select>
             </Column>

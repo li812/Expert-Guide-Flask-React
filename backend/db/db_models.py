@@ -142,30 +142,34 @@ class CourseMapping(db.Model):
     __tablename__ = 'course_mapping'
     course_mapping_id = db.Column(db.Integer, primary_key=True)
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.course_id'), nullable=False)
     course_type_id = db.Column(db.Integer, db.ForeignKey('course_type.course_type_id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.course_id'), nullable=False)
     description = db.Column(db.Text, nullable=False)
     fees = db.Column(db.Float, nullable=False)
-    website = db.Column(db.String(200), nullable=False)
-    student_qualification = db.Column(db.String(200), nullable=False)
+    website = db.Column(db.String(200))
+    student_qualification = db.Column(db.String(200))
     course_affliation = db.Column(db.String(200))
-    duration = db.Column(db.String(50), nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='active')
+    duration = db.Column(db.String(50))
+    status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Fix: Define relationships with back_populates instead of backref
+    # Relationships
     institution = db.relationship('Institution', back_populates='course_mappings')
     course = db.relationship('Course', back_populates='course_mappings')
     course_type = db.relationship('CourseType', back_populates='course_mappings')
 
 class CourseLikesDislikes(db.Model):
     __tablename__ = 'course_likes_dislikes'
-    course_mapping_id = db.Column(db.Integer, db.ForeignKey('course_mapping.course_mapping_id'), primary_key=True)
-    likes = db.Column(db.Integer, default=0)
-    dis_likes = db.Column(db.Integer, default=0)
+    id = db.Column(db.Integer, primary_key=True)
+    course_mapping_id = db.Column(db.Integer, db.ForeignKey('course_mapping.course_mapping_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('login.login_id'))
+    is_like = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('course_mapping_id', 'user_id', name='unique_course_user_rating'),
+    )
 
 class InstitutionLikesDislikes(db.Model):
     __tablename__ = 'institution_likes_dislikes'
