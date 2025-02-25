@@ -87,6 +87,8 @@ from services.course_services import (
     get_course_likes,
     get_filtered_courses,
     calculate_institution_rating,
+    update_course_rating,
+    get_institution_details
     )
 
 # Database models
@@ -1505,7 +1507,7 @@ def like_course(mapping_id):
         if "error" in result:
             return jsonify(result), 400
             
-        return jsonify({"message": "Course liked successfully"})
+        return jsonify(result)
     except Exception as e:
         print(f"Error in like_course: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -1521,7 +1523,7 @@ def dislike_course(mapping_id):
         if "error" in result:
             return jsonify(result), 400
             
-        return jsonify({"message": "Course disliked successfully"})
+        return jsonify(result)
     except Exception as e:
         print(f"Error in dislike_course: {str(e)}")
         return jsonify({"error": str(e)}), 500

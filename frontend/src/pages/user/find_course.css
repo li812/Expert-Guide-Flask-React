@@ -95,3 +95,15 @@
 .like-dislike button {
     flex: 1;
 }
+
+.location-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cds--combo-box[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

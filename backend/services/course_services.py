@@ -91,6 +91,9 @@ def get_filtered_courses(filters, page=1, per_page=12):
 
         if filters.get('state'):
             query = query.filter(Institution.state == filters['state'])
+            
+        if filters.get('district'):
+            query = query.filter(Institution.district == filters['district'])
 
         if filters.get('min_fees') is not None:
             query = query.filter(CourseMapping.fees >= filters['min_fees'])
@@ -98,20 +101,25 @@ def get_filtered_courses(filters, page=1, per_page=12):
         if filters.get('max_fees') is not None:
             query = query.filter(CourseMapping.fees <= filters['max_fees'])
 
-        # Get total count
-        total = query.count()
-
         # Apply sorting
         sort_by = filters.get('sort_by', 'relevance')
         if sort_by == 'fees_low':
             query = query.order_by(CourseMapping.fees.asc())
         elif sort_by == 'fees_high':
             query = query.order_by(CourseMapping.fees.desc())
-        
-        # Apply pagination
+        elif sort_by == 'rating':
+            # Join with likes table and order by likes ratio
+            query = query.outerjoin(CourseLikesDislikes)\
+                .group_by(CourseMapping.course_mapping_id)\
+                .order_by(
+                    db.func.count(db.case([(CourseLikesDislikes.is_like == True, 1)])).desc()
+                )
+
+        # Get total count and paginate
+        total = query.count()
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
 
-        # Format response with likes/dislikes
+        # Format response
         mappings = []
         for mapping in paginated.items:
             mappings.append({
@@ -233,7 +241,6 @@ def update_course_rating(mapping_id, user_id, is_like):
 
         db.session.commit()
         
-        # Return updated counts
         return {
             "likes": get_course_likes(mapping_id),
             "dislikes": get_course_dislikes(mapping_id)

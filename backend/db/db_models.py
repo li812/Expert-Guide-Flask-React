@@ -153,11 +153,11 @@ class CourseMapping(db.Model):
     status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships
+    
     institution = db.relationship('Institution', back_populates='course_mappings')
     course = db.relationship('Course', back_populates='course_mappings')
     course_type = db.relationship('CourseType', back_populates='course_mappings')
+    likes_dislikes = db.relationship('CourseLikesDislikes', backref='course_mapping', lazy=True)
 
 class CourseLikesDislikes(db.Model):
     __tablename__ = 'course_likes_dislikes'
@@ -166,16 +166,20 @@ class CourseLikesDislikes(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('login.login_id'))
     is_like = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    
     __table_args__ = (
         db.UniqueConstraint('course_mapping_id', 'user_id', name='unique_course_user_rating'),
     )
 
 class InstitutionLikesDislikes(db.Model):
     __tablename__ = 'institution_likes_dislikes'
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), primary_key=True)
-    likes = db.Column(db.Integer, default=0)
-    dis_likes = db.Column(db.Integer, default=0)
+    id = db.Column(db.Integer, primary_key=True)
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('login.login_id'))
+    is_like = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        db.UniqueConstraint('institution_id', 'user_id', name='unique_institution_user_rating'),
+    )
 

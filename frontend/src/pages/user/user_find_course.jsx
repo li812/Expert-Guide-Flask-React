@@ -32,14 +32,9 @@ import {
 } from '@carbon/icons-react';
 import ViewCourseDetailsModal from '../../components/ViewCourseDetailsModal/ViewCourseDetailsModal';
 import ViewInstituteDetailsModal from '../../components/ViewInstituteDetailsModal/ViewInstituteDetailsModal';
-import {
-    dummyMappings,
-    dummyCourseTypes,
-    dummyCareers,
-    dummyLocations
-} from '../../data/dummy_course_data';
 import './find_course.css';
 import { debounce } from 'lodash';
+import statesAndDistricts from '../../components/StatesAndDistricts';
 
 const UserFindCourse = () => {
     // States for filters
@@ -50,14 +45,18 @@ const UserFindCourse = () => {
         institutionTypes: [],
         feesRange: { min: 0, max: 1000000 },
         sortBy: 'relevance',
-        state: null
+        state: null,
+        district: null  // Add district filter
     });
 
     // Data states
     const [courseMappings, setCourseMappings] = useState([]);
     const [courseTypes, setCourseTypes] = useState([]);
     const [careers, setCareers] = useState([]);
-    const [locations, setLocations] = useState({ states: [], districts: [] });
+    const [locations, setLocations] = useState({
+        states: Object.keys(statesAndDistricts),
+        districts: []
+    });
 
     // UI states
     const [loading, setLoading] = useState(true);
@@ -67,8 +66,6 @@ const UserFindCourse = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [pageSize, setPageSize] = useState(12);
-    const [showDummyData, setShowDummyData] = useState(true);
-    const [isApiLoaded, setIsApiLoaded] = useState(false);
     const [viewInstituteModalOpen, setViewInstituteModalOpen] = useState(false);
     const [selectedInstitute, setSelectedInstitute] = useState(null);
 
@@ -78,14 +75,14 @@ const UserFindCourse = () => {
             const response = await fetch('http://localhost:5001/api/courses/filters', {
                 credentials: 'include'
             });
-            
+
             if (!response.ok) throw new Error('Failed to fetch filter options');
-            
+
             const data = await response.json();
-            setCourseTypes(data.course_types);
-            setCareers(data.careers);
+            setCourseTypes(data.course_types || []);
+            setCareers(data.careers || []);
             setLocations({
-                states: data.states,
+                states: data.states || [],
                 districts: []
             });
         } catch (error) {
@@ -98,40 +95,32 @@ const UserFindCourse = () => {
     const fetchCourses = async (page = currentPage) => {
         try {
             setLoading(true);
-            
-            // Build query parameters
             const queryParams = new URLSearchParams({
-                page: page,
-                per_page: pageSize,
-                search: filters.searchQuery,
-                sort_by: filters.sortBy,
-                min_fees: filters.feesRange.min,
-                max_fees: filters.feesRange.max,
-                state: filters.state || ''
+                page: page.toString(),
+                per_page: pageSize.toString(),
+                search: filters.searchQuery || '',
+                course_types: filters.courseTypes.map(ct => ct.id).join(','),
+                careers: filters.careers.map(c => c.id).join(','),
+                state: filters.state || '',
+                district: filters.district || '',
+                min_fees: filters.feesRange.min.toString(),
+                max_fees: filters.feesRange.max.toString(),
+                sort_by: filters.sortBy
             });
 
-            filters.courseTypes.forEach(type => {
-                queryParams.append('course_types[]', type.id);
+            const response = await fetch(`http://localhost:5001/api/courses/search?${queryParams}`, {
+                credentials: 'include'
             });
-            
-            filters.careers.forEach(career => {
-                queryParams.append('careers[]', career.id);
-            });
-
-            const response = await fetch(
-                `http://localhost:5001/api/courses/search?${queryParams}`,
-                { credentials: 'include' }
-            );
 
             if (!response.ok) throw new Error('Failed to fetch courses');
 
             const data = await response.json();
-            setCourseMappings(data.courses);
-            setTotalItems(data.total);
-            setCurrentPage(data.current_page);
-        } catch (error) {
-            console.error('Error fetching courses:', error);
-            setError('Failed to load courses');
+            setCourseMappings(data.courses || []);
+            setTotalItems(data.total || 0);
+            setError(null);
+        } catch (err) {
+            setError('Failed to fetch courses');
+            console.error('Error fetching courses:', err);
         } finally {
             setLoading(false);
         }
@@ -140,17 +129,17 @@ const UserFindCourse = () => {
     // Handle course likes/dislikes
     const handleLikeDislike = async (mappingId, isLike) => {
         try {
-            const response = await fetch(
-                `http://localhost:5001/api/courses/${mappingId}/${isLike ? 'like' : 'dislike'}`,
-                {
-                    method: 'POST',
-                    credentials: 'include'
+            const response = await fetch(`http://localhost:5001/api/courses/${mappingId}/${isLike ? 'like' : 'dislike'}`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
 
             if (!response.ok) throw new Error('Failed to update rating');
 
-            // Refresh courses to get updated likes/dislikes
+            // Refresh the courses to get updated likes/dislikes
             fetchCourses(currentPage);
         } catch (error) {
             console.error('Error updating rating:', error);
@@ -169,22 +158,39 @@ const UserFindCourse = () => {
 
     // Modified filter handlers
     const handleSearchChange = (e) => {
-        const value = e.target.value;
-        debouncedSearch(value);
+        setFilters(prev => ({ ...prev, searchQuery: e.target.value }));
+        debouncedSearch(e.target.value);
     };
 
     const handleCourseTypeChange = ({ selectedItems }) => {
         setFilters(prev => ({ ...prev, courseTypes: selectedItems }));
+        setCurrentPage(1);
         fetchCourses(1);
     };
 
     const handleCareerChange = ({ selectedItems }) => {
         setFilters(prev => ({ ...prev, careers: selectedItems }));
+        setCurrentPage(1);
         fetchCourses(1);
     };
 
     const handleStateChange = ({ selectedItem }) => {
-        setFilters(prev => ({ ...prev, state: selectedItem }));
+        setFilters(prev => ({
+            ...prev,
+            state: selectedItem,
+            district: null
+        }));
+        setLocations(prev => ({
+            ...prev,
+            districts: selectedItem ? statesAndDistricts[selectedItem] || [] : []
+        }));
+        setCurrentPage(1);
+        fetchCourses(1);
+    };
+
+    const handleDistrictChange = ({ selectedItem }) => {
+        setFilters(prev => ({ ...prev, district: selectedItem }));
+        setCurrentPage(1);
         fetchCourses(1);
     };
 
@@ -212,28 +218,9 @@ const UserFindCourse = () => {
 
     // Initial data load
     useEffect(() => {
-        if (!showDummyData && !isApiLoaded) {
-            fetchFilterOptions();
-            fetchCourses(1);
-            setIsApiLoaded(true);
-        }
-    }, [showDummyData, isApiLoaded]);
-
-    // Update when dummy data toggle changes
-    useEffect(() => {
-        setTimeout(() => {
-            if (showDummyData) {
-                setCourseMappings(dummyMappings);
-                setCourseTypes(dummyCourseTypes);
-                setCareers(dummyCareers);
-                setLocations(dummyLocations);
-                setTotalItems(dummyMappings.length);
-                setLoading(false);
-            } else {
-                setIsApiLoaded(false);
-            }
-        }, 1000);
-    }, [showDummyData]);
+        fetchFilterOptions();
+        fetchCourses(1);
+    }, []);
 
     // Filter handlers
     const handleMinFeesChange = (e) => {
@@ -255,11 +242,6 @@ const UserFindCourse = () => {
     const handleViewDetails = (mapping) => {
         setSelectedCourse(mapping);
         setViewModalOpen(true);
-    };
-
-    const handleToggleDummyData = (toggled) => {
-        setShowDummyData(toggled);
-        setLoading(true); // Show loading while data changes
     };
 
     const handleViewInstitute = (mapping) => {
@@ -302,26 +284,6 @@ const UserFindCourse = () => {
 
     return (
         <Grid className="find-course-container">
-            {/* Demo Data Toggle */}
-            <Column lg={16} md={8} sm={4}>
-                <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Toggle
-                        id="dummy-data-toggle"
-                        labelText="Show Demo Data"
-                        toggled={showDummyData}
-                        onToggle={handleToggleDummyData}
-                    />
-                    {!showDummyData && (
-                        <InlineNotification
-                            kind="info"
-                            title="Demo Mode Disabled"
-                            subtitle="Connect to backend API to see real data"
-                            style={{ flex: 1 }}
-                        />
-                    )}
-                </div>
-            </Column>
-
             {/* Top Filters Section */}
 
             <Column lg={16} md={8} sm={4}>
@@ -330,7 +292,7 @@ const UserFindCourse = () => {
                     <Grid narrow>
 
 
-                        <Column lg={3} md={4} sm={4}>
+                        <Column lg={4} md={4} sm={4}>
                             <FilterableMultiSelect
                                 id="course-types-filter"
                                 titleText="Course Types"
@@ -341,7 +303,7 @@ const UserFindCourse = () => {
                             />
                         </Column>
 
-                        <Column lg={3} md={4} sm={4}>
+                        <Column lg={4} md={4} sm={4}>
                             <FilterableMultiSelect
                                 id="careers-filter"
                                 titleText="Careers"
@@ -352,10 +314,10 @@ const UserFindCourse = () => {
                             />
                         </Column>
 
-                        <Column lg={3} md={4} sm={4}>
+                        <Column lg={4} md={4} sm={4}>
                             <ComboBox
                                 id="state-filter"
-                                titleText="Location"
+                                titleText="State"
                                 items={locations.states}
                                 selectedItem={filters.state}
                                 onChange={handleStateChange}
@@ -364,27 +326,36 @@ const UserFindCourse = () => {
                         </Column>
 
                         <Column lg={4} md={4} sm={4}>
-                            <div className="fees-range">
-                                <h4>Fees Range (₹)</h4>
-                                <Slider
-                                    id="fees-range-slider"
-                                    labelText="Fees Range"
-                                    max={5000000}
-                                    min={0}
-                                    step={10000}
-                                    value={[filters.feesRange.min, filters.feesRange.max]}
-                                    onChange={handleFeesRangeChange}
-                                />
-                                <div className="fees-range-labels">
-                                    <span>₹{filters.feesRange.min.toLocaleString('en-IN')}</span>
-                                    <span>₹{filters.feesRange.max.toLocaleString('en-IN')}</span>
-                                </div>
-                            </div>
+                            <ComboBox
+                                id="district-filter"
+                                titleText="District"
+                                items={locations.districts}
+                                selectedItem={filters.district}
+                                onChange={handleDistrictChange}
+                                placeholder="Select district"
+                                disabled={!filters.state}  // Disable if no state selected
+                            />
+                        </Column>
+
+                        <Column lg={4} md={8} sm={4}>
+                            <Select
+                                id="sort-by"
+                                labelText="Sort by"
+                                value={filters.sortBy}
+                                onChange={handleSortChange}
+                            >
+                                <SelectItem value="relevance" text="Most Relevant" />
+                                <SelectItem value="fees_high" text="Fees: Low to High" />
+                                <SelectItem value="fees_low" text="Fees: High to Low" />
+                                <SelectItem value="rating" text="Rating" />
+                            </Select>
                         </Column>
                     </Grid>
                 </Tile>
+                <br></br><br></br>
             </Column>
-            <Column lg={12} md={8} sm={4}>
+            
+            <Column lg={16} md={8} sm={4}>
                 <Search
                     id="search-courses"
                     labelText="Search courses"
@@ -393,20 +364,9 @@ const UserFindCourse = () => {
                     onChange={handleSearchChange}
                     size="lg"
                 />
+                <br></br><br></br>
             </Column>
-            <Column lg={4} md={8} sm={4}>
-                <Select
-                    id="sort-by"
-                    labelText="Sort by"
-                    value={filters.sortBy}
-                    onChange={handleSortChange}
-                >
-                    <SelectItem value="relevance" text="Most Relevant" />
-                    <SelectItem value="fees_high" text="Fees: Low to High" />
-                    <SelectItem value="fees_low" text="Fees: High to Low" />
-                    <SelectItem value="rating" text="Rating" />
-                </Select>
-            </Column>
+
 
 
             {/* Main Content */}
