@@ -29,7 +29,8 @@ import {
   Email,          // Add these
   FaceMask,       // Add this icon
   Chat,
-  ScisTransparentSupply
+  ScisTransparentSupply,
+  SearchLocate          // Add this icon
 } from '@carbon/icons-react';
 import UserHome from './user_home';
 import UserSettings from './user_settings';
@@ -39,6 +40,7 @@ import UserSendComplaints from './user_send_complaints';
 import UserManageComplaints from './user_manage_complaints';
 import UserLLMChat from './user_llm_chat';
 import UserCareerAssessment from './user_career_assessment';  // Corrected import
+import UserFindCourse from './user_find_course';
 
 function UserBase() {
   const navigate = useNavigate();
@@ -202,7 +204,7 @@ function UserBase() {
                   <HeaderMenuItem as={Link} to="/user/complaints">Send Complaint</HeaderMenuItem>
                   <HeaderMenuItem as={Link} to="/user/manage-complaints">Manage Complaints</HeaderMenuItem>
                 </HeaderMenu>
-
+                <HeaderMenuItem as={Link} to="/user/find-course">Find Courses</HeaderMenuItem>
                 <HeaderMenuItem as={Link} to="/user/settings">Settings</HeaderMenuItem>
               </HeaderNavigation>
 
@@ -260,7 +262,15 @@ function UserBase() {
                   >
                     Career Guidance AI
                   </SideNavLink>
-
+                  <SideNavLink
+                    renderIcon={() => <SearchLocate size={40} style={{ fontSize: "3rem" }} />}
+                    isActive={location.pathname === "/user/find-course"}
+                    as={Link}
+                    to="/user/find-course"
+                    className="side-nav-link"
+                  >
+                    Find Courses
+                  </SideNavLink>
 
                   <SideNavLink
                     renderIcon={() => <Email size={40} style={{ fontSize: "3rem" }} />}
@@ -299,6 +309,7 @@ function UserBase() {
                   >
                     Manage Facial Data
                   </SideNavLink> */}
+
                   <SideNavLink
                     renderIcon={() => <Settings size={40} style={{ fontSize: "3rem" }} />}
                     isActive={location.pathname === "/user/settings"}
@@ -332,6 +343,7 @@ function UserBase() {
                 <Route path="/manage-complaints" element={<UserManageComplaints />} />
                 <Route path="/llm-chat" element={<UserLLMChat />} /> {/* Add this route */}
                 <Route path="/career-assessment" element={<UserCareerAssessment />} /> {/* Add this route */}
+                <Route path="/find-course" element={<UserFindCourse />} />
                 <Route path="*" element={<UserHome username={username} />} />
               </Routes>
             </Content>

@@ -115,65 +115,63 @@ class InstitutionType(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Institution(db.Model):
-    __tablename__ = 'institution'  # Fixed tablename
+    __tablename__ = 'institution'
     institution_id = db.Column(db.Integer, primary_key=True)
     institution = db.Column(db.String(120), unique=True, nullable=False)
     institution_type_id = db.Column(db.Integer, db.ForeignKey('institution_type.institution_type_id'), nullable=False)
     description = db.Column(db.Text, nullable=False)
     accreditation = db.Column(db.String(100))
     since_date = db.Column(db.Date, nullable=False)
-    website = db.Column(db.String(200), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    phone = db.Column(db.String(20), unique=True, nullable=False)
-    address = db.Column(db.String(200), nullable=False)
-    state = db.Column(db.String(50), nullable=False)
-    district = db.Column(db.String(50), nullable=False)
-    postalPinCode = db.Column(db.String(10), nullable=False)
+    website = db.Column(db.String(200))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    address = db.Column(db.Text)
+    state = db.Column(db.String(50))
+    district = db.Column(db.String(50))
+    postalPinCode = db.Column(db.String(10))
     logoPicture = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Update relationship
+    institution_type = db.relationship('InstitutionType', backref='institutions')
+    # Fix: Remove backref from here and define one-way relationship
     course_mappings = db.relationship('CourseMapping', back_populates='institution', lazy='dynamic')
 
 class CourseMapping(db.Model):
     __tablename__ = 'course_mapping'
     course_mapping_id = db.Column(db.Integer, primary_key=True)
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), nullable=False)
-    course_type_id = db.Column(db.Integer, db.ForeignKey('course_type.course_type_id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('course.course_id'), nullable=False)
+    course_type_id = db.Column(db.Integer, db.ForeignKey('course_type.course_type_id'), nullable=False)
     description = db.Column(db.Text, nullable=False)
     fees = db.Column(db.Float, nullable=False)
     website = db.Column(db.String(200), nullable=False)
     student_qualification = db.Column(db.String(200), nullable=False)
-    course_affliation = db.Column(db.String(200), nullable=False)
-    duration = db.Column(db.String(200), nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='active', server_default='active')
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Update relationships
-    institution = db.relationship('Institution', back_populates='course_mappings', lazy='joined')
-    course = db.relationship('Course', back_populates='course_mappings', lazy='joined')
-    course_type = db.relationship('CourseType', back_populates='course_mappings', lazy='joined')
-    
-    # Add indexes and constraints
-    __table_args__ = (
-        db.UniqueConstraint('institution_id', 'course_id', name='uix_institution_course'),
-        db.Index('idx_course_mapping_status', 'status'),
-        db.Index('idx_course_mapping_created', 'created_at')
-    )
-    
+    course_affliation = db.Column(db.String(200))
+    duration = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='active')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Fix: Define relationships with back_populates instead of backref
+    institution = db.relationship('Institution', back_populates='course_mappings')
+    course = db.relationship('Course', back_populates='course_mappings')
+    course_type = db.relationship('CourseType', back_populates='course_mappings')
+
 class CourseLikesDislikes(db.Model):
     __tablename__ = 'course_likes_dislikes'
-    course_mapping_id = db.Column(db.Integer, db.ForeignKey('course_mapping.course_mapping_id'), primary_key=True, nullable=False)
-    likes = db.Column(db.Integer)
-    dis_likes = db.Column(db.Integer)
-    
-    
+    course_mapping_id = db.Column(db.Integer, db.ForeignKey('course_mapping.course_mapping_id'), primary_key=True)
+    likes = db.Column(db.Integer, default=0)
+    dis_likes = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class InstitutionLikesDislikes(db.Model):
     __tablename__ = 'institution_likes_dislikes'
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), primary_key=True, nullable=False)
-    likes = db.Column(db.Integer)
-    dis_likes = db.Column(db.Integer)
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), primary_key=True)
+    likes = db.Column(db.Integer, default=0)
+    dis_likes = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

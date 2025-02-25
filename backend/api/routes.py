@@ -80,7 +80,14 @@ from services.assesment_services import (
     get_assessment_questions,
     process_assessment
 )
-from services.course_services import get_course_mapping_details
+from services.course_services import (
+    get_course_mapping_details,
+    get_course_dislikes,
+    get_course_filters,
+    get_course_likes,
+    get_filtered_courses,
+    calculate_institution_rating
+    )
 
 # Database models
 from db.db_models import Users, Login, UserType, Complaints, Questions, Careers
@@ -1441,3 +1448,100 @@ def get_course_mapping_details_route(mapping_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Add these routes after your existing routes
+
+@api.route('/api/courses/search', methods=['GET'])
+def search_courses():
+    """Search and filter courses"""
+    try:
+        # Get query parameters
+        filters = {
+            'search': request.args.get('search', ''),
+            'course_types': [int(x) for x in request.args.getlist('course_types[]') if x],
+            'careers': [int(x) for x in request.args.getlist('careers[]') if x],
+            'state': request.args.get('state'),
+            'min_fees': float(request.args.get('min_fees', 0)),
+            'max_fees': float(request.args.get('max_fees', 5000000)),
+            'sort_by': request.args.get('sort_by', 'relevance')
+        }
+        
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 12, type=int)
+
+        result = get_filtered_courses(filters, page, per_page)
+        
+        if "error" in result:
+            return jsonify({"error": result["error"]}), 400
+            
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"Error in search_courses: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/courses/filters', methods=['GET'])
+def get_course_filter_options():
+    """Get all available filter options"""
+    try:
+        filters = get_course_filters()
+        
+        if "error" in filters:
+            return jsonify({"error": filters["error"]}), 400
+            
+        return jsonify(filters)
+
+    except Exception as e:
+        print(f"Error in get_course_filter_options: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/courses/<int:mapping_id>/like', methods=['POST'])
+@check_session(required_type=2)  # User only
+def like_course(mapping_id):
+    """Like a course"""
+    try:
+        likes = CourseLikesDislikes.query\
+            .filter_by(course_mapping_id=mapping_id)\
+            .first()
+            
+        if not likes:
+            likes = CourseLikesDislikes(
+                course_mapping_id=mapping_id,
+                likes=1,
+                dis_likes=0
+            )
+            db.session.add(likes)
+        else:
+            likes.likes += 1
+            
+        db.session.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print(f"Error in like_course: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/courses/<int:mapping_id>/dislike', methods=['POST'])
+@check_session(required_type=2)  # User only
+def dislike_course(mapping_id):
+    """Dislike a course"""
+    try:
+        likes = CourseLikesDislikes.query\
+            .filter_by(course_mapping_id=mapping_id)\
+            .first()
+            
+        if not likes:
+            likes = CourseLikesDislikes(
+                course_mapping_id=mapping_id,
+                likes=0,
+                dis_likes=1
+            )
+            db.session.add(likes)
+        else:
+            likes.dis_likes += 1
+            
+        db.session.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print(f"Error in dislike_course: {str(e)}")
+        return jsonify({"error": str(e)}), 500
