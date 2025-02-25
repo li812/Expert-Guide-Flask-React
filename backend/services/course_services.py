@@ -174,28 +174,44 @@ def highlight_text(text, search_term):
 
 def format_course_mapping(mapping):
     """Helper function to format course mapping data"""
-    return {
-        "course_mapping_id": mapping.course_mapping_id,
-        "institution": {
-            "id": mapping.institution.institution_id,
-            "name": mapping.institution.institution,
-            "type": mapping.institution.institution_type.institution_type,
-            "logoPicture": mapping.institution.logoPicture
-        },
-        "course": {
-            "name": mapping.course.course,
-            "type": mapping.course_type.course_type,
-            "description": mapping.course.course_description
-        },
-        "description": mapping.description,
-        "fees": mapping.fees,
-        "duration": mapping.duration,
-        "likes": get_course_likes(mapping.course_mapping_id),
-        "dislikes": get_course_dislikes(mapping.course_mapping_id),
-        "website": mapping.website,
-        "student_qualification": mapping.student_qualification,
-        "course_affliation": mapping.course_affliation
-    }
+    try:
+        return {
+            "course_mapping_id": mapping.course_mapping_id,
+            "institution": {
+                "institution_id": mapping.institution.institution_id,
+                "institution": mapping.institution.institution,
+                "type_id": mapping.institution.institution_type_id,
+                "type": mapping.institution.institution_type.institution_type,
+                "description": mapping.institution.description,
+                "accreditation": mapping.institution.accreditation,
+                "since_date": mapping.institution.since_date.strftime('%Y-%m-%d') if mapping.institution.since_date else None,
+                "website": mapping.institution.website,
+                "email": mapping.institution.email,
+                "phone": mapping.institution.phone,
+                "address": mapping.institution.address,
+                "state": mapping.institution.state,
+                "district": mapping.institution.district,
+                "postalPinCode": mapping.institution.postalPinCode,
+                "logoPicture": mapping.institution.logoPicture
+            },
+            "course": {
+                "name": mapping.course.course,
+                "type": mapping.course_type.course_type,
+                "description": mapping.course.course_description
+            },
+            "description": mapping.description,
+            "fees": mapping.fees,
+            "duration": mapping.duration,
+            "website": mapping.website,
+            "student_qualification": mapping.student_qualification,
+            "course_affliation": mapping.course_affliation,
+            "likes": get_course_likes(mapping.course_mapping_id),
+            "dislikes": get_course_dislikes(mapping.course_mapping_id),
+            "status": mapping.status
+        }
+    except Exception as e:
+        print(f"Error formatting course mapping: {str(e)}")
+        return {} 
 
 def get_course_filters():
     """Get all available filter options"""

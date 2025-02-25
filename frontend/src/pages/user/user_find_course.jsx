@@ -101,29 +101,47 @@ const UserFindCourse = () => {
             const queryParams = new URLSearchParams({
                 page: page.toString(),
                 per_page: pageSize.toString(),
-                search: filters.searchQuery || '',
-                course_types: filters.courseTypes.join(','),
-                careers: filters.careers.join(','),
-                state: filters.state || '',
-                district: filters.district || '',
-                min_fees: filters.feesRange.min.toString(),
-                max_fees: filters.feesRange.max.toString(),
-                sort_by: filters.sortBy
+                sort_by: filters.sortBy,
+                ...filters.searchQuery && { search: filters.searchQuery },
+                ...filters.courseTypes.length > 0 && { 
+                    course_types: filters.courseTypes.map(ct => ct.id).join(',') 
+                },
+                ...filters.careers.length > 0 && { 
+                    careers: filters.careers.map(c => c.id).join(',') 
+                },
+                ...filters.state && { state: filters.state },
+                ...filters.district && { district: filters.district },
+                ...filters.feesRange.min > 0 && { min_fees: filters.feesRange.min },
+                ...filters.feesRange.max < 1000000 && { max_fees: filters.feesRange.max }
             });
 
             const response = await fetch(`http://localhost:5001/api/courses/search?${queryParams}`, {
                 credentials: 'include'
             });
 
-            if (!response.ok) throw new Error('Failed to fetch courses');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const data = await response.json();
-            setCourseMappings(data.courses || []);
+            console.log('Received course data:', data); // Add logging
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            if (!data.courses || !Array.isArray(data.courses)) {
+                throw new Error('Invalid course data received');
+            }
+
+            setCourseMappings(data.courses);
             setTotalItems(data.total || 0);
             setError(null);
         } catch (err) {
-            setError('Failed to fetch courses');
             console.error('Error fetching courses:', err);
+            setError(err.message || 'Failed to fetch courses');
+            setCourseMappings([]);
+            setTotalItems(0);
         } finally {
             setLoading(false);
         }
@@ -356,19 +374,21 @@ const UserFindCourse = () => {
 
     const handleViewInstitute = (mapping) => {
         setSelectedInstitute({
-            institution_id: mapping.institution.id,
-            institution: mapping.institution.name,
+            institution_id: mapping.institution.institution_id,
+            institution: mapping.institution.institution,  // Changed from .name
+            institution_type_id: mapping.institution.type_id,
             institution_type: mapping.institution.type,
-            description: mapping.institution.description,
-            accreditation: mapping.institution.accreditation,
-            website: mapping.institution.website,
-            email: mapping.institution.email,
-            phone: mapping.institution.phone,
-            address: mapping.institution.address,
-            state: mapping.institution.state,
-            district: mapping.institution.district,
-            postalPinCode: mapping.institution.postalPinCode,
-            logoPicture: mapping.institution.logoPicture
+            description: mapping.institution.description || '',
+            accreditation: mapping.institution.accreditation || '',
+            since_date: mapping.institution.since_date || '',
+            website: mapping.institution.website || '',
+            email: mapping.institution.email || '',
+            phone: mapping.institution.phone || '',
+            address: mapping.institution.address || '',
+            state: mapping.institution.state || '',
+            district: mapping.institution.district || '',
+            postalPinCode: mapping.institution.postalPinCode || '',
+            logoPicture: mapping.institution.logoPicture || ''
         });
         setViewInstituteModalOpen(true);
     };
@@ -397,112 +417,117 @@ const UserFindCourse = () => {
             {/* Top Filters Section */}
 
 
-                <Column lg={16} md={8} sm={4}>
-                    <h2 className="search-filter-title">Find Courses</h2>
-                    <Tile className="filters-section">
-                        <Grid narrow>
-                            <Column lg={4} md={4} sm={4}>
-                                <FilterableMultiSelect
-                                    id="course-types-filter"
-                                    titleText="Course Types"
-                                    items={courseTypes}
-                                    itemToString={(item) => (item ? item.course_type : '')}
-                                    selectedItems={filters.courseTypes}
-                                    onChange={handleCourseTypeChange}
-                                />
-                            </Column>
+            <Column lg={16} md={8} sm={4}>
+            <div className="results-header">
+                        <h2>Find Courses</h2>
 
-                            <Column lg={3} md={4} sm={4}>
-                                <FilterableMultiSelect
-                                    id="careers-filter"
-                                    titleText="Careers"
-                                    items={careers}
-                                    itemToString={(item) => (item ? item.career : '')}
-                                    selectedItems={filters.careers}
-                                    onChange={handleCareerChange}
-                                />
-                            </Column>
+                    </div>
+                
+                <Tile className="filters-section">
+                    <Grid narrow>
+                        <Column lg={4} md={4} sm={4}>
+                            <FilterableMultiSelect
+                                id="course-types-filter"
+                                titleText="Course Types"
+                                items={courseTypes}
+                                itemToString={(item) => (item ? item.course_type : '')}
+                                selectedItems={filters.courseTypes}
+                                onChange={handleCourseTypeChange}
+                            />
+                        </Column>
 
-                            <Column lg={3} md={4} sm={4}>
-                                <ComboBox
-                                    id="state-filter"
-                                    titleText="State"
-                                    items={locations.states}
-                                    selectedItem={filters.state}
-                                    onChange={handleStateChange}
-                                    placeholder="Select state"
-                                />
-                            </Column>
+                        <Column lg={3} md={4} sm={4}>
+                            <FilterableMultiSelect
+                                id="careers-filter"
+                                titleText="Careers"
+                                items={careers}
+                                itemToString={(item) => (item ? item.career : '')}
+                                selectedItems={filters.careers}
+                                onChange={handleCareerChange}
+                            />
+                        </Column>
 
-                            <Column lg={3} md={4} sm={4}>
-                                <ComboBox
-                                    id="district-filter"
-                                    titleText="District"
-                                    items={locations.districts}
-                                    selectedItem={filters.district}
-                                    onChange={handleDistrictChange}
-                                    placeholder="Select district"
-                                    disabled={!filters.state}  // Disable if no state selected
-                                />
-                            </Column>
+                        <Column lg={3} md={4} sm={4}>
+                            <ComboBox
+                                id="state-filter"
+                                titleText="State"
+                                items={locations.states}
+                                selectedItem={filters.state}
+                                onChange={handleStateChange}
+                                placeholder="Select state"
+                            />
+                        </Column>
 
-                            <Column lg={3} md={8} sm={4}>
-                                <Select
-                                    id="sort-by"
-                                    labelText="Sort by"
-                                    value={filters.sortBy}
-                                    onChange={handleSortChange}
-                                >
-                                    <SelectItem value="relevance" text="Most Relevant" />
-                                    <SelectItem value="fees_high" text="Fees: Low to High" />
-                                    <SelectItem value="fees_low" text="Fees: High to Low" />
-                                    <SelectItem value="rating" text="Rating" />
-                                </Select>
-                            </Column>
-                        </Grid>
-                    </Tile>
-                </Column>
+                        <Column lg={3} md={4} sm={4}>
+                            <ComboBox
+                                id="district-filter"
+                                titleText="District"
+                                items={locations.districts}
+                                selectedItem={filters.district}
+                                onChange={handleDistrictChange}
+                                placeholder="Select district"
+                                disabled={!filters.state}  // Disable if no state selected
+                            />
+                        </Column>
 
-                <Column lg={16} md={8} sm={4}>
+                        <Column lg={3} md={8} sm={4}>
+                            <Select
+                                id="sort-by"
+                                labelText="Sort by"
+                                value={filters.sortBy}
+                                onChange={handleSortChange}
+                            >
+                                <SelectItem value="relevance" text="Most Relevant" />
+                                <SelectItem value="fees_high" text="Fees: Low to High" />
+                                <SelectItem value="fees_low" text="Fees: High to Low" />
+                                <SelectItem value="rating" text="Rating" />
+                            </Select>
+                        </Column>
+                    </Grid>
+                </Tile>
+            </Column>
 
-                        <Grid>
-                            <Column lg={14} md={6} sm={3}>
-                                <Search
-                                    id="search-courses"
-                                    labelText="Search courses"
-                                    placeholder="Search by course name, institution..."
-                                    value={filters.searchQuery}
-                                    onChange={handleSearchChange}
-                                    size="lg"
-                                    className="search-input"
-                                />
-                            </Column>
-                            <Column lg={2} md={2} sm={1}>
-                                <Button
-                                    kind="primary"
-                                    size="lg"
-                                    renderIcon={ThumbsDown}
-                                    className="reset-button"
-                                    onClick={() => {
-                                        setFilters({
-                                            searchQuery: '',
-                                            courseTypes: [],
-                                            careers: [],
-                                            institutionTypes: [],
-                                            feesRange: { min: 0, max: 1000000 },
-                                            sortBy: 'relevance',
-                                            state: null,
-                                            district: null
-                                        });
-                                        fetchCourses(1);
-                                    }}
-                                >
-                                    Reset
-                                </Button>
-                            </Column>
-                        </Grid>
+            <Column lg={16} md={8} sm={4}>
+                <Tile className="filters-section">
 
-                </Column>
+                    <Grid>
+                        <Column lg={14} md={6} sm={3}>
+                            <Search
+                                id="search-courses"
+                                labelText="Search courses"
+                                placeholder="Search by course name, institution..."
+                                value={filters.searchQuery}
+                                onChange={handleSearchChange}
+                                size="lg"
+                                className="search-input"
+                            />
+                        </Column>
+                        <Column lg={2} md={2} sm={1}>
+                            <Button
+                                kind="primary"
+                                size="lg"
+                                renderIcon={ThumbsDown}
+                                className="reset-button"
+                                onClick={() => {
+                                    setFilters({
+                                        searchQuery: '',
+                                        courseTypes: [],
+                                        careers: [],
+                                        institutionTypes: [],
+                                        feesRange: { min: 0, max: 1000000 },
+                                        sortBy: 'relevance',
+                                        state: null,
+                                        district: null
+                                    });
+                                    fetchCourses(1);
+                                }}
+                            >
+                                Reset
+                            </Button>
+                        </Column>
+                    </Grid>
+                </Tile>
+            </Column>
 
 
             {/* Main Content */}
@@ -510,11 +535,13 @@ const UserFindCourse = () => {
 
 
             <Column lg={16} md={8} sm={4}>
-                {/* Results Header */}
-                <div className="results-header">
-                    <h2>Found {totalItems} Courses</h2>
+                
+                    {/* Results Header */}
+                    <div className="results-header">
+                        <h2>Found {totalItems} Courses</h2>
 
-                </div>
+                    </div>
+                
 
                 {/* Course Grid */}
                 <Grid narrow className="course-grid">
@@ -524,8 +551,10 @@ const UserFindCourse = () => {
                                 <AspectRatio ratio="16x9">
                                     <div className="institution-logo">
                                         <img
-                                            src={`http://localhost:5001${mapping.institution.logoPicture}`}
-                                            alt={mapping.institution.name}
+                                            src={mapping.institution?.logoPicture ? 
+                                                `http://localhost:5001${mapping.institution.logoPicture}` : 
+                                                '/placeholder-logo.png'}
+                                            alt={mapping.institution?.name || 'Institution Logo'}
                                             className="institution-logo-banner"
                                             onError={(e) => {
                                                 e.target.onerror = null;
@@ -536,62 +565,67 @@ const UserFindCourse = () => {
                                 </AspectRatio>
 
                                 <div className="course-info">
-                                    <h3>{mapping.course.name}</h3>
+                                    <h3>{mapping?.course?.name || 'Course Name Not Available'}</h3>
                                     <p className="institution-name">
-                                        {mapping.institution.name}
+                                        {mapping?.institution?.institution || 'Institution Name Not Available'}
                                     </p>
 
                                     <div className="course-tags">
-                                        <Tag type="blue">{mapping.course.type}</Tag>
-                                        <Tag type="green">{mapping.institution.type}</Tag>
+                                        <Tag type="blue">
+                                            {mapping?.course?.type || 'Course Type Not Available'}
+                                        </Tag>
+                                        <Tag type="green">
+                                            {mapping?.institution?.type || 'Institution Type Not Available'}
+                                        </Tag>
                                     </div>
 
                                     <div className="course-stats">
                                         <span className="fees">
-                                            ₹{mapping.fees.toLocaleString('en-IN')}
+                                            ₹{(mapping?.fees || 0).toLocaleString('en-IN')}
                                         </span>
-                                        <span className="duration">{mapping.duration}</span>
+                                        <span className="duration">
+                                            {mapping?.duration || 'Duration Not Available'}
+                                        </span>
                                     </div>
-
-                                    <div className="course-actions">
+                                </div>
+                                <div className="course-actions">
+                                    <Button
+                                        kind="ghost"
+                                        size="sm"
+                                        renderIcon={ViewFilled}
+                                        onClick={() => handleViewDetails(mapping)}
+                                    >
+                                        View Course Details
+                                    </Button>
+                                    <Button
+                                        kind="ghost"
+                                        size="sm"
+                                        renderIcon={ViewFilled}
+                                        onClick={() => handleViewInstitute(mapping)}
+                                    >
+                                        View Institute Details
+                                    </Button>
+                                    <div className="like-dislike">
                                         <Button
                                             kind="ghost"
                                             size="sm"
-                                            renderIcon={ViewFilled}
-                                            onClick={() => handleViewDetails(mapping)}
+                                            renderIcon={ThumbsUp}
+                                            iconDescription="Like"
+                                            onClick={() => handleLikeDislike(mapping.course_mapping_id, true)}
+                                            disabled={pendingLikes[mapping.course_mapping_id]}
                                         >
-                                            View Course Details
+                                            {mapping.likes}
                                         </Button>
                                         <Button
                                             kind="ghost"
                                             size="sm"
-                                            renderIcon={ViewFilled}
-                                            onClick={() => handleViewInstitute(mapping)}
+                                            renderIcon={ThumbsDown}
+                                            iconDescription="Dislike"
+                                            onClick={() => handleLikeDislike(mapping.course_mapping_id, false)}
+                                            disabled={pendingLikes[mapping.course_mapping_id]}
                                         >
-                                            View Institute Details
+                                            {mapping.dislikes}
                                         </Button>
-                                        <div className="like-dislike">
-                                            <Button
-                                                kind="ghost"
-                                                size="sm"
-                                                renderIcon={ThumbsUp}
-                                                iconDescription="Like"
-                                                onClick={() => handleLikeDislike(mapping.course_mapping_id, true)}
-                                                disabled={pendingLikes[mapping.course_mapping_id]}
-                                            >
-                                                {mapping.likes}
-                                            </Button>
-                                            <Button
-                                                kind="ghost"
-                                                size="sm"
-                                                renderIcon={ThumbsDown}
-                                                iconDescription="Dislike"
-                                                onClick={() => handleLikeDislike(mapping.course_mapping_id, false)}
-                                                disabled={pendingLikes[mapping.course_mapping_id]}
-                                            >
-                                                {mapping.dislikes}
-                                            </Button>
-                                        </div>
                                     </div>
                                 </div>
                             </ClickableTile>
@@ -608,6 +642,7 @@ const UserFindCourse = () => {
                     pageSizes={[12, 24, 48]}
                     onChange={handlePagination}
                 />
+
             </Column>
 
             {/* Course Details Modal */}
@@ -618,7 +653,10 @@ const UserFindCourse = () => {
             />
             <ViewInstituteDetailsModal
                 open={viewInstituteModalOpen}
-                onClose={() => setViewInstituteModalOpen(false)}
+                onClose={() => {
+                    setViewInstituteModalOpen(false);
+                    setSelectedInstitute(null);  // Clean up on close
+                }}
                 institute={selectedInstitute}
                 instituteType={selectedInstitute?.institution_type}
             />
