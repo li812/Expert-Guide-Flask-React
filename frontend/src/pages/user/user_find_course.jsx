@@ -31,6 +31,7 @@ import {
     ThumbsDown
 } from '@carbon/icons-react';
 import ViewCourseDetailsModal from '../../components/ViewCourseDetailsModal/ViewCourseDetailsModal';
+import ViewInstituteDetailsModal from '../../components/ViewInstituteDetailsModal/ViewInstituteDetailsModal';
 import {
     dummyMappings,
     dummyCourseTypes,
@@ -68,6 +69,8 @@ const UserFindCourse = () => {
     const [pageSize, setPageSize] = useState(12);
     const [showDummyData, setShowDummyData] = useState(true);
     const [isApiLoaded, setIsApiLoaded] = useState(false);
+    const [viewInstituteModalOpen, setViewInstituteModalOpen] = useState(false);
+    const [selectedInstitute, setSelectedInstitute] = useState(null);
 
     // Fetch filter options from backend
     const fetchFilterOptions = async () => {
@@ -107,7 +110,6 @@ const UserFindCourse = () => {
                 state: filters.state || ''
             });
 
-            // Add array parameters
             filters.courseTypes.forEach(type => {
                 queryParams.append('course_types[]', type.id);
             });
@@ -258,6 +260,25 @@ const UserFindCourse = () => {
     const handleToggleDummyData = (toggled) => {
         setShowDummyData(toggled);
         setLoading(true); // Show loading while data changes
+    };
+
+    const handleViewInstitute = (mapping) => {
+        setSelectedInstitute({
+            institution_id: mapping.institution.id,
+            institution: mapping.institution.name,
+            institution_type: mapping.institution.type,
+            description: mapping.institution.description,
+            accreditation: mapping.institution.accreditation,
+            website: mapping.institution.website,
+            email: mapping.institution.email,
+            phone: mapping.institution.phone,
+            address: mapping.institution.address,
+            state: mapping.institution.state,
+            district: mapping.institution.district,
+            postalPinCode: mapping.institution.postalPinCode,
+            logoPicture: mapping.institution.logoPicture
+        });
+        setViewInstituteModalOpen(true);
     };
 
     if (loading) {
@@ -435,8 +456,6 @@ const UserFindCourse = () => {
                                         <span className="duration">{mapping.duration}</span>
                                     </div>
 
-                                
-
                                     <div className="course-actions">
                                         <Button
                                             kind="ghost"
@@ -444,7 +463,15 @@ const UserFindCourse = () => {
                                             renderIcon={ViewFilled}
                                             onClick={() => handleViewDetails(mapping)}
                                         >
-                                            View Details
+                                            View Course Details
+                                        </Button>
+                                        <Button
+                                            kind="ghost"
+                                            size="sm"
+                                            renderIcon={ViewFilled}
+                                            onClick={() => handleViewInstitute(mapping)}
+                                        >
+                                            View Institute Details
                                         </Button>
                                         <div className="like-dislike">
                                             <Button
@@ -490,8 +517,13 @@ const UserFindCourse = () => {
                 onClose={() => setViewModalOpen(false)}
                 mappingId={selectedCourse?.course_mapping_id}
             />
+            <ViewInstituteDetailsModal
+                open={viewInstituteModalOpen}
+                onClose={() => setViewInstituteModalOpen(false)}
+                institute={selectedInstitute}
+                instituteType={selectedInstitute?.institution_type}
+            />
         </Grid>
     );
 };
-
 export default UserFindCourse;

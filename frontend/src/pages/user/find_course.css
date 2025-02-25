@@ -73,3 +73,25 @@
 .duration {
     color: #525252;
 }
+
+.course-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.course-actions button {
+    width: 100%;
+    justify-content: center;
+}
+
+.like-dislike {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.like-dislike button {
+    flex: 1;
+}
