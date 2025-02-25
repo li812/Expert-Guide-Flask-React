@@ -435,18 +435,7 @@ const UserFindCourse = () => {
                                         <span className="duration">{mapping.duration}</span>
                                     </div>
 
-                                    <div className="course-rating">
-                                        <div className="stars">
-                                            {Array(5).fill(0).map((_, i) => (
-                                                i < Math.floor(mapping.institution.rating) ?
-                                                    <StarFilled key={i} size={16} /> :
-                                                    <Star key={i} size={16} />
-                                            ))}
-                                        </div>
-                                        <span className="rating-value">
-                                            {mapping.institution.rating}
-                                        </span>
-                                    </div>
+                                
 
                                     <div className="course-actions">
                                         <Button
