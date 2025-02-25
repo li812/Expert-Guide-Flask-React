@@ -962,7 +962,7 @@ def get_all_course_mappings(page=1, per_page=10, sort_key='course_mapping_id', s
             'course_affliation': cm.course_affliation,
             'duration': cm.duration,
             'status': cm.status,
-            'created_at': cm.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': cm.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ') # ISO format
         } for cm in paginated.items]
 
         return {

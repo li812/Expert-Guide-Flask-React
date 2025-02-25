@@ -313,21 +313,46 @@ const AdminCourseMapping = ({ username }) => {
     };
 
     const sortRow = (a, b, { sortDirection, sortKey }) => {
-        if (sortKey === 'fees') {
-            const aFees = parseFloat(a[sortKey].replace('₹', ''));
-            const bFees = parseFloat(b[sortKey].replace('₹', ''));
-            return sortDirection === 'asc' ? aFees - bFees : bFees - aFees;
+        try {
+            // Handle fees sorting
+            if (sortKey === 'fees') {
+                const aFees = parseFloat(a[sortKey].replace('₹', '').replace(/,/g, ''));
+                const bFees = parseFloat(b[sortKey].replace('₹', '').replace(/,/g, ''));
+                return sortDirection === 'asc' ? aFees - bFees : bFees - aFees;
+            }
+
+            // Handle date sorting
+            if (sortKey === 'created_at') {
+                const aDate = new Date(a[sortKey]);
+                const bDate = new Date(b[sortKey]);
+                
+                // Handle invalid dates
+                if (isNaN(aDate.getTime()) && isNaN(bDate.getTime())) return 0;
+                if (isNaN(aDate.getTime())) return sortDirection === 'asc' ? 1 : -1;
+                if (isNaN(bDate.getTime())) return sortDirection === 'asc' ? -1 : 1;
+                
+                return sortDirection === 'asc' 
+                    ? aDate.getTime() - bDate.getTime()
+                    : bDate.getTime() - aDate.getTime();
+            }
+
+            // Handle numeric ID sorting
+            if (sortKey === 'course_mapping_id') {
+                const aId = parseInt(a[sortKey]);
+                const bId = parseInt(b[sortKey]);
+                return sortDirection === 'asc' ? aId - bId : bId - aId;
+            }
+
+            // Default string sorting
+            const aValue = (a[sortKey] || '').toString().toLowerCase();
+            const bValue = (b[sortKey] || '').toString().toLowerCase();
+            return sortDirection === 'asc'
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        } catch (error) {
+            console.error('Sorting error:', error);
+            return 0;
         }
-        
-        if (sortKey === 'course_mapping_id') {
-            return sortDirection === 'asc' 
-                ? parseInt(a[sortKey]) - parseInt(b[sortKey])
-                : parseInt(b[sortKey]) - parseInt(a[sortKey]);
-        }
-        
-        return sortDirection === 'asc'
-            ? a[sortKey].toString().localeCompare(b[sortKey].toString())
-            : b[sortKey].toString().localeCompare(a[sortKey].toString());
     };
 
     // Improve course type change handler
@@ -354,14 +379,23 @@ const AdminCourseMapping = ({ username }) => {
     };
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        if (!dateString) return '-';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '-';
+            
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        } catch (error) {
+            console.error('Date formatting error:', error);
+            return '-';
+        }
     };
 
     return (
@@ -469,47 +503,18 @@ const AdminCourseMapping = ({ username }) => {
                                 )
                             }))}
                             headers={[
-                                { key: 'course_mapping_id', header: 'ID' },
-                                { key: 'institution', header: 'Institution' },
-                                { key: 'course_type', header: 'Course Type' },
-                                { key: 'course', header: 'Course' },
-                                // { key: 'description', header: 'Description' },
-                                // { key: 'website', header: 'Website' },
-                                // { key: 'student_qualification', header: 'Qualification' },
-                                // { key: 'course_affliation', header: 'Affiliation' },
-                                { key: 'duration', header: 'Duration' },
-                                { key: 'created_at', header: 'Created At' },
-
-                                { key: 'fees', header: 'Fees' },
-                                { key: 'status', header: 'Status' },
-                                { key: 'actions', header: 'Actions' }
+                                { key: 'course_mapping_id', header: 'ID', isSortable: true },
+                                { key: 'institution', header: 'Institution', isSortable: true },
+                                { key: 'course_type', header: 'Course Type', isSortable: true },
+                                { key: 'course', header: 'Course', isSortable: true },
+                                { key: 'duration', header: 'Duration', isSortable: true },
+                                { key: 'created_at', header: 'Created At', isSortable: true },
+                                { key: 'fees', header: 'Fees', isSortable: true },
+                                { key: 'status', header: 'Status', isSortable: true },
+                                { key: 'actions', header: 'Actions', isSortable: false }
                             ]}
                             isSortable
-                            sortRow={(a, b, { sortDirection, sortKey }) => {
-                                if (sortKey === 'fees') {
-                                    const aFees = parseFloat(a[sortKey].replace('₹', '').replace(/,/g, ''));
-                                    const bFees = parseFloat(b[sortKey].replace('₹', '').replace(/,/g, ''));
-                                    return sortDirection === 'asc' ? aFees - bFees : bFees - aFees;
-                                }
-                                
-                                if (sortKey === 'created_at') {
-                                    const aDate = new Date(a[sortKey]);
-                                    const bDate = new Date(b[sortKey]);
-                                    return sortDirection === 'asc' 
-                                        ? aDate.getTime() - bDate.getTime()
-                                        : bDate.getTime() - aDate.getTime();
-                                }
-                                
-                                if (sortKey === 'course_mapping_id') {
-                                    return sortDirection === 'asc' 
-                                        ? parseInt(a[sortKey]) - parseInt(b[sortKey])
-                                        : parseInt(b[sortKey]) - parseInt(a[sortKey]);
-                                }
-                                
-                                return sortDirection === 'asc'
-                                    ? a[sortKey].toString().localeCompare(b[sortKey].toString())
-                                    : b[sortKey].toString().localeCompare(a[sortKey].toString());
-                            }}
+                            sortRow={sortRow}
                         >
                             {({
                                 rows,
@@ -536,12 +541,11 @@ const AdminCourseMapping = ({ username }) => {
                                                     {headers.map(header => {
                                                         const headerProps = getHeaderProps({ 
                                                             header,
-                                                            onClick: header.key !== 'actions' ? () => handleSort(
+                                                            onClick: header.isSortable ? () => handleSort(
                                                                 header.key,
                                                                 sortDirection === 'asc' ? 'desc' : 'asc'
                                                             ) : undefined
                                                         });
-                                                        // Remove key from headerProps and pass it separately
                                                         const { key, ...otherProps } = headerProps;
                                                         return (
                                                             <TableHeader 
