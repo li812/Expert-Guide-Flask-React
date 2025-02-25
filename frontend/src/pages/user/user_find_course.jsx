@@ -40,8 +40,8 @@ const UserFindCourse = () => {
     // States for filters
     const [filters, setFilters] = useState({
         searchQuery: '',
-        courseTypes: [],
-        careers: [],
+        courseTypes: [], // Initialize as empty array
+        careers: [], // Initialize as empty array
         institutionTypes: [],
         feesRange: { min: 0, max: 1000000 },
         sortBy: 'relevance',
@@ -91,6 +91,46 @@ const UserFindCourse = () => {
         } catch (error) {
             console.error('Error fetching filter options:', error);
             setError('Failed to load filter options');
+        }
+    };
+
+    // Fix the fetchCoursesWithFilters function
+    const fetchCoursesWithFilters = async (page, currentFilters) => {
+        try {
+            setLoading(true);
+            const queryParams = new URLSearchParams({
+                page: page.toString(),
+                per_page: pageSize.toString(),
+                sort_by: currentFilters.sortBy,
+                search: encodeURIComponent(currentFilters.searchQuery?.trim() || ''),
+                // Fix the course types mapping
+                course_types: Array.isArray(currentFilters.courseTypes) ? 
+                    currentFilters.courseTypes.map(ct => ct.course_type_id).join(',') : '',
+                // Fix the careers mapping
+                careers: Array.isArray(currentFilters.careers) ? 
+                    currentFilters.careers.map(c => c.career_id).join(',') : '',
+                state: currentFilters.state || '',
+                district: currentFilters.district || '',
+                min_fees: currentFilters.feesRange?.min?.toString() || '0',
+                max_fees: currentFilters.feesRange?.max?.toString() || '1000000'
+            });
+
+            const response = await fetch(
+                `http://localhost:5001/api/courses/search?${queryParams}`,
+                { credentials: 'include' }
+            );
+
+            if (!response.ok) throw new Error('Failed to fetch courses');
+
+            const data = await response.json();
+            setCourseMappings(data.courses || []);
+            setTotalItems(data.total || 0);
+            setError(null);
+        } catch (err) {
+            console.error('Error:', err);
+            setError(err.message || 'Failed to fetch courses');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -225,14 +265,14 @@ const UserFindCourse = () => {
                     const queryParams = new URLSearchParams({
                         page: '1',
                         per_page: pageSize.toString(),
-                        search: searchTerm,
-                        course_types: filters.courseTypes.map(ct => ct.id).join(','),
-                        careers: filters.careers.map(c => c.id).join(','),
+                        sort_by: filters.sortBy,
+                        search: encodeURIComponent(searchTerm.trim()),
+                        course_types: filters.courseTypes.map(ct => ct.course_type_id).join(','),
+                        careers: filters.careers.map(c => c.career_id).join(','),
                         state: filters.state || '',
                         district: filters.district || '',
                         min_fees: filters.feesRange.min.toString(),
-                        max_fees: filters.feesRange.max.toString(),
-                        sort_by: filters.sortBy
+                        max_fees: filters.feesRange.max.toString()
                     });
 
                     const response = await fetch(
@@ -254,32 +294,39 @@ const UserFindCourse = () => {
                     setLoading(false);
                 }
             }, 500),
-        [pageSize, filters.courseTypes, filters.careers, filters.state, filters.district,
-            filters.feesRange.min, filters.feesRange.max, filters.sortBy]
+        [pageSize, filters]
     );
 
-    // Enhanced search handler with input validation
+    // Enhanced search handler with Enter key trigger
     const handleSearchChange = (e) => {
-        const searchTerm = e.target.value.trim();
-
-        // Update search query in filters immediately for UI
+        // Update search query in filters immediately for UI only
         setFilters(prev => ({ ...prev, searchQuery: e.target.value }));
+    };
 
-        // If search term is empty, reset to first page and fetch all courses
-        if (!searchTerm) {
+    // Add new handler for Enter key press
+    const handleSearchKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            const searchTerm = e.target.value.trim();
+
+            // If search term is empty, reset to first page and fetch all courses
+            if (!searchTerm) {
+                setCurrentPage(1);
+                fetchCourses(1);
+                return;
+            }
+
+            // If search term is too short, don't trigger search
+            if (searchTerm.length < 2) {
+                setError('Please enter at least 2 characters to search');
+                return;
+            }
+
             setCurrentPage(1);
-            fetchCourses(1);
-            return;
+            fetchCoursesWithFilters(1, {
+                ...filters,
+                searchQuery: searchTerm
+            });
         }
-
-        // If search term is too short, don't trigger search
-        if (searchTerm.length < 2) return;
-
-        // Cancel any pending debounced searches
-        debouncedSearch.cancel();
-
-        // Trigger debounced search
-        debouncedSearch(searchTerm);
     };
 
     // Cleanup debounced function on unmount
@@ -289,42 +336,73 @@ const UserFindCourse = () => {
         };
     }, [debouncedSearch]);
 
-    // Modified filter handlers
+    // Fix the handleCourseTypeChange function
     const handleCourseTypeChange = ({ selectedItems }) => {
-        setFilters(prev => ({ ...prev, courseTypes: selectedItems }));
+        // Ensure selectedItems is an array
+        const items = Array.isArray(selectedItems) ? selectedItems : [];
+        
+        // Update filters state
+        setFilters(prev => ({
+            ...prev,
+            courseTypes: items
+        }));
+        
         setCurrentPage(1);
-        fetchCourses(1);
+        
+        // Call fetchCoursesWithFilters with updated filters
+        fetchCoursesWithFilters(1, {
+            ...filters,
+            courseTypes: items
+        });
     };
 
+    // Fix the handleCareerChange function similarly
     const handleCareerChange = ({ selectedItems }) => {
-        setFilters(prev => ({ ...prev, careers: selectedItems }));
+        // Ensure selectedItems is an array
+        const items = Array.isArray(selectedItems) ? selectedItems : [];
+        
+        // Update filters state
+        setFilters(prev => ({
+            ...prev,
+            careers: items
+        }));
+        
         setCurrentPage(1);
-        fetchCourses(1);
+        
+        // Call fetchCoursesWithFilters with updated filters
+        fetchCoursesWithFilters(1, {
+            ...filters,
+            careers: items
+        });
     };
 
     const handleStateChange = ({ selectedItem }) => {
         setFilters(prev => ({
             ...prev,
             state: selectedItem,
-            district: null
+            district: null // Reset district when state changes
         }));
         setLocations(prev => ({
             ...prev,
             districts: selectedItem ? statesAndDistricts[selectedItem] || [] : []
         }));
         setCurrentPage(1);
-        fetchCourses(1);
+        fetchCoursesWithFilters(1, { 
+            ...filters, 
+            state: selectedItem,
+            district: null 
+        });
     };
 
     const handleDistrictChange = ({ selectedItem }) => {
         setFilters(prev => ({ ...prev, district: selectedItem }));
         setCurrentPage(1);
-        fetchCourses(1);
+        fetchCoursesWithFilters(1, filters);
     };
 
     const handleSortChange = (e) => {
         setFilters(prev => ({ ...prev, sortBy: e.target.value }));
-        fetchCourses(1);
+        fetchCoursesWithFilters(1, filters);
     };
 
     const handlePagination = ({ page, pageSize: newPageSize }) => {
@@ -332,7 +410,7 @@ const UserFindCourse = () => {
             setPageSize(newPageSize);
         }
         setCurrentPage(page);
-        fetchCourses(page);
+        fetchCoursesWithFilters(page, filters);
     };
 
     // Update fees range handler
@@ -341,7 +419,7 @@ const UserFindCourse = () => {
             ...prev,
             feesRange: { min: value[0], max: value[1] }
         }));
-        fetchCourses(1);
+        fetchCoursesWithFilters(1, filters);
     };
 
     // Initial data load
@@ -350,22 +428,6 @@ const UserFindCourse = () => {
         fetchCourses(1);
     }, []);
 
-    // Filter handlers
-    const handleMinFeesChange = (e) => {
-        const value = parseInt(e.target.value || '0', 10);
-        setFilters(prev => ({
-            ...prev,
-            feesRange: { ...prev.feesRange, min: value }
-        }));
-    };
-
-    const handleMaxFeesChange = (e) => {
-        const value = parseInt(e.target.value || '0', 10);
-        setFilters(prev => ({
-            ...prev,
-            feesRange: { ...prev.feesRange, max: value }
-        }));
-    };
 
     const handleViewDetails = (mapping) => {
         setSelectedCourse(mapping);
@@ -498,6 +560,7 @@ const UserFindCourse = () => {
                                 placeholder="Search by course name, institution..."
                                 value={filters.searchQuery}
                                 onChange={handleSearchChange}
+                                onKeyPress={handleSearchKeyPress}
                                 size="lg"
                                 className="search-input"
                             />

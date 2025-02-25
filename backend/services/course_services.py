@@ -86,18 +86,24 @@ def get_filtered_courses(filters, page=1, per_page=12):
                 )
             )
 
-        # Apply course type filter
+        # Apply course type filter with validation
         if filters.get('course_types'):
-            course_type_ids = [int(ct_id) for ct_id in filters['course_types'].split(',') if ct_id]
-            if course_type_ids:
-                query = query.filter(CourseType.course_type_id.in_(course_type_ids))
+            try:
+                course_type_ids = [int(ct_id) for ct_id in filters['course_types'].split(',') if ct_id]
+                if course_type_ids:
+                    query = query.filter(CourseType.course_type_id.in_(course_type_ids))
+            except (ValueError, AttributeError):
+                pass
 
-        # Apply career filter
+        # Apply career filter with validation
         if filters.get('careers'):
-            career_ids = [int(c_id) for c_id in filters['careers'].split(',') if c_id]
-            if career_ids:
-                query = query.join(Careers, Course.career_id == Careers.career_id)\
-                           .filter(Course.career_id.in_(career_ids))
+            try:
+                career_ids = [int(c_id) for c_id in filters['careers'].split(',') if c_id]
+                if career_ids:
+                    query = query.join(Careers, Course.career_id == Careers.career_id)\
+                               .filter(Course.career_id.in_(career_ids))
+            except (ValueError, AttributeError):
+                pass
 
         # Apply location filters
         if filters.get('state'):
@@ -123,11 +129,11 @@ def get_filtered_courses(filters, page=1, per_page=12):
         elif sort_by == 'fees_high':
             query = query.order_by(CourseMapping.fees.desc())
         elif sort_by == 'rating':
-            # Add rating sort logic
             query = query.outerjoin(CourseLikesDislikes)\
                 .group_by(CourseMapping.course_mapping_id)\
                 .order_by(
-                    func.count(case([(CourseLikesDislikes.is_like == True, 1)], else_=0)).desc()
+                    (func.count(case([(CourseLikesDislikes.is_like == True, 1)], else_=0)) * 1.0 / 
+                    func.greatest(func.count(CourseLikesDislikes.id), 1)).desc()
                 )
 
         # Get total and paginate
