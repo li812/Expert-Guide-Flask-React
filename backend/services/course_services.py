@@ -241,6 +241,7 @@ def update_course_rating(mapping_id, user_id, is_like):
 
         db.session.commit()
         
+        # Return updated counts
         return {
             "likes": get_course_likes(mapping_id),
             "dislikes": get_course_dislikes(mapping_id)

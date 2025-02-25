@@ -69,6 +69,9 @@ const UserFindCourse = () => {
     const [viewInstituteModalOpen, setViewInstituteModalOpen] = useState(false);
     const [selectedInstitute, setSelectedInstitute] = useState(null);
 
+    // Add optimistic update state
+    const [pendingLikes, setPendingLikes] = useState({});
+
     // Fetch filter options from backend
     const fetchFilterOptions = async () => {
         try {
@@ -126,9 +129,27 @@ const UserFindCourse = () => {
         }
     };
 
-    // Handle course likes/dislikes
+    // Modified handleLikeDislike function
     const handleLikeDislike = async (mappingId, isLike) => {
         try {
+            // Optimistically update the UI
+            setCourseMappings(prevMappings => prevMappings.map(mapping => {
+                if (mapping.course_mapping_id === mappingId) {
+                    return {
+                        ...mapping,
+                        likes: isLike ? mapping.likes + 1 : mapping.likes,
+                        dislikes: !isLike ? mapping.dislikes + 1 : mapping.dislikes
+                    };
+                }
+                return mapping;
+            }));
+
+            // Track pending like/dislike
+            setPendingLikes(prev => ({
+                ...prev,
+                [mappingId]: true
+            }));
+
             const response = await fetch(`http://localhost:5001/api/courses/${mappingId}/${isLike ? 'like' : 'dislike'}`, {
                 method: 'POST',
                 credentials: 'include',
@@ -139,11 +160,41 @@ const UserFindCourse = () => {
 
             if (!response.ok) throw new Error('Failed to update rating');
 
-            // Refresh the courses to get updated likes/dislikes
-            fetchCourses(currentPage);
+            const data = await response.json();
+
+            // Update only the specific course's likes/dislikes
+            setCourseMappings(prevMappings => prevMappings.map(mapping => {
+                if (mapping.course_mapping_id === mappingId) {
+                    return {
+                        ...mapping,
+                        likes: data.likes,
+                        dislikes: data.dislikes
+                    };
+                }
+                return mapping;
+            }));
+
         } catch (error) {
             console.error('Error updating rating:', error);
             setError('Failed to update rating');
+            
+            // Revert optimistic update on error
+            setCourseMappings(prevMappings => prevMappings.map(mapping => {
+                if (mapping.course_mapping_id === mappingId) {
+                    return {
+                        ...mapping,
+                        likes: mapping.likes - (isLike ? 1 : 0),
+                        dislikes: mapping.dislikes - (!isLike ? 1 : 0)
+                    };
+                }
+                return mapping;
+            }));
+        } finally {
+            // Clear pending state
+            setPendingLikes(prev => ({
+                ...prev,
+                [mappingId]: false
+            }));
         }
     };
 
@@ -440,6 +491,7 @@ const UserFindCourse = () => {
                                                 renderIcon={ThumbsUp}
                                                 iconDescription="Like"
                                                 onClick={() => handleLikeDislike(mapping.course_mapping_id, true)}
+                                                disabled={pendingLikes[mapping.course_mapping_id]}
                                             >
                                                 {mapping.likes}
                                             </Button>
@@ -449,6 +501,7 @@ const UserFindCourse = () => {
                                                 renderIcon={ThumbsDown}
                                                 iconDescription="Dislike"
                                                 onClick={() => handleLikeDislike(mapping.course_mapping_id, false)}
+                                                disabled={pendingLikes[mapping.course_mapping_id]}
                                             >
                                                 {mapping.dislikes}
                                             </Button>
