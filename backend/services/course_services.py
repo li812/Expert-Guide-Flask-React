@@ -65,12 +65,12 @@ def get_course_mapping_details(mapping_id):
 
 
 def get_filtered_courses(filters, page=1, per_page=12):
-    """Get filtered and paginated course mappings"""
     try:
         query = CourseMapping.query\
             .join(Institution)\
             .join(Course)\
-            .join(CourseType)
+            .join(CourseType)\
+            .join(Careers, Course.career_id == Careers.career_id)  # Add careers join
 
         # Apply filters
         if filters.get('search'):
@@ -83,69 +83,67 @@ def get_filtered_courses(filters, page=1, per_page=12):
                 )
             )
 
+        # Fix course types filter
         if filters.get('course_types'):
-            query = query.filter(CourseType.course_type_id.in_(filters['course_types']))
+            course_type_ids = [int(id) for id in filters['course_types'].split(',') if id]
+            if course_type_ids:
+                query = query.filter(CourseType.course_type_id.in_(course_type_ids))
 
+        # Fix careers filter
         if filters.get('careers'):
-            query = query.filter(Course.career_id.in_(filters['careers']))
+            career_ids = [int(id) for id in filters['careers'].split(',') if id]
+            if career_ids:
+                query = query.filter(Course.career_id.in_(career_ids))
 
+        # Fix state and district filters
         if filters.get('state'):
             query = query.filter(Institution.state == filters['state'])
-            
-        if filters.get('district'):
-            query = query.filter(Institution.district == filters['district'])
+            if filters.get('district'):
+                query = query.filter(Institution.district == filters['district'])
 
+        # Fix fees range filter
         if filters.get('min_fees') is not None:
-            query = query.filter(CourseMapping.fees >= filters['min_fees'])
+            try:
+                min_fees = float(filters['min_fees'])
+                query = query.filter(CourseMapping.fees >= min_fees)
+            except (ValueError, TypeError):
+                pass
 
         if filters.get('max_fees') is not None:
-            query = query.filter(CourseMapping.fees <= filters['max_fees'])
+            try:
+                max_fees = float(filters['max_fees'])
+                query = query.filter(CourseMapping.fees <= max_fees)
+            except (ValueError, TypeError):
+                pass
 
-        # Apply sorting
+        # Fix sorting
         sort_by = filters.get('sort_by', 'relevance')
         if sort_by == 'fees_low':
             query = query.order_by(CourseMapping.fees.asc())
         elif sort_by == 'fees_high':
             query = query.order_by(CourseMapping.fees.desc())
         elif sort_by == 'rating':
-            # Join with likes table and order by likes ratio
             query = query.outerjoin(CourseLikesDislikes)\
-                .group_by(CourseMapping.course_mapping_id)\
+                .group_by(
+                    CourseMapping.course_mapping_id,
+                    Institution.institution,
+                    Course.course,
+                    CourseType.course_type
+                )\
                 .order_by(
-                    db.func.count(db.case([(CourseLikesDislikes.is_like == True, 1)])).desc()
+                    db.func.coalesce(
+                        db.func.sum(db.case([(CourseLikesDislikes.is_like == True, 1)], else_=0)) /
+                        db.func.nullif(db.func.count(CourseLikesDislikes.id), 0),
+                        0
+                    ).desc()
                 )
 
         # Get total count and paginate
         total = query.count()
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
 
-        # Format response
-        mappings = []
-        for mapping in paginated.items:
-            mappings.append({
-                "course_mapping_id": mapping.course_mapping_id,
-                "institution": {
-                    "name": mapping.institution.institution,
-                    "type": mapping.institution.institution_type.institution_type,
-                    "logoPicture": mapping.institution.logoPicture
-                },
-                "course": {
-                    "name": mapping.course.course,
-                    "type": mapping.course_type.course_type,
-                    "description": mapping.course.course_description
-                },
-                "description": mapping.description,
-                "fees": mapping.fees,
-                "duration": mapping.duration,
-                "likes": get_course_likes(mapping.course_mapping_id),
-                "dislikes": get_course_dislikes(mapping.course_mapping_id),
-                "website": mapping.website,
-                "student_qualification": mapping.student_qualification,
-                "course_affliation": mapping.course_affliation
-            })
-
         return {
-            "courses": mappings,
+            "courses": [format_course_mapping(mapping) for mapping in paginated.items],
             "total": total,
             "pages": paginated.pages,
             "current_page": page
@@ -154,6 +152,31 @@ def get_filtered_courses(filters, page=1, per_page=12):
     except Exception as e:
         print(f"Error in get_filtered_courses: {str(e)}")
         return {"error": str(e)}
+
+def format_course_mapping(mapping):
+    """Helper function to format course mapping data"""
+    return {
+        "course_mapping_id": mapping.course_mapping_id,
+        "institution": {
+            "id": mapping.institution.institution_id,
+            "name": mapping.institution.institution,
+            "type": mapping.institution.institution_type.institution_type,
+            "logoPicture": mapping.institution.logoPicture
+        },
+        "course": {
+            "name": mapping.course.course,
+            "type": mapping.course_type.course_type,
+            "description": mapping.course.course_description
+        },
+        "description": mapping.description,
+        "fees": mapping.fees,
+        "duration": mapping.duration,
+        "likes": get_course_likes(mapping.course_mapping_id),
+        "dislikes": get_course_dislikes(mapping.course_mapping_id),
+        "website": mapping.website,
+        "student_qualification": mapping.student_qualification,
+        "course_affliation": mapping.course_affliation
+    }
 
 def get_course_filters():
     """Get all available filter options"""
