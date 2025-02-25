@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
     Grid, 
     Column, 
@@ -27,7 +27,8 @@ import {
     SelectItem,
     NumberInput,
     Tag,
-    Pagination
+    Pagination,
+    Link
 } from '@carbon/react';
 import { Add, TrashCan, Edit, View } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -69,6 +70,10 @@ const AdminCourseMapping = ({ username }) => {
         status: 'active'
     });
 
+    const [loadingInstitutes, setLoadingInstitutes] = useState(false);
+    const [loadingCourses, setLoadingCourses] = useState(false);
+    const [loadingCourseTypes, setLoadingCourseTypes] = useState(false);
+
     useEffect(() => {
         fetchMappings();
         fetchInstitutes();
@@ -76,13 +81,12 @@ const AdminCourseMapping = ({ username }) => {
         fetchCourseTypes();
     }, [currentPage, pageSize, sortKey, sortDirection]);
 
-    const fetchMappings = async () => {
+    const fetchMappings = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch(
                 `http://localhost:5001/api/admin/course-mappings?page=${currentPage}&per_page=${pageSize}&sort=${sortKey}&direction=${sortDirection}`,
                 {
-                    method: 'GET',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                 }
@@ -94,24 +98,32 @@ const AdminCourseMapping = ({ username }) => {
             }
 
             const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
             setCourseMappings(data.mappings || []);
             setTotalItems(data.total || 0);
         } catch (error) {
-            setError('Error fetching course mappings');
+            setError('Error fetching course mappings: ' + error.message);
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, pageSize, sortKey, sortDirection, navigate]);
 
     const fetchInstitutes = async () => {
         try {
+            setLoadingInstitutes(true);
             const response = await fetch('http://localhost:5001/api/admin/institutes', {
                 credentials: 'include'
             });
             const data = await response.json();
+            if (data.error) throw new Error(data.error);
             setInstitutes(data.institutes || []);
         } catch (error) {
-            console.error('Error fetching institutes:', error);
+            setError('Error fetching institutes: ' + error.message);
+        } finally {
+            setLoadingInstitutes(false);
         }
     };
 
@@ -150,22 +162,22 @@ const AdminCourseMapping = ({ username }) => {
         if (!mapping.course_id) {
             return 'Please select a course';
         }
-        if (!mapping.description || mapping.description.trim().length === 0) {
+        if (!mapping.description?.trim()) {
             return 'Description is required';
         }
         if (!mapping.fees || isNaN(mapping.fees) || parseFloat(mapping.fees) <= 0) {
             return 'Please enter valid fees';
         }
-        if (!mapping.website || mapping.website.trim().length === 0) {
+        if (!mapping.website?.trim()) {
             return 'Website URL is required';
         }
-        if (!mapping.student_qualification || mapping.student_qualification.trim().length === 0) {
+        if (!mapping.student_qualification?.trim()) {
             return 'Student qualification is required';
         }
-        if (!mapping.course_affliation || mapping.course_affliation.trim().length === 0) {
+        if (!mapping.course_affliation?.trim()) {
             return 'Course affiliation is required';
         }
-        if (!mapping.duration || mapping.duration.trim().length === 0) {
+        if (!mapping.duration?.trim()) {
             return 'Duration is required';
         }
         return null;
@@ -341,6 +353,17 @@ const AdminCourseMapping = ({ username }) => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
     return (
         <Grid className="dashboard">
             <Column lg={16} md={8} sm={4}>
@@ -389,10 +412,21 @@ const AdminCourseMapping = ({ username }) => {
                         <DataTable
                             rows={courseMappings.map(mapping => ({
                                 id: String(mapping.course_mapping_id),
+                                course_mapping_id: String(mapping.course_mapping_id),
                                 institution: institutes.find(i => i.institution_id === mapping.institution_id)?.institution || '-',
+                                course_type: courseTypes.find(ct => ct.course_type_id === mapping.course_type_id)?.course_type || '-',
                                 course: courses.find(c => c.course_id === mapping.course_id)?.course || '-',
-                                fees: `₹${mapping.fees}`,
+                                description: mapping.description,
+                                fees: `₹${mapping.fees.toLocaleString('en-IN')}`,
+                                website: (
+                                    <Link href={mapping.website} target="_blank">
+                                        {mapping.website}
+                                    </Link>
+                                ),
+                                student_qualification: mapping.student_qualification,
+                                course_affliation: mapping.course_affliation,
                                 duration: mapping.duration,
+                                created_at: formatDate(mapping.created_at),
                                 status: (
                                     <Tag type={mapping.status === 'active' ? 'green' : 'red'}>
                                         {mapping.status}
@@ -435,15 +469,47 @@ const AdminCourseMapping = ({ username }) => {
                                 )
                             }))}
                             headers={[
+                                { key: 'course_mapping_id', header: 'ID' },
                                 { key: 'institution', header: 'Institution' },
+                                { key: 'course_type', header: 'Course Type' },
                                 { key: 'course', header: 'Course' },
-                                { key: 'fees', header: 'Fees' },
+                                // { key: 'description', header: 'Description' },
+                                // { key: 'website', header: 'Website' },
+                                // { key: 'student_qualification', header: 'Qualification' },
+                                // { key: 'course_affliation', header: 'Affiliation' },
                                 { key: 'duration', header: 'Duration' },
+                                { key: 'created_at', header: 'Created At' },
+
+                                { key: 'fees', header: 'Fees' },
                                 { key: 'status', header: 'Status' },
                                 { key: 'actions', header: 'Actions' }
                             ]}
                             isSortable
-                            sortRow={sortRow}
+                            sortRow={(a, b, { sortDirection, sortKey }) => {
+                                if (sortKey === 'fees') {
+                                    const aFees = parseFloat(a[sortKey].replace('₹', '').replace(/,/g, ''));
+                                    const bFees = parseFloat(b[sortKey].replace('₹', '').replace(/,/g, ''));
+                                    return sortDirection === 'asc' ? aFees - bFees : bFees - aFees;
+                                }
+                                
+                                if (sortKey === 'created_at') {
+                                    const aDate = new Date(a[sortKey]);
+                                    const bDate = new Date(b[sortKey]);
+                                    return sortDirection === 'asc' 
+                                        ? aDate.getTime() - bDate.getTime()
+                                        : bDate.getTime() - aDate.getTime();
+                                }
+                                
+                                if (sortKey === 'course_mapping_id') {
+                                    return sortDirection === 'asc' 
+                                        ? parseInt(a[sortKey]) - parseInt(b[sortKey])
+                                        : parseInt(b[sortKey]) - parseInt(a[sortKey]);
+                                }
+                                
+                                return sortDirection === 'asc'
+                                    ? a[sortKey].toString().localeCompare(b[sortKey].toString())
+                                    : b[sortKey].toString().localeCompare(a[sortKey].toString());
+                            }}
                         >
                             {({
                                 rows,

@@ -1369,6 +1369,28 @@ def get_all_course_mappings_route():
 def add_course_mapping_route():
     try:
         mapping_data = request.json
+        
+        # Validate required fields
+        required_fields = ['institution_id', 'course_type_id', 'course_id', 'description', 
+                         'fees', 'website', 'student_qualification', 'course_affliation', 
+                         'duration']
+        
+        for field in required_fields:
+            if field not in mapping_data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Validate relationships
+        institution = Institution.query.get(mapping_data['institution_id'])
+        course = Course.query.get(mapping_data['course_id'])
+        course_type = CourseType.query.get(mapping_data['course_type_id'])
+
+        if not institution:
+            return jsonify({"error": "Invalid institution_id"}), 400
+        if not course:
+            return jsonify({"error": "Invalid course_id"}), 400
+        if not course_type:
+            return jsonify({"error": "Invalid course_type_id"}), 400
+
         result = add_course_mapping(mapping_data)
 
         if "error" in result:
@@ -1376,6 +1398,7 @@ def add_course_mapping_route():
             
         return jsonify(result), 201
     except Exception as e:
+        print(f"Error in add_course_mapping_route: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @api.route('/api/admin/course-mappings/<int:mapping_id>', methods=['PUT'])
@@ -1404,4 +1427,4 @@ def delete_course_mapping_route(mapping_id):
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+

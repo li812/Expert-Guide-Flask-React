@@ -915,18 +915,23 @@ def get_all_institutes(page=1, per_page=10, sort_key='institution_id', sort_dire
 def get_all_course_mappings(page=1, per_page=10, sort_key='course_mapping_id', sort_direction='asc'):
     """Get all course mappings with pagination and sorting"""
     try:
-        # Create base query
-        query = CourseMapping.query
+        # Create base query with joins
+        query = CourseMapping.query\
+            .join(Institution)\
+            .join(Course)\
+            .join(CourseType)
 
         # Apply sorting
-        if sort_key == 'course_mapping_id':
-            sort_column = CourseMapping.course_mapping_id
-        elif sort_key == 'institution_id':
-            sort_column = CourseMapping.institution_id
-        elif sort_key == 'course_id':
-            sort_column = CourseMapping.course_id
+        if sort_key == 'institution':
+            sort_column = Institution.institution
+        elif sort_key == 'course':
+            sort_column = Course.course
+        elif sort_key == 'course_type':
+            sort_column = CourseType.course_type
         elif sort_key == 'fees':
             sort_column = CourseMapping.fees
+        elif sort_key == 'created_at':
+            sort_column = CourseMapping.created_at
         else:
             sort_column = getattr(CourseMapping, sort_key, CourseMapping.course_mapping_id)
 
@@ -935,17 +940,21 @@ def get_all_course_mappings(page=1, per_page=10, sort_key='course_mapping_id', s
         else:
             query = query.order_by(sort_column.asc())
 
-        # Get total count before pagination
+        # Get total count
         total = query.count()
 
         # Apply pagination
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
 
-        # Format response
+        # Format response with related data
         mappings_list = [{
             'course_mapping_id': cm.course_mapping_id,
             'institution_id': cm.institution_id,
+            'course_type_id': cm.course_type_id,
             'course_id': cm.course_id,
+            'institution': cm.institution.institution,
+            'course_type': cm.course.course_type.course_type,
+            'course': cm.course.course,
             'description': cm.description,
             'fees': cm.fees,
             'website': cm.website,
@@ -953,8 +962,7 @@ def get_all_course_mappings(page=1, per_page=10, sort_key='course_mapping_id', s
             'course_affliation': cm.course_affliation,
             'duration': cm.duration,
             'status': cm.status,
-            'created_at': cm.created_at.isoformat() if cm.created_at else None,
-            'updated_at': cm.updated_at.isoformat() if cm.updated_at else None
+            'created_at': cm.created_at.strftime('%Y-%m-%d %H:%M:%S')
         } for cm in paginated.items]
 
         return {
@@ -1080,9 +1088,9 @@ def update_course_mapping(mapping_id, mapping_data):
             'student_qualification': mapping.student_qualification,
             'course_affliation': mapping.course_affliation,
             'duration': mapping.duration,
-            'status': mapping.status,
             'created_at': mapping.created_at.isoformat(),
-            'updated_at': mapping.updated_at.isoformat()
+            'updated_at': mapping.updated_at.isoformat(),
+            'status': mapping.status,
         }
     except Exception as e:
         db.session.rollback()
