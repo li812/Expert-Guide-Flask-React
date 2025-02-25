@@ -177,7 +177,7 @@ const UserFindCourse = () => {
         } catch (error) {
             console.error('Error updating rating:', error);
             setError('Failed to update rating');
-            
+
             // Revert optimistic update on error
             setCourseMappings(prevMappings => prevMappings.map(mapping => {
                 if (mapping.course_mapping_id === mappingId) {
@@ -236,14 +236,14 @@ const UserFindCourse = () => {
                     setLoading(false);
                 }
             }, 500),
-        [pageSize, filters.courseTypes, filters.careers, filters.state, filters.district, 
-         filters.feesRange.min, filters.feesRange.max, filters.sortBy]
+        [pageSize, filters.courseTypes, filters.careers, filters.state, filters.district,
+            filters.feesRange.min, filters.feesRange.max, filters.sortBy]
     );
 
     // Enhanced search handler with input validation
     const handleSearchChange = (e) => {
         const searchTerm = e.target.value.trim();
-        
+
         // Update search query in filters immediately for UI
         setFilters(prev => ({ ...prev, searchQuery: e.target.value }));
 
@@ -396,87 +396,113 @@ const UserFindCourse = () => {
         <Grid className="find-course-container">
             {/* Top Filters Section */}
 
-            <Column lg={16} md={8} sm={4}>
-                <h2>Find Courses</h2>
-                <Tile className="filters-section">
-                    <Grid narrow>
 
+                <Column lg={16} md={8} sm={4}>
+                    <h2 className="search-filter-title">Find Courses</h2>
+                    <Tile className="filters-section">
+                        <Grid narrow>
+                            <Column lg={4} md={4} sm={4}>
+                                <FilterableMultiSelect
+                                    id="course-types-filter"
+                                    titleText="Course Types"
+                                    items={courseTypes}
+                                    itemToString={(item) => (item ? item.course_type : '')}
+                                    selectedItems={filters.courseTypes}
+                                    onChange={handleCourseTypeChange}
+                                />
+                            </Column>
 
-                        <Column lg={4} md={4} sm={4}>
-                            <FilterableMultiSelect
-                                id="course-types-filter"
-                                titleText="Course Types"
-                                items={courseTypes}
-                                itemToString={(item) => (item ? item.course_type : '')}
-                                selectedItems={filters.courseTypes}
-                                onChange={handleCourseTypeChange}
-                            />
-                        </Column>
+                            <Column lg={3} md={4} sm={4}>
+                                <FilterableMultiSelect
+                                    id="careers-filter"
+                                    titleText="Careers"
+                                    items={careers}
+                                    itemToString={(item) => (item ? item.career : '')}
+                                    selectedItems={filters.careers}
+                                    onChange={handleCareerChange}
+                                />
+                            </Column>
 
-                        <Column lg={3} md={4} sm={4}>
-                            <FilterableMultiSelect
-                                id="careers-filter"
-                                titleText="Careers"
-                                items={careers}
-                                itemToString={(item) => (item ? item.career : '')}
-                                selectedItems={filters.careers}
-                                onChange={handleCareerChange}
-                            />
-                        </Column>
+                            <Column lg={3} md={4} sm={4}>
+                                <ComboBox
+                                    id="state-filter"
+                                    titleText="State"
+                                    items={locations.states}
+                                    selectedItem={filters.state}
+                                    onChange={handleStateChange}
+                                    placeholder="Select state"
+                                />
+                            </Column>
 
-                        <Column lg={3} md={4} sm={4}>
-                            <ComboBox
-                                id="state-filter"
-                                titleText="State"
-                                items={locations.states}
-                                selectedItem={filters.state}
-                                onChange={handleStateChange}
-                                placeholder="Select state"
-                            />
-                        </Column>
+                            <Column lg={3} md={4} sm={4}>
+                                <ComboBox
+                                    id="district-filter"
+                                    titleText="District"
+                                    items={locations.districts}
+                                    selectedItem={filters.district}
+                                    onChange={handleDistrictChange}
+                                    placeholder="Select district"
+                                    disabled={!filters.state}  // Disable if no state selected
+                                />
+                            </Column>
 
-                        <Column lg={3} md={4} sm={4}>
-                            <ComboBox
-                                id="district-filter"
-                                titleText="District"
-                                items={locations.districts}
-                                selectedItem={filters.district}
-                                onChange={handleDistrictChange}
-                                placeholder="Select district"
-                                disabled={!filters.state}  // Disable if no state selected
-                            />
-                        </Column>
+                            <Column lg={3} md={8} sm={4}>
+                                <Select
+                                    id="sort-by"
+                                    labelText="Sort by"
+                                    value={filters.sortBy}
+                                    onChange={handleSortChange}
+                                >
+                                    <SelectItem value="relevance" text="Most Relevant" />
+                                    <SelectItem value="fees_high" text="Fees: Low to High" />
+                                    <SelectItem value="fees_low" text="Fees: High to Low" />
+                                    <SelectItem value="rating" text="Rating" />
+                                </Select>
+                            </Column>
+                        </Grid>
+                    </Tile>
+                </Column>
 
-                        <Column lg={3} md={8} sm={4}>
-                            <Select
-                                id="sort-by"
-                                labelText="Sort by"
-                                value={filters.sortBy}
-                                onChange={handleSortChange}
-                            >
-                                <SelectItem value="relevance" text="Most Relevant" />
-                                <SelectItem value="fees_high" text="Fees: Low to High" />
-                                <SelectItem value="fees_low" text="Fees: High to Low" />
-                                <SelectItem value="rating" text="Rating" />
-                            </Select>
-                        </Column>
-                    </Grid>
-                </Tile>
-                <br></br><br></br>
-            </Column>
-            
-            <Column lg={16} md={8} sm={4}>
-                <Search
-                    id="search-courses"
-                    labelText="Search courses"
-                    placeholder="Search by course name, institution..."
-                    value={filters.searchQuery}
-                    onChange={handleSearchChange}
-                    size="lg"
-                />
-                <br></br><br></br>
-            </Column>
+                <Column lg={16} md={8} sm={4}>
 
+                        <Grid>
+                            <Column lg={14} md={6} sm={3}>
+                                <Search
+                                    id="search-courses"
+                                    labelText="Search courses"
+                                    placeholder="Search by course name, institution..."
+                                    value={filters.searchQuery}
+                                    onChange={handleSearchChange}
+                                    size="lg"
+                                    className="search-input"
+                                />
+                            </Column>
+                            <Column lg={2} md={2} sm={1}>
+                                <Button
+                                    kind="primary"
+                                    size="lg"
+                                    renderIcon={ThumbsDown}
+                                    className="reset-button"
+                                    onClick={() => {
+                                        setFilters({
+                                            searchQuery: '',
+                                            courseTypes: [],
+                                            careers: [],
+                                            institutionTypes: [],
+                                            feesRange: { min: 0, max: 1000000 },
+                                            sortBy: 'relevance',
+                                            state: null,
+                                            district: null
+                                        });
+                                        fetchCourses(1);
+                                    }}
+                                >
+                                    Reset
+                                </Button>
+                            </Column>
+                        </Grid>
+
+                </Column>
 
 
             {/* Main Content */}
