@@ -256,46 +256,7 @@ const UserFindCourse = () => {
         }
     };
 
-    // Memoize the debounced search function
-    const debouncedSearch = useMemo(
-        () =>
-            debounce(async (searchTerm) => {
-                try {
-                    setLoading(true);
-                    const queryParams = new URLSearchParams({
-                        page: '1',
-                        per_page: pageSize.toString(),
-                        sort_by: filters.sortBy,
-                        search: encodeURIComponent(searchTerm.trim()),
-                        course_types: filters.courseTypes.map(ct => ct.course_type_id).join(','),
-                        careers: filters.careers.map(c => c.career_id).join(','),
-                        state: filters.state || '',
-                        district: filters.district || '',
-                        min_fees: filters.feesRange.min.toString(),
-                        max_fees: filters.feesRange.max.toString()
-                    });
 
-                    const response = await fetch(
-                        `http://localhost:5001/api/courses/search?${queryParams}`,
-                        { credentials: 'include' }
-                    );
-
-                    if (!response.ok) throw new Error('Search failed');
-
-                    const data = await response.json();
-                    setCourseMappings(data.courses || []);
-                    setTotalItems(data.total || 0);
-                    setCurrentPage(1);
-                    setError(null);
-                } catch (err) {
-                    console.error('Search error:', err);
-                    setError('Search failed. Please try again.');
-                } finally {
-                    setLoading(false);
-                }
-            }, 500),
-        [pageSize, filters]
-    );
 
     // Enhanced search handler with Enter key trigger
     const handleSearchChange = (e) => {
@@ -329,12 +290,6 @@ const UserFindCourse = () => {
         }
     };
 
-    // Cleanup debounced function on unmount
-    useEffect(() => {
-        return () => {
-            debouncedSearch.cancel();
-        };
-    }, [debouncedSearch]);
 
     // Fix the handleCourseTypeChange function
     const handleCourseTypeChange = ({ selectedItems }) => {
