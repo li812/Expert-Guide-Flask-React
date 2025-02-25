@@ -133,6 +133,7 @@ class CourseMapping(db.Model):
     __tablename__ = 'course_mapping'
     course_mapping_id = db.Column(db.Integer, primary_key=True)
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), nullable=False)
+    course_type_id = db.Column(db.Integer, db.ForeignKey('course_type.course_type_id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('course.course_id'), nullable=False)
     description = db.Column(db.Text, nullable=False)
     fees = db.Column(db.Float, nullable=False)

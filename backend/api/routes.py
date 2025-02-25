@@ -56,8 +56,7 @@ from services.admin_services import (
     delete_course_mapping,
     update_course_mapping,
     add_course_mapping,
-    get_all_course_mappings,
-    get_course_mapping_details
+    get_all_course_mappings
 )
 from services.question_services import (
     get_all_questions,
@@ -1406,32 +1405,3 @@ def delete_course_mapping_route(mapping_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    
-@api.route('/api/admin/course-mappings/<int:mapping_id>', methods=['GET'])
-@check_session(required_type=1)
-def get_course_mapping_details(mapping_id):
-    try:
-        mapping = CourseMapping.query.get_or_404(mapping_id)
-        return jsonify({
-            'course_mapping_id': mapping.course_mapping_id,
-            'institution': {
-                'institution_id': mapping.institution.institution_id,
-                'institution': mapping.institution.institution
-            },
-            'course': {
-                'course_id': mapping.course.course_id,
-                'course': mapping.course.course
-            },
-            'description': mapping.description,
-            'fees': mapping.fees,
-            'website': mapping.website,
-            'student_qualification': mapping.student_qualification,
-            'course_affliation': mapping.course_affliation,
-            'duration': mapping.duration,
-            'status': mapping.status,
-            'created_at': mapping.created_at.isoformat(),
-            'updated_at': mapping.updated_at.isoformat()
-        })
-    except Exception as e:
-        print(f"Error fetching course mapping details: {str(e)}")
-        return jsonify({'error': str(e)}), 500

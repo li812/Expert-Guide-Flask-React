@@ -52,8 +52,13 @@ const AdminCourseMapping = ({ username }) => {
     const navigate = useNavigate();
     const [selectedMappingId, setSelectedMappingId] = useState(null);
 
+    const [courseTypes, setCourseTypes] = useState([]);
+    const [selectedCourseType, setSelectedCourseType] = useState('');
+    const [filteredCourses, setFilteredCourses] = useState([]);
+
     const [newMapping, setNewMapping] = useState({
         institution_id: '',
+        course_type_id: '',
         course_id: '',
         description: '',
         fees: '',
@@ -68,6 +73,7 @@ const AdminCourseMapping = ({ username }) => {
         fetchMappings();
         fetchInstitutes();
         fetchCourses();
+        fetchCourseTypes();
     }, [currentPage, pageSize, sortKey, sortDirection]);
 
     const fetchMappings = async () => {
@@ -121,15 +127,47 @@ const AdminCourseMapping = ({ username }) => {
         }
     };
 
+    const fetchCourseTypes = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/admin/course-types', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            setCourseTypes(data.courseTypes || []);
+        } catch (error) {
+            console.error('Error fetching course types:', error);
+            setError('Error fetching course types');
+        }
+    };
+
     const validateMapping = (mapping) => {
-        if (!mapping.institution_id) return 'Institution is required';
-        if (!mapping.course_id) return 'Course is required';
-        if (!mapping.description) return 'Description is required';
-        if (!mapping.fees || mapping.fees <= 0) return 'Valid fees amount is required';
-        if (!mapping.website) return 'Website is required';
-        if (!mapping.student_qualification) return 'Student qualification is required';
-        if (!mapping.course_affliation) return 'Course affiliation is required';
-        if (!mapping.duration) return 'Duration is required';
+        if (!mapping.institution_id) {
+            return 'Please select an institution';
+        }
+        if (!mapping.course_type_id) {
+            return 'Please select a course type';
+        }
+        if (!mapping.course_id) {
+            return 'Please select a course';
+        }
+        if (!mapping.description || mapping.description.trim().length === 0) {
+            return 'Description is required';
+        }
+        if (!mapping.fees || isNaN(mapping.fees) || parseFloat(mapping.fees) <= 0) {
+            return 'Please enter valid fees';
+        }
+        if (!mapping.website || mapping.website.trim().length === 0) {
+            return 'Website URL is required';
+        }
+        if (!mapping.student_qualification || mapping.student_qualification.trim().length === 0) {
+            return 'Student qualification is required';
+        }
+        if (!mapping.course_affliation || mapping.course_affliation.trim().length === 0) {
+            return 'Course affiliation is required';
+        }
+        if (!mapping.duration || mapping.duration.trim().length === 0) {
+            return 'Duration is required';
+        }
         return null;
     };
 
@@ -141,20 +179,80 @@ const AdminCourseMapping = ({ username }) => {
         }
 
         try {
+            // Format data before sending
+            const mappingData = {
+                ...newMapping,
+                institution_id: parseInt(newMapping.institution_id),
+                course_type_id: parseInt(newMapping.course_type_id),
+                course_id: parseInt(newMapping.course_id),
+                fees: parseFloat(newMapping.fees)
+            };
+
             const response = await fetch('http://localhost:5001/api/admin/course-mappings', {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newMapping),
+                body: JSON.stringify(mappingData),
             });
 
-            if (!response.ok) throw new Error('Failed to add mapping');
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to add mapping');
+            }
             
             await fetchMappings();
             setSuccessMessage('Course mapping added successfully');
             setShowAddModal(false);
+            resetForm();
+        } catch (error) {
+            setError(error.message || 'Error adding course mapping');
+        }
+    };
+
+    const resetForm = () => {
+        setNewMapping({
+            institution_id: '',
+            course_type_id: '',
+            course_id: '',
+            description: '',
+            fees: '',
+            website: '',
+            student_qualification: '',
+            course_affliation: '',
+            duration: '',
+            status: 'active'
+        });
+        setSelectedCourseType('');
+        setFilteredCourses([]);
+    };
+
+    const handleEdit = async () => {
+        const error = validateMapping(newMapping);
+        if (error) {
+            setError(error);
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/course-mappings/${selectedMapping.course_mapping_id}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newMapping),
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            await fetchMappings();
+            setSuccessMessage('Course mapping updated successfully');
+            setShowEditModal(false);
+            setSelectedMapping(null);
             setNewMapping({
                 institution_id: '',
+                course_type_id: '',
                 course_id: '',
                 description: '',
                 fees: '',
@@ -164,32 +262,7 @@ const AdminCourseMapping = ({ username }) => {
                 duration: '',
                 status: 'active'
             });
-        } catch (error) {
-            setError('Error adding course mapping');
-        }
-    };
-
-    const handleEdit = async () => {
-        const error = validateMapping(newMapping);
-        if (error) {
-            setError(error);
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/course-mappings/${selectedMapping.course_mapping_id}`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newMapping),
-            });
-
-            if (!response.ok) throw new Error('Failed to update mapping');
-            
-            await fetchMappings();
-            setSuccessMessage('Course mapping updated successfully');
-            setShowEditModal(false);
-            setSelectedMapping(null);
+            setSelectedCourseType('');
         } catch (error) {
             setError('Error updating course mapping');
         }
@@ -243,6 +316,29 @@ const AdminCourseMapping = ({ username }) => {
         return sortDirection === 'asc'
             ? a[sortKey].toString().localeCompare(b[sortKey].toString())
             : b[sortKey].toString().localeCompare(a[sortKey].toString());
+    };
+
+    // Improve course type change handler
+    const handleCourseTypeChange = (e) => {
+        const courseTypeId = e.target.value;
+        setSelectedCourseType(courseTypeId);
+        
+        // Update newMapping with course_type_id and reset course_id
+        setNewMapping(prev => ({
+            ...prev, 
+            course_type_id: courseTypeId ? parseInt(courseTypeId) : '',
+            course_id: '' // Reset course selection when course type changes
+        }));
+        
+        // Filter courses based on selected course type
+        if (courseTypeId) {
+            const filtered = courses.filter(course => 
+                course.course_type_id === parseInt(courseTypeId)
+            );
+            setFilteredCourses(filtered);
+        } else {
+            setFilteredCourses([]);
+        }
     };
 
     return (
@@ -371,20 +467,25 @@ const AdminCourseMapping = ({ username }) => {
                                         <Table {...getTableProps()} size="lg">
                                             <TableHead>
                                                 <TableRow>
-                                                    {headers.map(header => (
-                                                        <TableHeader 
-                                                            key={header.key}
-                                                            {...getHeaderProps({ 
-                                                                header,
-                                                                onClick: header.key !== 'actions' ? () => handleSort(
-                                                                    header.key,
-                                                                    sortDirection === 'asc' ? 'desc' : 'asc'
-                                                                ) : undefined
-                                                            })}
-                                                        >
-                                                            {header.header}
-                                                        </TableHeader>
-                                                    ))}
+                                                    {headers.map(header => {
+                                                        const headerProps = getHeaderProps({ 
+                                                            header,
+                                                            onClick: header.key !== 'actions' ? () => handleSort(
+                                                                header.key,
+                                                                sortDirection === 'asc' ? 'desc' : 'asc'
+                                                            ) : undefined
+                                                        });
+                                                        // Remove key from headerProps and pass it separately
+                                                        const { key, ...otherProps } = headerProps;
+                                                        return (
+                                                            <TableHeader 
+                                                                key={header.key}
+                                                                {...otherProps}
+                                                            >
+                                                                {header.header}
+                                                            </TableHeader>
+                                                        );
+                                                    })}
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
@@ -429,6 +530,7 @@ const AdminCourseMapping = ({ username }) => {
                     setSelectedMapping(null);
                     setNewMapping({
                         institution_id: '',
+                        course_type_id: '',
                         course_id: '',
                         description: '',
                         fees: '',
@@ -461,6 +563,23 @@ const AdminCourseMapping = ({ username }) => {
                         </Select>
 
                         <Select
+                            id="courseType"
+                            labelText="Course Type"
+                            value={selectedCourseType}
+                            onChange={handleCourseTypeChange}
+                            required
+                        >
+                            <SelectItem value="" text="Choose a course type" />
+                            {courseTypes.map(type => (
+                                <SelectItem
+                                    key={type.course_type_id}
+                                    value={type.course_type_id}
+                                    text={type.course_type}
+                                />
+                            ))}
+                        </Select>
+
+                        <Select
                             id="course"
                             labelText="Course"
                             value={newMapping.course_id}
@@ -468,7 +587,7 @@ const AdminCourseMapping = ({ username }) => {
                             required
                         >
                             <SelectItem value="" text="Choose a course" />
-                            {courses.map(course => (
+                            {filteredCourses.map(course => (
                                 <SelectItem
                                     key={course.course_id}
                                     value={course.course_id}
@@ -488,8 +607,7 @@ const AdminCourseMapping = ({ username }) => {
 
                         <NumberInput
                             id="fees"
-                            label="Fees (₹)" // Add label prop
-                            labelText="Fees (₹)"
+                            label="Fees (₹)"
                             value={newMapping.fees}
                             onChange={(e, { value }) => setNewMapping({...newMapping, fees: value})} // Update onChange handler
                             min={0}

@@ -969,6 +969,8 @@ def validate_course_mapping(mapping_data):
     """Validate course mapping data"""
     if not mapping_data.get('institution_id'):
         return False, "Institution ID is required"
+    if not mapping_data.get('course_type_id'):  # Add this validation
+        return False, "Course Type ID is required"
     if not mapping_data.get('course_id'):
         return False, "Course ID is required"
     if not mapping_data.get('description'):
@@ -1003,6 +1005,7 @@ def add_course_mapping(mapping_data):
 
         new_mapping = CourseMapping(
             institution_id=mapping_data['institution_id'],
+            course_type_id=mapping_data['course_type_id'],  # Add this field
             course_id=mapping_data['course_id'],
             description=mapping_data['description'],
             fees=float(mapping_data['fees']),
@@ -1018,6 +1021,7 @@ def add_course_mapping(mapping_data):
         return {
             'course_mapping_id': new_mapping.course_mapping_id,
             'institution_id': new_mapping.institution_id,
+            'course_type_id': new_mapping.course_type_id,  # Add this field
             'course_id': new_mapping.course_id,
             'description': new_mapping.description,
             'fees': new_mapping.fees,
@@ -1097,48 +1101,4 @@ def delete_course_mapping(mapping_id):
         return {"message": "Course mapping deleted successfully"}
     except Exception as e:
         db.session.rollback()
-        return {"error": str(e)}    
-
-def get_course_mapping_details(mapping_id):
-    """Get detailed information for a specific course mapping"""
-    try:
-        mapping = CourseMapping.query.get_or_404(mapping_id)
-        institution = Institution.query.get(mapping.institution_id)
-        institution_type = InstitutionType.query.get(institution.institution_type_id)
-        
-        return {
-            'course_mapping_id': mapping.course_mapping_id,
-            'institution': {
-                'institution_id': institution.institution_id,
-                'institution': institution.institution,
-                'institution_type_id': institution.institution_type_id,
-                'institution_type': institution_type.institution_type,
-                'description': institution.description,
-                'accreditation': institution.accreditation,
-                'since_date': institution.since_date.isoformat() if institution.since_date else None,
-                'website': institution.website,
-                'email': institution.email,
-                'phone': institution.phone,
-                'address': institution.address,
-                'state': institution.state,
-                'district': institution.district,
-                'postalPinCode': institution.postalPinCode,
-                'logoPicture': institution.logoPicture
-            },
-            'course': {
-                'course_id': mapping.course.course_id,
-                'course': mapping.course.course
-            },
-            'description': mapping.description,
-            'fees': mapping.fees,
-            'website': mapping.website,
-            'student_qualification': mapping.student_qualification,
-            'course_affliation': mapping.course_affliation,
-            'duration': mapping.duration,
-            'status': mapping.status,
-            'created_at': mapping.created_at.isoformat(),
-            'updated_at': mapping.updated_at.isoformat()
-        }
-    except Exception as e:
-        print(f"Error getting course mapping details: {str(e)}")
-        return {'error': str(e)}
+        return {"error": str(e)}
