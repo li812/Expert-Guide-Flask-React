@@ -128,6 +128,31 @@
   cursor: not-allowed;
 }
 
+/* Search bar styling */
+.course-search {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.course-search input {
+    height: 48px;
+    font-size: 1.1rem;
+    padding-left: 3rem;
+}
+
+.search-loading {
+    margin-top: 0.5rem;
+    margin-left: 1rem;
+}
+
+/* Add search highlight styles */
+.search-highlight {
+    background-color: var(--cds-highlight);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
 @media (max-width: 672px) {
     .institution-logo-banner {
         width: 300px;

@@ -106,6 +106,10 @@ class Course(db.Model):
     course_type = db.relationship('CourseType', back_populates='courses', lazy='joined')
     course_mappings = db.relationship('CourseMapping', back_populates='course', lazy='dynamic')
 
+    # Add index with length specification for TEXT columns
+    __table_args__ = (
+        db.Index('idx_course_description', 'course_description', mysql_length=500),
+    )
 
 class InstitutionType(db.Model):
     __tablename__ = 'institution_type'
@@ -158,6 +162,12 @@ class CourseMapping(db.Model):
     course = db.relationship('Course', back_populates='course_mappings')
     course_type = db.relationship('CourseType', back_populates='course_mappings')
     likes_dislikes = db.relationship('CourseLikesDislikes', backref='course_mapping', lazy=True)
+
+    # Add index with length specification for TEXT columns
+    __table_args__ = (
+        db.Index('idx_description', 'description', mysql_length=500),
+        db.Index('idx_fees', 'fees'),
+    )
 
 class CourseLikesDislikes(db.Model):
     __tablename__ = 'course_likes_dislikes'

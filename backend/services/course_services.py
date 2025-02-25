@@ -1,4 +1,5 @@
-from sqlalchemy import or_, and_, desc
+from sqlalchemy import func, case, text
+from sqlalchemy.sql.expression import or_, and_
 from db.db_models import (
     db, CourseMapping, Institution, Course, CourseType, 
     CourseLikesDislikes, InstitutionLikesDislikes, Careers, InstitutionType
@@ -66,84 +67,75 @@ def get_course_mapping_details(mapping_id):
 
 def get_filtered_courses(filters, page=1, per_page=12):
     try:
+        # Create base query with all necessary joins
         query = CourseMapping.query\
             .join(Institution)\
             .join(Course)\
-            .join(CourseType)\
-            .join(Careers, Course.career_id == Careers.career_id)  # Add careers join
+            .join(CourseType)
 
         # Apply filters
         if filters.get('search'):
-            search = f"%{filters['search']}%"
+            search_term = f"%{filters['search'].strip()}%"
             query = query.filter(
                 or_(
-                    Course.course.ilike(search),
-                    Institution.institution.ilike(search),
-                    CourseMapping.description.ilike(search)
+                    Course.course.ilike(search_term),
+                    Institution.institution.ilike(search_term),
+                    # Use func.substring for TEXT columns
+                    func.substring(CourseMapping.description, 1, 500).ilike(search_term),
+                    func.substring(Course.course_description, 1, 500).ilike(search_term)
                 )
             )
 
-        # Fix course types filter
+        # Apply course type filter
         if filters.get('course_types'):
-            course_type_ids = [int(id) for id in filters['course_types'].split(',') if id]
+            course_type_ids = [int(ct_id) for ct_id in filters['course_types'].split(',') if ct_id]
             if course_type_ids:
                 query = query.filter(CourseType.course_type_id.in_(course_type_ids))
 
-        # Fix careers filter
+        # Apply career filter
         if filters.get('careers'):
-            career_ids = [int(id) for id in filters['careers'].split(',') if id]
+            career_ids = [int(c_id) for c_id in filters['careers'].split(',') if c_id]
             if career_ids:
-                query = query.filter(Course.career_id.in_(career_ids))
+                query = query.join(Careers, Course.career_id == Careers.career_id)\
+                           .filter(Course.career_id.in_(career_ids))
 
-        # Fix state and district filters
+        # Apply location filters
         if filters.get('state'):
             query = query.filter(Institution.state == filters['state'])
             if filters.get('district'):
                 query = query.filter(Institution.district == filters['district'])
 
-        # Fix fees range filter
-        if filters.get('min_fees') is not None:
-            try:
+        # Apply fees filter
+        try:
+            if filters.get('min_fees'):
                 min_fees = float(filters['min_fees'])
                 query = query.filter(CourseMapping.fees >= min_fees)
-            except (ValueError, TypeError):
-                pass
-
-        if filters.get('max_fees') is not None:
-            try:
+            if filters.get('max_fees'):
                 max_fees = float(filters['max_fees'])
                 query = query.filter(CourseMapping.fees <= max_fees)
-            except (ValueError, TypeError):
-                pass
+        except (ValueError, TypeError):
+            pass
 
-        # Fix sorting
+        # Apply sorting
         sort_by = filters.get('sort_by', 'relevance')
         if sort_by == 'fees_low':
             query = query.order_by(CourseMapping.fees.asc())
         elif sort_by == 'fees_high':
             query = query.order_by(CourseMapping.fees.desc())
         elif sort_by == 'rating':
+            # Add rating sort logic
             query = query.outerjoin(CourseLikesDislikes)\
-                .group_by(
-                    CourseMapping.course_mapping_id,
-                    Institution.institution,
-                    Course.course,
-                    CourseType.course_type
-                )\
+                .group_by(CourseMapping.course_mapping_id)\
                 .order_by(
-                    db.func.coalesce(
-                        db.func.sum(db.case([(CourseLikesDislikes.is_like == True, 1)], else_=0)) /
-                        db.func.nullif(db.func.count(CourseLikesDislikes.id), 0),
-                        0
-                    ).desc()
+                    func.count(case([(CourseLikesDislikes.is_like == True, 1)], else_=0)).desc()
                 )
 
-        # Get total count and paginate
+        # Get total and paginate
         total = query.count()
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
 
         return {
-            "courses": [format_course_mapping(mapping) for mapping in paginated.items],
+            "courses": [format_course_mapping(m) for m in paginated.items],
             "total": total,
             "pages": paginated.pages,
             "current_page": page
@@ -152,6 +144,33 @@ def get_filtered_courses(filters, page=1, per_page=12):
     except Exception as e:
         print(f"Error in get_filtered_courses: {str(e)}")
         return {"error": str(e)}
+
+def highlight_text(text, search_term):
+    """Helper function to highlight search terms in text"""
+    if not text or not search_term:
+        return text
+    
+    try:
+        parts = text.lower().split(search_term.lower())
+        if len(parts) == 1:
+            return text
+            
+        result = []
+        last_end = 0
+        
+        for i in range(len(parts) - 1):
+            start = text.lower().find(search_term.lower(), last_end)
+            end = start + len(search_term)
+            result.append(text[last_end:start])
+            result.append('<mark>')
+            result.append(text[start:end])
+            result.append('</mark>')
+            last_end = end
+            
+        result.append(text[last_end:])
+        return ''.join(result)
+    except Exception:
+        return text
 
 def format_course_mapping(mapping):
     """Helper function to format course mapping data"""

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Grid, Column, Heading, Tile, InlineNotification } from "@carbon/react";
 import { UserAdmin, UserAvatar, Api } from "@carbon/icons-react";
 import { DonutChart, SimpleBarChart } from "@carbon/charts-react";
+import { AiExplainability } from '@carbon/pictograms-react';
+
 import "@carbon/charts/styles.css";
 import "./admin.css"; // Import the CSS file for styling
 
@@ -190,8 +192,9 @@ const AdminHome = ({ username }) => {
 
   return (
     <Grid className="dashboard">
-      <Column lg={16} md={8} sm={4}>
+      <Column lg={15} md={8} sm={4}>
         <Tile className="stat-tile">
+        <AiExplainability size={32} />
           <Heading className="dashboard-heading">Welcome, {username}!</Heading>
           <p className="dashboard-content">
             This is your admin dashboard. Use the navigation links to manage
@@ -213,7 +216,7 @@ const AdminHome = ({ username }) => {
       <br></br>
       <br></br>
       {/* Statistics Section */}
-      <Column lg={7} md={2} sm={1}>
+      <Column lg={5} md={2} sm={1}>
         <Tile className="stat-tile">
           <UserAdmin size={32} />
           <h4>Total<br></br>Users</h4>
@@ -222,10 +225,18 @@ const AdminHome = ({ username }) => {
       </Column>
 
 
-      <Column lg={7} md={2} sm={1}>
+      <Column lg={5} md={2} sm={1}>
         <Tile className="stat-tile">
           <Api size={32} />
           <h4>New User<br></br>Complaints</h4>
+          <p>{stats.pending_user_complaints}</p>
+        </Tile>
+      </Column>
+
+      <Column lg={5} md={2} sm={1}>
+        <Tile className="stat-tile">
+          <Api size={32} />
+          <h4>Total<br></br>Courses</h4>
           <p>{stats.pending_user_complaints}</p>
         </Tile>
       </Column>

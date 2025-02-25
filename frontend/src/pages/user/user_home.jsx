@@ -118,6 +118,8 @@ const UserHome = ({ username }) => {
                 <Tile className="quick-actions-tile">
                     <h4>Quick Actions</h4>
                     <div className="quick-actions-grid">
+
+                    <p><br></br>
                         <Button
                             kind="primary"
                             renderIcon={Settings}
@@ -126,6 +128,8 @@ const UserHome = ({ username }) => {
                         >
                             Update Profile
                         </Button>
+                        </p>
+                        <p><br></br>
                         <Button
                             kind="secondary"
                             renderIcon={Settings}
@@ -134,6 +138,7 @@ const UserHome = ({ username }) => {
                         >
                             Change Password
                         </Button>
+                        </p>
                     </div>
                 </Tile>
             </Column>

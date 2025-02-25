@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     Grid,
     Column,
@@ -198,21 +198,80 @@ const UserFindCourse = () => {
         }
     };
 
-    // Debounced search
-    const debouncedSearch = useCallback(
-        debounce((value) => {
-            setFilters(prev => ({ ...prev, searchQuery: value }));
-            fetchCourses(1); // Reset to first page on search
-        }, 500),
-        []
+    // Memoize the debounced search function
+    const debouncedSearch = useMemo(
+        () =>
+            debounce(async (searchTerm) => {
+                try {
+                    setLoading(true);
+                    const queryParams = new URLSearchParams({
+                        page: '1',
+                        per_page: pageSize.toString(),
+                        search: searchTerm,
+                        course_types: filters.courseTypes.map(ct => ct.id).join(','),
+                        careers: filters.careers.map(c => c.id).join(','),
+                        state: filters.state || '',
+                        district: filters.district || '',
+                        min_fees: filters.feesRange.min.toString(),
+                        max_fees: filters.feesRange.max.toString(),
+                        sort_by: filters.sortBy
+                    });
+
+                    const response = await fetch(
+                        `http://localhost:5001/api/courses/search?${queryParams}`,
+                        { credentials: 'include' }
+                    );
+
+                    if (!response.ok) throw new Error('Search failed');
+
+                    const data = await response.json();
+                    setCourseMappings(data.courses || []);
+                    setTotalItems(data.total || 0);
+                    setCurrentPage(1);
+                    setError(null);
+                } catch (err) {
+                    console.error('Search error:', err);
+                    setError('Search failed. Please try again.');
+                } finally {
+                    setLoading(false);
+                }
+            }, 500),
+        [pageSize, filters.courseTypes, filters.careers, filters.state, filters.district, 
+         filters.feesRange.min, filters.feesRange.max, filters.sortBy]
     );
 
-    // Modified filter handlers
+    // Enhanced search handler with input validation
     const handleSearchChange = (e) => {
+        const searchTerm = e.target.value.trim();
+        
+        // Update search query in filters immediately for UI
         setFilters(prev => ({ ...prev, searchQuery: e.target.value }));
-        debouncedSearch(e.target.value);
+
+        // If search term is empty, reset to first page and fetch all courses
+        if (!searchTerm) {
+            setCurrentPage(1);
+            fetchCourses(1);
+            return;
+        }
+
+        // If search term is too short, don't trigger search
+        if (searchTerm.length < 2) return;
+
+        // Cancel any pending debounced searches
+        debouncedSearch.cancel();
+
+        // Trigger debounced search
+        debouncedSearch(searchTerm);
     };
 
+    // Cleanup debounced function on unmount
+    useEffect(() => {
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [debouncedSearch]);
+
+    // Modified filter handlers
     const handleCourseTypeChange = ({ selectedItems }) => {
         setFilters(prev => ({ ...prev, courseTypes: selectedItems }));
         setCurrentPage(1);
@@ -434,7 +493,7 @@ const UserFindCourse = () => {
                 {/* Course Grid */}
                 <Grid narrow className="course-grid">
                     {courseMappings.map((mapping) => (
-                        <Column key={mapping.course_mapping_id} lg={5} md={4} sm={4}>
+                        <Column key={mapping.course_mapping_id} lg={4} md={4} sm={4}>
                             <ClickableTile className="course-tile">
                                 <AspectRatio ratio="16x9">
                                     <div className="institution-logo">
