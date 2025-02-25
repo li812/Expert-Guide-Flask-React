@@ -32,7 +32,7 @@ import {
     Information
 } from '@carbon/icons-react';
 
-
+import IconLabel from '../IconLabel/IconLabel';
 
 import './ViewInstituteDetailsModal.css';
 
@@ -111,28 +111,18 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
             onRequestClose={onClose}
             modalHeading={
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Education size={24} />
-                    <span>{institute.institution}</span>
+                    <IconLabel icon={Education} label={institute.institution} size={24} />
                     <Tag type="blue">{instituteType}</Tag>
                 </div>
             }
             passiveModal
             size="lg"
         >
-            <Tabs 
-                selectedIndex={selectedTab} 
-                onChange={({ selectedIndex }) => setSelectedTab(selectedIndex)}
-            >
+            <Tabs selectedIndex={selectedTab} onChange={({ selectedIndex }) => setSelectedTab(selectedIndex)}>
                 <TabList aria-label="Institute details tabs" contained>
-                    <Tab>
-                        <Information size={16} /> Basic Info
-                    </Tab>
-                    <Tab>
-                        <Email size={16} /> Contact
-                    </Tab>
-                    <Tab>
-                        <Location size={16} /> Location
-                    </Tab>
+                    <Tab><IconLabel icon={Information} label="Basic Info" size={16} /></Tab>
+                    <Tab><IconLabel icon={Email} label="Contact" size={16} /></Tab>
+                    <Tab><IconLabel icon={Location} label="Location" size={16} /></Tab>
                 </TabList>
 
                 <TabPanels>
@@ -144,41 +134,36 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
                                 <StructuredListWrapper>
                                     <StructuredListBody>
                                         <StructuredListRow>
-                                            <StructuredListCell>Institution Type</StructuredListCell>
                                             <StructuredListCell>
-                                                <Tag type="blue">
-                                                    <Education style={{ marginRight: '0.5rem' }} />
-                                                    {instituteType}
-                                                </Tag>
+                                                <IconLabel icon={Education} label="Institution Type" />
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                <Tag type="blue">{instituteType}</Tag>
                                             </StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
-                                            <StructuredListCell>Description</StructuredListCell>
+                                            <StructuredListCell>
+                                                <IconLabel icon={Information} label="Description" />
+                                            </StructuredListCell>
                                             <StructuredListCell>{institute.description}</StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
                                             <StructuredListCell>
-                                                <Certificate style={{ marginRight: '0.5rem' }} />
-                                                Accreditation
+                                                <IconLabel icon={Certificate} label="Accreditation" />
                                             </StructuredListCell>
                                             <StructuredListCell>
-                                                <Tag type="green" >
-                                                    {institute.accreditation || 'N/A'}
-                                                </Tag>
+                                                <Tag type="green">{institute.accreditation || 'N/A'}</Tag>
                                             </StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
                                             <StructuredListCell>
-                                                <Calendar style={{ marginRight: '0.5rem' }} />
-                                                Established Date
+                                                <IconLabel icon={Calendar} label="Established Date" />
                                             </StructuredListCell>
                                             <StructuredListCell>
-                                                <Tag type="purple" >
-                                                    {formatDate(institute.since_date)}
-                                                </Tag>
+                                                <Tag type="purple">{formatDate(institute.since_date)}</Tag>
                                             </StructuredListCell>
                                         </StructuredListRow>
                                     </StructuredListBody>
@@ -195,38 +180,33 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
                                 <StructuredListWrapper>
                                     <StructuredListBody>
                                         <StructuredListRow>
-                                            <StructuredListCell>Email</StructuredListCell>
                                             <StructuredListCell>
-                                                <Link 
-                                                    href={`mailto:${institute.email}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <Email style={{ marginRight: '0.5rem' }} />
+                                                <IconLabel icon={Email} label="Email" />
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                <Link href={`mailto:${institute.email}`}>
                                                     {institute.email}
                                                 </Link>
                                             </StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
-                                            <StructuredListCell>Phone</StructuredListCell>
+                                            <StructuredListCell>
+                                                <IconLabel icon={Phone} label="Phone" />
+                                            </StructuredListCell>
                                             <StructuredListCell>
                                                 <Link href={`tel:${institute.phone}`}>
-                                                    <Phone style={{ marginRight: '0.5rem' }} />
                                                     {institute.phone}
                                                 </Link>
                                             </StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
-                                            <StructuredListCell>Website</StructuredListCell>
                                             <StructuredListCell>
-                                                <Link 
-                                                    href={institute.website} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <Globe style={{ marginRight: '0.5rem' }} />
+                                                <IconLabel icon={Globe} label="Website" />
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                <Link href={institute.website} target="_blank">
                                                     {institute.website}
                                                 </Link>
                                             </StructuredListCell>
@@ -245,34 +225,38 @@ const ViewInstituteDetailsModal = ({ open, onClose, institute, instituteType }) 
                                 <StructuredListWrapper>
                                     <StructuredListBody>
                                         <StructuredListRow>
-                                            <StructuredListCell>Full Address</StructuredListCell>
                                             <StructuredListCell>
-                                                <Location style={{ marginRight: '0.5rem' }} />
+                                                <IconLabel icon={Location} label="Full Address" />
+                                            </StructuredListCell>
+                                            <StructuredListCell>
                                                 {institute.address}
                                             </StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
-                                            <StructuredListCell>State</StructuredListCell>
                                             <StructuredListCell>
-                                                
-                                                    {institute.state}
-                                                
+                                                <IconLabel icon={Location} label="State" />
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                {institute.state}
                                             </StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
-                                            <StructuredListCell>District</StructuredListCell>
                                             <StructuredListCell>
-                                                    {institute.district}
-                                                
+                                                <IconLabel icon={Location} label="District" />
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                {institute.district}
                                             </StructuredListCell>
                                         </StructuredListRow>
 
                                         <StructuredListRow>
-                                            <StructuredListCell>Postal/Pin Code</StructuredListCell>
                                             <StructuredListCell>
-                                                    {institute.postalPinCode}
+                                                <IconLabel icon={Location} label="Postal/Pin Code" />
+                                            </StructuredListCell>
+                                            <StructuredListCell>
+                                                {institute.postalPinCode}
                                             </StructuredListCell>
                                         </StructuredListRow>
                                     </StructuredListBody>

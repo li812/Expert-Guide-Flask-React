@@ -80,6 +80,7 @@ from services.assesment_services import (
     get_assessment_questions,
     process_assessment
 )
+from services.course_services import get_course_mapping_details
 
 # Database models
 from db.db_models import Users, Login, UserType, Complaints, Questions, Careers
@@ -1424,6 +1425,18 @@ def delete_course_mapping_route(mapping_id):
         if "error" in result:
             return jsonify({"error": result["error"]}), 400
             
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Add this new route
+@api.route('/api/admin/course-mappings/<int:mapping_id>', methods=['GET'])
+def get_course_mapping_details_route(mapping_id):
+    """Get detailed information about a course mapping"""
+    try:
+        result = get_course_mapping_details(mapping_id)
+        if "error" in result:
+            return jsonify(result), 404
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

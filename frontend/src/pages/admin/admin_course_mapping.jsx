@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-    Grid, 
-    Column, 
+import {
+    Grid,
+    Column,
     Tile,
     DataTable,
     Table,
@@ -30,7 +30,7 @@ import {
     Pagination,
     Link
 } from '@carbon/react';
-import { Add, TrashCan, Edit, View } from '@carbon/icons-react';
+import { Add, TrashCan, Edit, View, DataViewAlt } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 import ViewCourseDetailsModal from '../../components/ViewCourseDetailsModal/ViewCourseDetailsModal';
 
@@ -211,7 +211,7 @@ const AdminCourseMapping = ({ username }) => {
                 const data = await response.json();
                 throw new Error(data.error || 'Failed to add mapping');
             }
-            
+
             await fetchMappings();
             setSuccessMessage('Course mapping added successfully');
             setShowAddModal(false);
@@ -253,11 +253,11 @@ const AdminCourseMapping = ({ username }) => {
                 },
                 body: JSON.stringify(newMapping),
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             await fetchMappings();
             setSuccessMessage('Course mapping updated successfully');
             setShowEditModal(false);
@@ -291,7 +291,7 @@ const AdminCourseMapping = ({ username }) => {
             });
 
             if (!response.ok) throw new Error('Failed to delete mapping');
-            
+
             await fetchMappings();
             setSuccessMessage('Course mapping deleted successfully');
         } catch (error) {
@@ -325,13 +325,13 @@ const AdminCourseMapping = ({ username }) => {
             if (sortKey === 'created_at') {
                 const aDate = new Date(a[sortKey]);
                 const bDate = new Date(b[sortKey]);
-                
+
                 // Handle invalid dates
                 if (isNaN(aDate.getTime()) && isNaN(bDate.getTime())) return 0;
                 if (isNaN(aDate.getTime())) return sortDirection === 'asc' ? 1 : -1;
                 if (isNaN(bDate.getTime())) return sortDirection === 'asc' ? -1 : 1;
-                
-                return sortDirection === 'asc' 
+
+                return sortDirection === 'asc'
                     ? aDate.getTime() - bDate.getTime()
                     : bDate.getTime() - aDate.getTime();
             }
@@ -359,17 +359,17 @@ const AdminCourseMapping = ({ username }) => {
     const handleCourseTypeChange = (e) => {
         const courseTypeId = e.target.value;
         setSelectedCourseType(courseTypeId);
-        
+
         // Update newMapping with course_type_id and reset course_id
         setNewMapping(prev => ({
-            ...prev, 
+            ...prev,
             course_type_id: courseTypeId ? parseInt(courseTypeId) : '',
             course_id: '' // Reset course selection when course type changes
         }));
-        
+
         // Filter courses based on selected course type
         if (courseTypeId) {
-            const filtered = courses.filter(course => 
+            const filtered = courses.filter(course =>
                 course.course_type_id === parseInt(courseTypeId)
             );
             setFilteredCourses(filtered);
@@ -383,7 +383,7 @@ const AdminCourseMapping = ({ username }) => {
         try {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return '-';
-            
+
             return date.toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
@@ -469,9 +469,9 @@ const AdminCourseMapping = ({ username }) => {
                                 actions: (
                                     <Stack orientation="horizontal" gap={4}>
                                         <Button
-                                            kind="ghost"
+                                            kind="primary"
                                             size="sm"
-                                            renderIcon={View}
+                                            renderIcon={DataViewAlt} Ç
                                             onClick={() => {
                                                 setSelectedMappingId(mapping.course_mapping_id);
                                                 setShowViewModal(true);
@@ -485,7 +485,7 @@ const AdminCourseMapping = ({ username }) => {
                                             renderIcon={Edit}
                                             onClick={() => {
                                                 setSelectedMapping(mapping);
-                                                setNewMapping({...mapping});
+                                                setNewMapping({ ...mapping });
                                                 setShowEditModal(true);
                                             }}
                                         >
@@ -539,7 +539,7 @@ const AdminCourseMapping = ({ username }) => {
                                             <TableHead>
                                                 <TableRow>
                                                     {headers.map(header => {
-                                                        const headerProps = getHeaderProps({ 
+                                                        const headerProps = getHeaderProps({
                                                             header,
                                                             onClick: header.isSortable ? () => handleSort(
                                                                 header.key,
@@ -548,7 +548,7 @@ const AdminCourseMapping = ({ username }) => {
                                                         });
                                                         const { key, ...otherProps } = headerProps;
                                                         return (
-                                                            <TableHeader 
+                                                            <TableHeader
                                                                 key={header.key}
                                                                 {...otherProps}
                                                             >
@@ -619,7 +619,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="institution"
                             labelText="Institution"
                             value={newMapping.institution_id}
-                            onChange={(e) => setNewMapping({...newMapping, institution_id: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, institution_id: e.target.value })}
                             required
                         >
                             <SelectItem value="" text="Choose an institution" />
@@ -653,7 +653,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="course"
                             labelText="Course"
                             value={newMapping.course_id}
-                            onChange={(e) => setNewMapping({...newMapping, course_id: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, course_id: e.target.value })}
                             required
                         >
                             <SelectItem value="" text="Choose a course" />
@@ -670,7 +670,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="description"
                             labelText="Description"
                             value={newMapping.description}
-                            onChange={(e) => setNewMapping({...newMapping, description: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, description: e.target.value })}
                             rows={4}
                             required
                         />
@@ -679,7 +679,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="fees"
                             label="Fees (₹)"
                             value={newMapping.fees}
-                            onChange={(e, { value }) => setNewMapping({...newMapping, fees: value})} // Update onChange handler
+                            onChange={(e, { value }) => setNewMapping({ ...newMapping, fees: value })} // Update onChange handler
                             min={0}
                             required
                             hideSteppers={false} // Add step buttons
@@ -691,7 +691,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="website"
                             labelText="Course Website"
                             value={newMapping.website}
-                            onChange={(e) => setNewMapping({...newMapping, website: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, website: e.target.value })}
                             required
                         />
 
@@ -699,7 +699,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="qualification"
                             labelText="Student Qualification Required"
                             value={newMapping.student_qualification}
-                            onChange={(e) => setNewMapping({...newMapping, student_qualification: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, student_qualification: e.target.value })}
                             rows={2}
                             required
                         />
@@ -708,7 +708,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="affliation"
                             labelText="Course Affiliation"
                             value={newMapping.course_affliation}
-                            onChange={(e) => setNewMapping({...newMapping, course_affliation: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, course_affliation: e.target.value })}
                             required
                         />
 
@@ -716,7 +716,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="duration"
                             labelText="Course Duration"
                             value={newMapping.duration}
-                            onChange={(e) => setNewMapping({...newMapping, duration: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, duration: e.target.value })}
                             required
                         />
 
@@ -724,7 +724,7 @@ const AdminCourseMapping = ({ username }) => {
                             id="status"
                             labelText="Status"
                             value={newMapping.status}
-                            onChange={(e) => setNewMapping({...newMapping, status: e.target.value})}
+                            onChange={(e) => setNewMapping({ ...newMapping, status: e.target.value })}
                             required
                         >
                             <SelectItem value="active" text="Active" />
@@ -735,7 +735,7 @@ const AdminCourseMapping = ({ username }) => {
             </Modal>
 
             {/* View Details Modal */}
-            <ViewCourseDetailsModal 
+            <ViewCourseDetailsModal
                 open={showViewModal}
                 onClose={() => {
                     setShowViewModal(false);
