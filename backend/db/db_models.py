@@ -87,7 +87,9 @@ class CourseType(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    courses = db.relationship('Course', back_populates='course_type', lazy=True)
+    # Update relationships
+    courses = db.relationship('Course', back_populates='course_type', lazy='dynamic')
+    course_mappings = db.relationship('CourseMapping', back_populates='course_type', lazy='dynamic')
 
 class Course(db.Model):
     __tablename__ = 'course'
@@ -99,9 +101,11 @@ class Course(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Update the relationship definition here
-    career = db.relationship('Careers', back_populates='courses', lazy=True)
-    course_type = db.relationship('CourseType', back_populates='courses', lazy=True)
+    # Update relationships
+    career = db.relationship('Careers', back_populates='courses', lazy='joined')
+    course_type = db.relationship('CourseType', back_populates='courses', lazy='joined')
+    course_mappings = db.relationship('CourseMapping', back_populates='course', lazy='dynamic')
+
 
 class InstitutionType(db.Model):
     __tablename__ = 'institution_type'
@@ -129,6 +133,9 @@ class Institution(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Update relationship
+    course_mappings = db.relationship('CourseMapping', back_populates='institution', lazy='dynamic')
+
 class CourseMapping(db.Model):
     __tablename__ = 'course_mapping'
     course_mapping_id = db.Column(db.Integer, primary_key=True)
@@ -145,9 +152,28 @@ class CourseMapping(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    institution = db.relationship('Institution', backref='course_mappings')
-    course = db.relationship('Course', backref='institution_mappings')
+    # Update relationships
+    institution = db.relationship('Institution', back_populates='course_mappings', lazy='joined')
+    course = db.relationship('Course', back_populates='course_mappings', lazy='joined')
+    course_type = db.relationship('CourseType', back_populates='course_mappings', lazy='joined')
     
+    # Add indexes and constraints
     __table_args__ = (
         db.UniqueConstraint('institution_id', 'course_id', name='uix_institution_course'),
+        db.Index('idx_course_mapping_status', 'status'),
+        db.Index('idx_course_mapping_created', 'created_at')
     )
+    
+class CourseLikesDislikes(db.Model):
+    __tablename__ = 'course_likes_dislikes'
+    course_mapping_id = db.Column(db.Integer, db.ForeignKey('course_mapping.course_mapping_id'), primary_key=True, nullable=False)
+    likes = db.Column(db.Integer)
+    dis_likes = db.Column(db.Integer)
+    
+    
+class InstitutionLikesDislikes(db.Model):
+    __tablename__ = 'institution_likes_dislikes'
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'), primary_key=True, nullable=False)
+    likes = db.Column(db.Integer)
+    dis_likes = db.Column(db.Integer)
+
