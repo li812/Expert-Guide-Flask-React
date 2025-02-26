@@ -285,12 +285,28 @@ const UserFindCourse = () => {
                 method: 'POST',
                 credentials: 'include'
             });
-            if (!response.ok) throw new Error('Failed to update rating');
-            fetchCourses(); // Refresh courses to update rating info
+
+            if (!response.ok) {
+                throw new Error('Failed to update rating');
+            }
+
+            // Instead of reloading all courses, just update the specific course's likes/dislikes
+            const result = await response.json();
+            setCourseMappings(prevMappings => 
+                prevMappings.map(mapping => 
+                    mapping.course_mapping_id === mappingId 
+                        ? {
+                            ...mapping,
+                            likes: result.likes,
+                            dislikes: result.dislikes
+                        }
+                        : mapping
+                )
+            );
         } catch (error) {
             console.error('Error updating rating:', error);
         }
-    }, [fetchCourses]);
+    }, []); // Remove fetchCourses from dependencies
 
     // Debounce fetchCourses on filter changes
     useEffect(() => {
