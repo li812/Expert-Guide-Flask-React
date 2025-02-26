@@ -31,6 +31,7 @@ from services.admin_services import (
     get_all_users,
     delete_user,
     get_server_info,
+    get_admin_stats,
     get_all_user_complaints,
     reply_to_user_complaints,
     update_admin_password,  
@@ -326,22 +327,20 @@ def delete_user_route(login_id):
         return jsonify({'error': str(e)}), 500
 
 @api.route('/api/admin/stats', methods=['GET'])
-@check_session(required_type=1)  # Admin type_id = 1
-def get_admin_stats():
+@check_session(required_type=1)  # Admin only
+def get_admin_stats_route():
+    """Get statistics for admin dashboard"""
     try:
-        user_count = Users.query.count()
-        
-        
-        # Specify the onclause for the join
-        pending_user_complaints = Complaints.query.join(Login, Complaints.sender_login_id == Login.login_id).filter(Login.type_id == 2, Complaints.status == 'pending').count()
-        
-        return jsonify({
-            'user_count': user_count,
-            'pending_user_complaints': pending_user_complaints,
-        })
+        stats = get_admin_stats()
+        return jsonify(stats)
     except Exception as e:
-        print(f"Error in get_admin_stats: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        print(f"Error in admin stats route: {str(e)}")
+        return jsonify({
+            "error": "Failed to fetch admin stats",
+            "user_count": 0,
+            "pending_user_complaints": 0,
+            "total_courses": 0
+        }), 500
 
 # Update the question routes to use the services
 @api.route('/api/admin/questions', methods=['GET'])

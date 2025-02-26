@@ -1110,3 +1110,23 @@ def delete_course_mapping(mapping_id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}
+
+def get_admin_stats():
+    """Get admin dashboard statistics"""
+    try:
+        user_count = Users.query.count() or 0
+        pending_complaints = Complaints.query.filter_by(status='pending').count() or 0
+        total_courses = CourseMapping.query.filter_by(status='active').count() or 0
+
+        return {
+            "user_count": user_count,
+            "pending_user_complaints": pending_complaints,
+            "total_courses": total_courses
+        }
+    except Exception as e:
+        print(f"Error getting admin stats: {str(e)}")
+        return {
+            "user_count": 0,
+            "pending_user_complaints": 0,
+            "total_courses": 0
+        }

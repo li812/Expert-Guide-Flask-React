@@ -237,7 +237,7 @@ const AdminHome = ({ username }) => {
         <Tile className="stat-tile">
           <Api size={32} />
           <h4>Total<br></br>Courses</h4>
-          <p>{stats.pending_user_complaints}</p>
+          <p>{stats.total_courses}</p>
         </Tile>
       </Column>
 
@@ -269,14 +269,6 @@ const AdminHome = ({ username }) => {
         </Tile>
       </Column>
 
-      {error && (
-        <InlineNotification
-          kind="error"
-          title="Error"
-          subtitle={error}
-          onCloseButtonClick={() => setError(null)}
-        />
-      )}
     </Grid>
   );
 };
