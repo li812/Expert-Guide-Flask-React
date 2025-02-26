@@ -1553,3 +1553,27 @@ def get_course_details(mapping_id):
         return jsonify(details)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api.route('/api/course-types', methods=['GET'])
+def get_course_types_route():
+    """Get all course types for filtering"""
+    try:
+        course_types = CourseType.query.all()
+        return jsonify({
+            "courseTypes": [{"course_type_id": ct.course_type_id, "course_type": ct.course_type} 
+                          for ct in course_types]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/api/careers', methods=['GET'])
+def get_careers_route():
+    """Get all careers for filtering"""
+    try:
+        careers = Careers.query.all()
+        return jsonify({
+            "careers": [{"career_id": c.career_id, "career": c.career} 
+                      for c in careers]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
