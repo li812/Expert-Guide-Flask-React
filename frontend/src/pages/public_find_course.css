@@ -1,6 +1,10 @@
 .find-course-container {
-    padding: .1rem;
-    /* background-color: #f4f4f4; */
+    padding: 0.1rem;
+    background-color: var(--cds-background);
+    color: var(--cds-text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .filters-section {
@@ -9,6 +13,7 @@
     background-color: var(--cds-layer-01);
     box-shadow: 0 2px 6px var(--cds-shadow);
     margin-bottom: 1.5rem;
+    border: 1px solid var(--cds-border-subtle);
 }
 
 .fees-range {
@@ -24,228 +29,16 @@
     margin-bottom: 2rem;
 }
 
-/* Course Grid Layout */
-.course-grid {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    row-gap: 2rem !important; /* Add vertical gap between rows */
-}
-
-/* Course Tile Container */
-.course-tile {
-    height: 100%; /* Make tiles fill full height */
-    transition: transform 0.2s;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem; /* Add bottom margin */
-    background-color: var(--cds-layer-01);
-    border: 1px solid var(--cds-border-subtle);
-    display: flex;
-    flex-direction: column;
-}
-
-/* Course Tile Hover Effect */
-.course-tile:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: var(--cds-border-strong);
-}
-
-/* Column Spacing */
-.course-grid .cds--col {
-    margin-bottom: 1.5rem; /* Add space between columns */
-}
-
-@media (max-width: 672px) {
-    #search_sort_filter {
-        padding: 0.75rem;
-        margin-bottom: 1rem;
-    }
-
-    .search-filter-title {
-        font-size: 1.25rem;
-        padding: 0 0.5rem;
-    }
-
-    .filters-section {
-        padding: 0.75rem;
-    }
-
-    .filters-section .cds--grid {
-        row-gap: 0.75rem;
-    }
-
-    .search-section {
-        padding: 0.75rem;
-    }
-
-    .reset-button {
-        margin-top: 0.5rem;
-        margin-left: 0;
-    }
-
-    .institution-logo-banner {
-        width: 300px;
-        height: 300px;
-    }
-    
-    .course-tile .cds--aspect-ratio--16x9::before {
-        padding-top: 300px !important;
-        padding-bottom: 1.5rem;
-    }
-
-    /* Stack filters vertically */
-    .filters-section .cds--col {
-        flex: 0 0 100%;
-        max-width: 100%;
-        padding-right: 0;
-        margin-bottom: 0.75rem;
-    }
-
-    /* Adjust search and reset button layout */
-    .search-section .cds--col {
-        flex: 0 0 100%;
-        max-width: 100%;
-        margin-bottom: 0.5rem;
-    }
-
-    .course-grid {
-        row-gap: 1.5rem !important;
-    }
-    
-    .course-tile {
-        margin-bottom: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    #search_sort_filter {
-        padding: 0.5rem;
-    }
-
-    .search-filter-title {
-        font-size: 1.125rem;
-    }
-
-    .filters-section,
-    .search-section {
-        padding: 0.5rem;
-    }
-
-    .institution-logo-banner {
-        width: 250px;
-        height: 250px;
-    }
-    
-    .course-tile .cds--aspect-ratio--16x9::before {
-        padding-top: 250px !important;
-        padding-bottom: 1.5rem;
-    }
-
-    .filters-section .cds--col {
-        flex: 0 0 100%;
-        max-width: 100%;
-        margin-bottom: 0.5rem;
-    }
-
-    .course-grid {
-        row-gap: 1rem !important;
-    }
-    
-    .course-tile {
-        margin-bottom: 0.75rem;
-    }
-}
-
-.institution-logo {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-    background-color: var(--cds-layer-01);
-    border-radius: 8px;
-}
-
-.institution-logo-banner {
-    width: 250px;
-    height: 250px;
-    object-fit: cover;
-    border-radius: 50%; /* Make it circular */
-    padding: 1rem;
-    transition: transform 0.3s ease;
-}
-
-.institution-logo-banner:hover {
-    transform: scale(1.05);
-}
-
-.course-tile .cds--aspect-ratio--16x9::before {
-    padding-top: 250px !important;
-    padding-bottom: 1.5rem;
-}
-
-.course-info {
-    padding: 1rem 0;
-}
-
-.course-info h3 {
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-}
-
-.institution-name {
-    color: #666;
-    margin-bottom: 0.5rem;
-}
-
-.course-stats {
-    display: flex;
-    justify-content: space-between;
-    margin: 1rem 0;
-}
-
-.fees {
-    font-weight: bold;
-    color: #0f62fe;
-}
-
-.duration {
-    color: #525252;
-}
-
-.course-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.course-actions button {
-    width: 100%;
-    justify-content: center;
-}
-
-.like-dislike {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
-.like-dislike button {
-    flex: 1;
-}
-
 .location-filters {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .cds--combo-box[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Search bar styling */
@@ -286,6 +79,8 @@
     backdrop-filter: blur(8px);
     transition: all 0.3s ease;
     border-radius: 0 0 8px 8px;
+    color: var(--cds-text-primary);
+    border-bottom: 1px solid var(--cds-border-subtle);
 }
 
 /* Title Styling */
@@ -295,17 +90,6 @@
     color: var(--cds-text-primary);
     margin-bottom: 1rem;
     padding: 0 1rem;
-}
-
-/* Theme-compatible backgrounds */
-:global(.cds--white) .filters-section {
-    background-color: var(--cds-layer-01);
-    border: 1px solid var(--cds-border-subtle);
-}
-
-:global(.cds--g100) .filters-section {
-    background-color: var(--cds-layer-01);
-    border: 1px solid var(--cds-border-subtle);
 }
 
 /* Filter Grid Layout */
@@ -381,6 +165,39 @@
     }
 }
 
+@media (max-width: 672px) {
+    #search_sort_filter {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-filter-title {
+        font-size: 1.25rem;
+        padding: 0 0.5rem;
+    }
+
+    .filters-section {
+        padding: 0.75rem;
+    }
+
+    .filters-section .cds--grid {
+        row-gap: 0.75rem;
+    }
+
+    .search-section {
+        padding: 0.75rem;
+    }
+
+    .reset-button {
+        margin-top: 0.5rem;
+        margin-left: 0;
+    }
+
+    #page-bottom {
+        padding: 1rem;
+    }
+}
+
 @media (max-width: 480px) {
     #search_sort_filter {
         padding: 0.5rem;
@@ -395,28 +212,8 @@
         padding: 0.5rem;
     }
 
-    .institution-logo-banner {
-        width: 250px;
-        height: 250px;
-    }
-    
-    .course-tile .cds--aspect-ratio--16x9::before {
-        padding-top: 250px !important;
-        padding-bottom: 1.5rem;
-    }
-
-    .filters-section .cds--col {
-        flex: 0 0 100%;
-        max-width: 100%;
-        margin-bottom: 0.5rem;
-    }
-
-    .course-grid {
-        row-gap: 1rem !important;
-    }
-    
-    .course-tile {
-        margin-bottom: 0.75rem;
+    #page-bottom {
+        padding: 0.75rem;
     }
 }
 
@@ -469,7 +266,7 @@
 /* Selected Items */
 .filters-section .cds--list-box__selection {
     background-color: var(--cds-background-selected);
-    color: var (--cds-text-on-color);
+    color: var(--cds-text-on-color);
 }
 
 /* Dropdown Items */
@@ -485,4 +282,19 @@
 .filters-section .cds--list-box__menu-item--highlighted {
     background-color: var(--cds-background-selected);
     color: var(--cds-text-on-color);
+}
+
+/* Style the pagination container */
+#page-bottom {
+    margin-top: auto;
+    padding: 1.5rem;
+    background-color: var(--cds-layer);
+    border-top: 1px solid var(--cds-border-subtle);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
 }

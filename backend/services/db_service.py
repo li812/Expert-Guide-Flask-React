@@ -10,7 +10,7 @@ def authenticate_user(username, password):
     try:
         user = Login.query.filter_by(username=username).first()
         if user and user.check_password(password):
-            # Update last login time and increment login count
+            # Update login statistics
             user.last_login = datetime.utcnow()
             user.login_count = (user.login_count or 0) + 1
             db.session.commit()
@@ -150,9 +150,13 @@ def verify_password(identifier, password):
         user = Login.query.filter_by(username=identifier).first()
         if user:
             print(f"Found user by username")
-            # Use check_password method instead of direct comparison
             if user.check_password(password):
                 print("Password verified successfully")
+                # Update login statistics
+                user.last_login = datetime.utcnow()
+                user.login_count = (user.login_count or 0) + 1
+                db.session.commit()
+                
                 return {
                     "success": True,
                     "type": user.type_id,
@@ -171,8 +175,13 @@ def verify_password(identifier, password):
         ).first()
         if user:
             print(f"Found user by Users email")
-            if user.check_password(password):  # Use check_password here too
+            if user.check_password(password):
                 print("Password verified successfully")
+                # Update login statistics
+                user.last_login = datetime.utcnow()
+                user.login_count = (user.login_count or 0) + 1
+                db.session.commit()
+                
                 return {
                     "success": True,
                     "type": user.type_id,
@@ -193,6 +202,7 @@ def verify_password(identifier, password):
 
     except Exception as e:
         print(f"Error verifying password: {str(e)}")
+        db.session.rollback()
         return {
             "success": False,
             "error": str(e)

@@ -27,6 +27,7 @@ import LLMChatBotSmallButton from './components/LLMChatBotSmall/LLMChatBotSmallB
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminManageUsers from "./pages/admin/admin_manage_users.jsx";
 import AdminSettings from "./pages/admin/admin_settings.jsx";
+import PublicFindCourse from "./pages/public_find_courses";
 
 
 function App() {
@@ -54,13 +55,10 @@ function App() {
               <HeaderMenuItem as={Link} to="/about" style={{ fontSize: "1rem" }}>
                 About
               </HeaderMenuItem>
-              {/* <HeaderMenuItem as={Link} to="/sum" style={{ fontSize: "1rem" }}>
-                Sum
-              </HeaderMenuItem> */}
               <HeaderMenuItem as={Link} to="/for_students" style={{ fontSize: "1rem" }}>
                 For Students
               </HeaderMenuItem>
-              <HeaderMenuItem as={Link} to="/for_students" style={{ fontSize: "1rem" }}>
+              <HeaderMenuItem as={Link} to="/find-courses" style={{ fontSize: "1rem" }}>
                 Find Courses
               </HeaderMenuItem>
             </HeaderNavigation>
@@ -82,7 +80,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/sum" element={<Sum />} />
-              <Route path="/for_students" element={<ForStudents />} /> {/* Add this line */}
+              <Route path="/for_students" element={<ForStudents />} /> 
+              <Route path="/find-courses" element={<PublicFindCourse />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register-user" element={<RegisterUser />} /> 
               
