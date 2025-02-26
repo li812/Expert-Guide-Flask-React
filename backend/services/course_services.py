@@ -1,20 +1,22 @@
-import logger
+import logger, logging
+from sqlalchemy.orm import joinedload
 from sqlalchemy import func, case, text
 from sqlalchemy.sql.expression import or_, and_
-from sqlalchemy.orm import joinedload
+
 from db.db_models import (
-    db, CourseMapping, Institution, Course, CourseType, 
-    CourseLikesDislikes, InstitutionLikesDislikes, Careers, InstitutionType
+    db, 
+    CourseMapping,
+    Institution,
+    Course,
+    CourseType, 
+    CourseLikesDislikes,
+    Careers
 )
-import logging
 
 logger = logging.getLogger(__name__)
 
-
 def get_course_mapping_details(mapping_id):
-    """Get detailed information about a course mapping"""
     try:
-        # Query the mapping with all related data
         mapping = CourseMapping.query\
             .join(Institution)\
             .join(Course)\
@@ -25,7 +27,6 @@ def get_course_mapping_details(mapping_id):
         if not mapping:
             return {"error": "Course mapping not found"}
 
-        # Format the response
         mapping_details = {
             "course_mapping_id": mapping.course_mapping_id,
             "institution_id": mapping.institution_id,
@@ -41,7 +42,6 @@ def get_course_mapping_details(mapping_id):
             "created_at": mapping.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             "updated_at": mapping.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
             
-            # Institution details
             "institution": {
                 "name": mapping.institution.institution,
                 "email": mapping.institution.email,
@@ -54,7 +54,6 @@ def get_course_mapping_details(mapping_id):
                 "logoPicture": mapping.institution.logoPicture
             },
             
-            # Course details
             "course": {
                 "name": mapping.course.course,
                 "description": mapping.course.course_description,
@@ -71,15 +70,12 @@ def get_course_mapping_details(mapping_id):
 
 
 def get_filtered_courses(filters, page=1, per_page=12):
-    """Get filtered and paginated courses"""
     try:
-        # Input validation
         if not isinstance(page, int) or page < 1:
             return {"error": "Invalid page number"}
         if not isinstance(per_page, int) or per_page < 1 or per_page > 48:
             return {"error": "Invalid page size"}
 
-        # Create optimized base query with necessary joins
         query = CourseMapping.query\
             .join(Institution)\
             .join(Course)\
@@ -90,7 +86,6 @@ def get_filtered_courses(filters, page=1, per_page=12):
                 joinedload(CourseMapping.course_type)
             )
 
-        # Apply search filter with optimization
         if filters.get('search'):
             search_term = filters['search'].strip()
             if len(search_term) < 2:
@@ -104,7 +99,6 @@ def get_filtered_courses(filters, page=1, per_page=12):
                 )
             )
 
-        # Apply course type filter with validation
         if filters.get('course_types'):
             try:
                 course_type_ids = [
@@ -116,7 +110,6 @@ def get_filtered_courses(filters, page=1, per_page=12):
             except (ValueError, AttributeError) as e:
                 logger.error(f"Error processing course types: {str(e)}")
 
-        # Apply career filter with validation
         if filters.get('careers'):
             try:
                 career_ids = [
@@ -128,13 +121,11 @@ def get_filtered_courses(filters, page=1, per_page=12):
             except (ValueError, AttributeError) as e:
                 logger.error(f"Error processing careers: {str(e)}")
 
-        # Apply location filters
         if filters.get('state'):
             query = query.filter(Institution.state == filters['state'])
             if filters.get('district'):
                 query = query.filter(Institution.district == filters['district'])
 
-        # Apply fees filter with validation
         try:
             min_fees = float(filters.get('min_fees', 0))
             max_fees = float(filters.get('max_fees', 5000000))
@@ -149,7 +140,6 @@ def get_filtered_courses(filters, page=1, per_page=12):
         except ValueError:
             return {"error": "Invalid fees values"}
 
-        # Apply sorting with validation
         sort_by = filters.get('sort_by', 'relevance')
         if sort_by not in ['relevance', 'fees_low', 'fees_high', 'rating']:
             return {"error": "Invalid sort option"}
@@ -166,7 +156,6 @@ def get_filtered_courses(filters, page=1, per_page=12):
                     func.greatest(func.count(CourseLikesDislikes.id), 1)).desc()
                 )
 
-        # Get total and paginate
         total = query.count()
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
 
@@ -274,21 +263,6 @@ def get_course_filters():
         print(f"Error in get_course_filters: {str(e)}")
         return {"error": str(e)}
 
-def calculate_institution_rating(institution_id):
-    """Calculate institution rating based on likes/dislikes"""
-    try:
-        likes_data = InstitutionLikesDislikes.query\
-            .filter_by(institution_id=institution_id)\
-            .first()
-        
-        if likes_data:
-            total = likes_data.likes + likes_data.dis_likes
-            if total > 0:
-                return round((likes_data.likes / total) * 5, 1)
-        return 0
-    except Exception as e:
-        print(f"Error calculating institution rating: {str(e)}")
-        return 0
 
 def get_course_likes(course_mapping_id):
     """Get number of likes for a course"""
@@ -315,12 +289,9 @@ def get_course_dislikes(course_mapping_id):
 def update_course_rating(mapping_id, user_id, is_like):
     """Update course rating (like/dislike)"""
     try:
-        # Verify course mapping exists
         mapping = CourseMapping.query.get(mapping_id)
         if not mapping:
             return {"error": "Course mapping not found"}
-
-        # Check for existing rating
         existing_rating = CourseLikesDislikes.query.filter_by(
             course_mapping_id=mapping_id,
             user_id=user_id
@@ -328,13 +299,10 @@ def update_course_rating(mapping_id, user_id, is_like):
 
         if existing_rating:
             if existing_rating.is_like == is_like:
-                # Remove rating if same type
                 db.session.delete(existing_rating)
             else:
-                # Update rating if different type
                 existing_rating.is_like = is_like
         else:
-            # Create new rating
             new_rating = CourseLikesDislikes(
                 course_mapping_id=mapping_id,
                 user_id=user_id,
@@ -344,7 +312,6 @@ def update_course_rating(mapping_id, user_id, is_like):
 
         db.session.commit()
         
-        # Return updated counts
         return {
             "likes": get_course_likes(mapping_id),
             "dislikes": get_course_dislikes(mapping_id)
@@ -355,39 +322,7 @@ def update_course_rating(mapping_id, user_id, is_like):
         print(f"Error updating course rating: {str(e)}")
         return {"error": str(e)}
 
-def get_institution_details(institution_id):
-    """Get detailed information about an institution"""
-    try:
-        institution = Institution.query\
-            .join(InstitutionType)\
-            .filter(Institution.institution_id == institution_id)\
-            .first()
 
-        if not institution:
-            return {"error": "Institution not found"}
-
-        return {
-            "institution_id": institution.institution_id,
-            "name": institution.institution,
-            "type": institution.institution_type.institution_type,
-            "description": institution.description,
-            "accreditation": institution.accreditation,
-            "since_date": institution.since_date.strftime('%Y-%m-%d'),
-            "website": institution.website,
-            "email": institution.email,
-            "phone": institution.phone,
-            "address": institution.address,
-            "state": institution.state,
-            "district": institution.district,
-            "postalPinCode": institution.postalPinCode,
-            "logoPicture": institution.logoPicture,
-            "rating": calculate_institution_rating(institution.institution_id)
-        }
-    except Exception as e:
-        print(f"Error in get_institution_details: {str(e)}")
-        return {"error": str(e)}
-
-# Backend - Enhanced Course Type Filter Logic
 def apply_course_type_filter(query, course_types):
     """Apply course type filter with validation and error handling"""
     try:

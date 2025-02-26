@@ -181,15 +181,3 @@ class CourseLikesDislikes(db.Model):
         db.UniqueConstraint('course_mapping_id', 'user_id', name='unique_course_user_rating'),
     )
 
-class InstitutionLikesDislikes(db.Model):
-    __tablename__ = 'institution_likes_dislikes'
-    id = db.Column(db.Integer, primary_key=True)
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.institution_id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('login.login_id'))
-    is_like = db.Column(db.Boolean, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    __table_args__ = (
-        db.UniqueConstraint('institution_id', 'user_id', name='unique_institution_user_rating'),
-    )
-

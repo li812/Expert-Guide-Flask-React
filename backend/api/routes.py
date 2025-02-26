@@ -1,32 +1,42 @@
-from flask import Blueprint, request, jsonify, session
+import os, time, logger
 from functools import wraps
-import time
-import logger
-import os
-from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course, InstitutionType, Institution, CourseMapping
-
 from datetime import datetime
+from flask import Blueprint, request, jsonify, session
+
+from db.db_models import (
+    db,
+    Users,
+    Login,
+    Complaints,
+    Careers,
+    CourseType,
+    Course,
+    Institution
+)
 
 # Service imports
 from services.sum_service import calculate_sum_service
 from services.llm_chat_service import generate_content
+
 from services.db_service import (
     authenticate_user,
-    get_user_type,
     get_username_by_login_id,
     register_user,
     check_credentials,
     verify_password
 )
+
 from services.face_lock import (
     check_user_face,
     register_user_face_video
 )
+
 from services.session_management import (
     init_session,
     clear_session,
     check_session,
 )
+
 from services.admin_services import (
     get_all_users,
     delete_user,
@@ -60,6 +70,7 @@ from services.admin_services import (
     add_course_mapping,
     get_all_course_mappings
 )
+
 from services.question_services import (
     get_all_questions,
     add_question,
@@ -82,16 +93,14 @@ from services.assesment_services import (
     get_assessment_questions,
     process_assessment
 )
+
 from services.course_services import (
     get_course_mapping_details,
-    get_course_dislikes,
     get_course_filters,
-    get_course_likes,
     get_filtered_courses,
-    calculate_institution_rating,
-    update_course_rating,
-    get_institution_details
-    )
+    update_course_rating
+)
+
 from services.front_end_services import (
     get_success_metrics
 )
