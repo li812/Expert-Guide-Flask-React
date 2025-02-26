@@ -33,9 +33,34 @@ const FACE_REGISTRATION_STEPS = {
   FINISHED: 'Registration complete'
 };
 
-// Update validation rules
+// Add these validation patterns at the top with other constants
 const VALIDATION_RULES = {
-  // Remove aadhaar, pan, passport validation rules
+  email: {
+    pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    message: 'Please enter a valid email address'
+  },
+  phone: {
+    pattern: /^\d{10}$/,
+    message: 'Phone number must be exactly 10 digits'
+  },
+  username: {
+    pattern: /^[a-zA-Z0-9_]{6,}$/,
+    message: 'Username must be at least 6 characters and can only contain letters, numbers, and underscores',
+    requirements: [
+      { pattern: /.{6,}/, message: 'At least 6 characters long' },
+      { pattern: /^[a-zA-Z0-9_]*$/, message: 'Only letters, numbers, and underscores allowed' }
+    ]
+  },
+  password: {
+    pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/,
+    message: 'Password must meet all requirements below',
+    requirements: [
+      { pattern: /.{6,}/, message: 'At least 6 characters long' },
+      { pattern: /(?=.*[A-Za-z])/, message: 'At least one letter' },
+      { pattern: /(?=.*\d)/, message: 'At least one number' },
+      { pattern: /(?=.*[@$!%*#?&])/, message: 'At least one special character (@$!%*#?&)' }
+    ]
+  }
 };
 
 // 1. Update DATE_CONFIG
@@ -138,6 +163,19 @@ function RegisterUser() {
   const [videoProcessing, setVideoProcessing] = useState(false);
   const streamRef = useRef(null);
 
+  // Add new state variables for tracking requirement statuses
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    letter: false,
+    number: false,
+    special: false
+  });
+
+  const [usernameRequirements, setUsernameRequirements] = useState({
+    length: false,
+    validChars: false
+  });
+
   // Add cleanup function
   const cleanupCamera = () => {
     if (streamRef.current) {
@@ -217,12 +255,32 @@ function RegisterUser() {
     return true;
   };
 
-  // Update handleNextStep
+  // Update handleNextStep to include new validations for step 1 and 2
   const handleNextStep = (e) => {
     e.preventDefault();
+    
+    if (step === 1) {
+      // Validate email and phone
+      if (!validateField('email', formData.email) || 
+          !validateField('phone', formData.phone)) {
+        return;
+      }
+    }
+  
+    if (step === 2) {
+      // Validate username and passwords
+      if (!validateField('username', formData.username) || 
+          !validateField('password', formData.password) ||
+          !validatePasswordMatch()) {
+        return;
+      }
+    }
+  
+    // Existing date validation
     if (!formData.dateOfBirth || !validateDate(formData.dateOfBirth)) {
       return;
     }
+  
     setStep(step + 1);
   };
 
@@ -234,27 +292,86 @@ function RegisterUser() {
   // Update validation function
   const validateField = (name, value) => {
     const rule = VALIDATION_RULES[name];
-    if (!rule || !value) return true; // Skip validation if empty
+    if (!rule) return true;
 
-    if (value && !rule.pattern.test(value)) {
-      setError(rule.message);
+    switch (name) {
+      case 'username':
+        const usernameValid = rule.requirements.every(req => req.pattern.test(value));
+        const usernameReqs = {
+          length: /.{6,}/.test(value),
+          validChars: /^[a-zA-Z0-9_]*$/.test(value)
+        };
+        setUsernameRequirements(usernameReqs);
+        if (!usernameValid) {
+          setError(rule.message);
+          return false;
+        }
+        break;
+
+      case 'password':
+        const passwordValid = rule.requirements.every(req => req.pattern.test(value));
+        const passwordReqs = {
+          length: /.{6,}/.test(value),
+          letter: /(?=.*[A-Za-z])/.test(value),
+          number: /(?=.*\d)/.test(value),
+          special: /(?=.*[@$!%*#?&])/.test(value)
+        };
+        setPasswordRequirements(passwordReqs);
+        if (!passwordValid) {
+          setError(rule.message);
+          return false;
+        }
+        break;
+
+      default:
+        if (!rule.pattern.test(value)) {
+          setError(rule.message);
+          return false;
+        }
+        break;
+    }
+    return true;
+  };
+
+  // Add validatePasswordMatch function
+  const validatePasswordMatch = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
       return false;
     }
     return true;
   };
 
+  // Update handleInputChange function
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    // Validate length and pattern for specific fields
-    if (VALIDATION_RULES[name]) {
-      if (value.length > VALIDATION_RULES[name].length) {
-        return; // Don't update if exceeds max length
+    
+    // Special validation for specific fields
+    if (name === 'phone') {
+      // Only allow digits and max 10 characters
+      if (!/^\d*$/.test(value) || value.length > 10) {
+        return;
       }
-      validateField(name, value);
     }
-
-    setFormData({ ...formData, [name]: value });
+  
+    if (name === 'username') {
+      // Only allow letters, numbers and underscore
+      if (!/^[a-zA-Z0-9_]*$/.test(value)) {
+        return;
+      }
+    }
+  
+    // Validate field if it has validation rules
+    if (VALIDATION_RULES[name]) {
+      const isValid = validateField(name, value);
+      if (!isValid) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+        return;
+      }
+    }
+  
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setError(null); // Clear error when input changes
   };
 
   // Inside RegisterUser component, before return statement
@@ -550,6 +667,35 @@ function RegisterUser() {
     return true;
   };
 
+  // Add this component for displaying requirements
+  const RequirementsList = ({ requirements, title }) => (
+    <div className="requirements-list" style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
+      <p style={{ color: '#525252', marginBottom: '0.5rem' }}>{title}:</p>
+      {Object.entries(requirements).map(([key, isMet]) => (
+        <div key={key} style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          color: isMet ? '#198038' : '#da1e28',
+          marginBottom: '0.25rem'
+        }}>
+          {isMet ? '✓' : '×'} {getRequirementLabel(key)}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Add this helper function
+  const getRequirementLabel = (key) => {
+    const labels = {
+      length: 'At least 6 characters long',
+      letter: 'Contains at least one letter',
+      number: 'Contains at least one number',
+      special: 'Contains at least one special character',
+      validChars: 'Only letters, numbers, and underscores'
+    };
+    return labels[key] || key;
+  };
+
   return (
     <Grid className="register-page">
       <Column lg={9} md={9} sm={4} id="illu">
@@ -651,6 +797,8 @@ function RegisterUser() {
                     labelText="Email"
                     value={formData.email}
                     onChange={handleInputChange}
+                    invalid={!!error && error.includes('email')}
+                    invalidText={error && error.includes('email') ? error : ''}
                     required
                   />
 
@@ -660,6 +808,8 @@ function RegisterUser() {
                     labelText="Phone Number"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    invalid={!!error && error.includes('phone')}
+                    invalidText={error && error.includes('phone') ? error : ''}
                     required
                   />
 
@@ -700,7 +850,13 @@ function RegisterUser() {
                     labelText="Username"
                     value={formData.username}
                     onChange={handleInputChange}
+                    invalid={!!error && error.includes('username')}
+                    invalidText={error && error.includes('username') ? error : ''}
                     required
+                  />
+                  <RequirementsList 
+                    requirements={usernameRequirements} 
+                    title="Username Requirements" 
                   />
                   <PasswordInput
                     id="password"
@@ -708,9 +864,15 @@ function RegisterUser() {
                     value={formData.password}
                     onChange={handleInputChange}
                     name="password"
+                    invalid={!!error && error.includes('password')}
+                    invalidText={error && error.includes('password') ? error : ''}
                     required
                     hidePasswordLabel="Hide password"
                     showPasswordLabel="Show password"
+                  />
+                  <RequirementsList 
+                    requirements={passwordRequirements} 
+                    title="Password Requirements" 
                   />
                   <PasswordInput
                     id="confirmPassword"
@@ -718,6 +880,8 @@ function RegisterUser() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     name="confirmPassword"
+                    invalid={!!error && error.includes('match')}
+                    invalidText={error && error.includes('match') ? error : ''}
                     required
                     hidePasswordLabel="Hide password"
                     showPasswordLabel="Show password"
