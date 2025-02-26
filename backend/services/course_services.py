@@ -6,6 +6,9 @@ from db.db_models import (
     db, CourseMapping, Institution, Course, CourseType, 
     CourseLikesDislikes, InstitutionLikesDislikes, Careers, InstitutionType
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_course_mapping_details(mapping_id):
@@ -163,9 +166,6 @@ def get_filtered_courses(filters, page=1, per_page=12):
                     func.greatest(func.count(CourseLikesDislikes.id), 1)).desc()
                 )
 
-        # Add index hint for large datasets
-        query = query.with_hint(CourseMapping, 'USE INDEX (idx_course_mapping_status)')
-
         # Get total and paginate
         total = query.count()
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -187,7 +187,7 @@ def get_filtered_courses(filters, page=1, per_page=12):
         }
 
     except Exception as e:
-        logger.error(f"Error in get_filtered_courses: {str(e)}")
+        logger.error("Error in get_filtered_courses: %s", str(e))
         return {"error": "Internal server error"}
 
 def highlight_text(text, search_term):
