@@ -22,15 +22,44 @@ import "prismjs/themes/prism.css";
 
 const MAX_MESSAGE_LENGTH = 1000;
 const MAX_MESSAGES = 50;
-const STORAGE_KEY = 'career_guidance_chat';
 const MAX_STORED_MESSAGES = 50;
 
+// Add login_id to STORAGE_KEY
+const getUserSpecificStorageKey = (loginId) => `career_guidance_chat_${loginId}`;
+
 const UserLLMChat = () => {
-  const [input, setInput] = useState('');
+  // Get login_id from session/context
+  const [loginId, setLoginId] = useState(null);
+  
+  useEffect(() => {
+    // Fetch login_id when component mounts
+    const fetchLoginId = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/check-session', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.login_id) {
+          setLoginId(data.login_id);
+        }
+      } catch (error) {
+        console.error('Error fetching login ID:', error);
+      }
+    };
+    fetchLoginId();
+  }, []);
+
+  // Use user-specific storage key
+  const storageKey = loginId ? getUserSpecificStorageKey(loginId) : null;
+  
+  // Initialize messages with user-specific storage
   const [messages, setMessages] = useState(() => {
-    const savedMessages = localStorage.getItem(STORAGE_KEY);
+    if (!storageKey) return [];
+    const savedMessages = localStorage.getItem(storageKey);
     return savedMessages ? JSON.parse(savedMessages) : [];
   });
+
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasWelcomeMessage, setHasWelcomeMessage] = useState(false);
@@ -52,7 +81,7 @@ const UserLLMChat = () => {
       let greeting = "Good evening";
       if (hour < 12) greeting = "Good morning";
       else if (hour < 18) greeting = "Good afternoon";
-      
+
       const welcomeMessage = {
         text: `${greeting}! I'm your Career Guidance AI assistant. How can I help you today?`,
         sender: 'bot',
@@ -60,32 +89,32 @@ const UserLLMChat = () => {
       };
       setMessages([welcomeMessage]);
       setHasWelcomeMessage(true);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([welcomeMessage]));
+      localStorage.setItem(storageKey, JSON.stringify([welcomeMessage]));
     }
-  }, [hasWelcomeMessage, messages.length]);
+  }, [hasWelcomeMessage, messages.length, storageKey]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-MAX_STORED_MESSAGES)));
-  }, [messages]);
+    if (storageKey) {
+      localStorage.setItem(storageKey, JSON.stringify(messages.slice(-MAX_STORED_MESSAGES)));
+    }
+  }, [messages, storageKey]);
 
   const handleError = (error) => {
     const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred';
     setError(errorMessage);
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        text: `Error: ${errorMessage}. Please try again.`,
-        sender: 'bot',
-        timestamp: new Date().toLocaleTimeString(),
-        isError: true
-      }
-    ]);
+    addMessage({
+      text: `Error: ${errorMessage}`,
+      sender: "bot",
+      format: "text",
+      timestamp: new Date().toLocaleTimeString(),
+      isError: true
+    });
   };
 
   const addMessage = (newMessage) => {
     setMessages(prevMessages => {
       const updatedMessages = [...prevMessages, newMessage].slice(-MAX_MESSAGES);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedMessages));
+      localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
       return updatedMessages;
     });
   };
@@ -124,47 +153,37 @@ const UserLLMChat = () => {
   const handleClearChat = () => {
     setMessages([]);
     setHasWelcomeMessage(false);
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(storageKey);
   };
 
-  const formatContent = (content) => {
-    // Configure marked options
-    marked.setOptions({
-      highlight: function (code, lang) {
-        if (Prism.languages[lang]) {
-          return Prism.highlight(code, Prism.languages[lang], lang);
-        }
-        return code;
-      },
-      breaks: true,
-      gfm: true
-    });
+  const formatContent = (content, format = "text") => {
+    if (format === "markdown") {
+      marked.setOptions({
+        highlight: function (code, lang) {
+          if (Prism.languages[lang]) {
+            return Prism.highlight(code, Prism.languages[lang], lang);
+          }
+          return code;
+        },
+        breaks: true,
+        gfm: true,
+      });
 
-    try {
-      // Convert markdown to HTML and sanitize
-      const sanitizedHtml = DOMPurify.sanitize(marked(content));
-      return (
-        <div 
-          className="markdown-body"
-          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-        />
-      );
-    } catch (error) {
-      console.error("Markdown parsing error:", error);
-      return content.split('\n').map((str, index) => <p key={index}>{str}</p>);
+      try {
+        return DOMPurify.sanitize(marked(content));
+      } catch (error) {
+        console.error("Markdown parsing error:", error);
+        return content;
+      }
+    } else {
+      const div = document.createElement("div");
+      div.textContent = content;
+      return div.innerHTML;
     }
   };
 
-  const renderLoadingState = () => (
-    <div className="typing-indicator" style={{
-      padding: '0.5rem',
-      fontSize: '0.875rem',
-      color: 'var(--cds-text-helper)',
-      fontStyle: 'italic',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem'
-    }}>
+  const LoadingIndicator = () => (
+    <div className="typing-indicator">
       <AiGenerate size={16} />
       <span>AI is thinking...</span>
     </div>
@@ -201,6 +220,29 @@ const UserLLMChat = () => {
     recognition.start();
   };
 
+  const Message = ({ message }) => {
+    return (
+      <div className={`message-group ${message.sender}`}>
+        <div className="message-bubble">
+          <div
+            className="message-content"
+            dangerouslySetInnerHTML={{
+              __html: formatContent(message.text, message.format),
+            }}
+          />
+          <div className="message-meta">
+            <span className="message-time">{message.timestamp}</span>
+            {message.sender === 'bot' && (
+              <Tag type="blue" size="sm">
+                AI
+              </Tag>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Content className="chat-content" style={{ padding: '1rem' }}>
       <Grid fullWidth className="chat-container">
@@ -220,141 +262,160 @@ const UserLLMChat = () => {
             borderRadius: '8px',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
             zIndex: 100
-          }}>
+            }}>
             <style>
               {`
-                .markdown-body {
-                  font-size: 14px;
-                  line-height: 1.6;
-                  background: none !important;
-                  color: var(--cds-text-primary) !important;
-                }
+              .message-content.markdown-body {
+                font-size: 14px;
+                line-height: 1.6;
+                color: var(--cds-text-primary);
+              }
 
-                .markdown-body pre {
-                  padding: 1em;
-                  border-radius: 4px;
-                  overflow-x: auto;
-                  background: var(--cds-background-selected) !important;
-                  color: var(--cds-text-primary) !important;
-                  border: 1px solid var(--cds-border-subtle);
-                }
+              .message-content.markdown-body pre {
+                margin: 1em 0;
+                padding: 1em;
+                overflow-x: auto;
+                background: var(--cds-background-selected) !important;
+                border-radius: 4px;
+              }
 
-                .markdown-body code {
-                  padding: 0.2em 0.4em;
-                  border-radius: 3px;
-                  font-size: 85%;
-                  background: var(--cds-background-selected) !important;
-                  color: var(--cds-text-primary) !important;
-                }
+              .message-content.markdown-body code {
+                font-family: 'IBM Plex Mono', monospace;
+                font-size: 85%;
+              }
 
-                .markdown-body pre code {
-                  padding: 0;
-                  background: none !important;
-                  color: var(--cds-text-primary) !important;
-                  border: none;
-                }
+              .message-content.markdown-body p {
+                margin: 0.5em 0;
+              }
 
-                /* Syntax highlighting colors optimized for both themes */
-                .token.comment,
-                .token.prolog,
-                .token.doctype,
-                .token.cdata {
-                  color: var(--cds-text-helper) !important;
-                }
+              .message-content.markdown-body ul,
+              .message-content.markdown-body ol {
+                margin: 0.5em 0;
+                padding-left: 1.5em;
+              }
 
-                .token.function,
-                .token.class-name {
-                  color: var(--cds-support-02) !important;
-                }
+              .empty-state {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+                padding: 2rem;
+                text-align: center;
+                color: var(--cds-text-helper);
+              }
 
-                .token.keyword,
-                .token.boolean,
-                .token.number {
-                  color: var(--cds-support-03) !important;
-                }
+              .message-group {
+                display: flex;
+                flex-direction: column;
+                max-width: 85%;
+              }
 
-                .token.string,
-                .token.char,
-                .token.regex {
-                  color: var(--cds-support-04) !important;
-                }
+              .message-group.user {
+                align-self: flex-end;
+              }
 
-                .token.operator,
-                .token.entity,
-                .token.url,
-                .token.punctuation {
-                  color: var(--cds-text-secondary) !important;
-                }
+              .message-group.bot {
+                align-self: flex-start;
+              }
 
-                .markdown-body blockquote {
-                  border-left: 4px solid var(--cds-border-strong);
-                  margin: 0;
-                  padding-left: 1em;
-                  color: var(--cds-text-helper);
-                }
+              .message-bubble {
+                padding: 0.75rem 1rem;
+                border-radius: 1rem;
+                background: var(--cds-layer-hover);
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+              }
 
-                .markdown-body h1,
-                .markdown-body h2,
-                .markdown-body h3,
-                .markdown-body h4,
-                .markdown-body h5,
-                .markdown-body h6 {
-                  color: var(--cds-text-primary);
-                  margin-top: 1.5rem;
-                  margin-bottom: 1rem;
-                }
+              .message-meta {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+                font-size: 0.75rem;
+                color: var(--cds-text-helper);
+              }
 
-                .markdown-body strong {
-                  color: var(--cds-text-primary);
-                }
+              .typing-indicator {
+                padding: 0.5rem;
+                font-size: 0.875rem;
+                color: var(--cds-text-helper);
+                font-style: italic;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              }
 
-                .markdown-body a {
-                  color: var(--cds-link-primary);
-                }
+              .empty-state h4 {
+                margin: 0;
+                color: var(--cds-text-primary);
+              }
 
-                .markdown-body ul,
-                .markdown-body ol {
-                  color: var(--cds-text-primary);
-                  margin-left: 1.5rem;
-                }
+              .empty-state p {
+                margin: 0;
+                color: var(--cds-text-helper);
+              }
 
-                .markdown-body li {
-                  margin: 0.25rem 0;
-                }
+              .llm-chat-modal {
+                --chat-max-height: calc(100vh - 180px);
+              }
 
-                .markdown-body table {
-                  border-collapse: collapse;
-                  width: 100%;
-                  margin: 1em 0;
-                }
+              .chat-container {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                overflow: hidden;
+              }
 
-                .markdown-body th,
-                .markdown-body td {
-                  border: 1px solid var(--cds-border-subtle);
-                  padding: 0.5em;
-                  text-align: left;
-                  color: var(--cds-text-primary);
-                }
+              .message-group.bot .message-bubble {
+                background: var(--cds-layer-selected);
+                border-top-left-radius: 0;
+              }
 
-                .markdown-body th {
-                  background: var(--cds-background-selected);
-                }
+              .message-group.user .message-bubble {
+                background: var(--cds-layer-selected-hover);
+                border-top-right-radius: 0;
+              }
+
+              .input-row {
+                display: flex;
+                gap: 0.5rem;
+                align-items: flex-start;
+              }
               `}
             </style>
+
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               marginBottom: '1rem',
-              padding: '1rem'
+              padding: '1rem',
+              borderBottom: '1px solid var(--cds-border-subtle)'
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem'
               }}>
-                <AiGenerate size={24} />
-                <span style={{ fontSize: '1rem', fontWeight: '600' }}>Career Guidance AI</span>
+                <WatsonxAi size={32} />  
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem'
+                }}>
+                  <span style={{
+                    fontSize: '1.25rem',
+                    fontWeight: '600',
+                    color: 'var(--cds-text-primary)'
+                  }}>
+                    Career Guidance AI
+                  </span>
+                  <span style={{
+                    fontSize: '0.875rem',
+                    color: 'var(--cds-text-helper)'
+                  }}>
+                    Powered by Google Gemma
+                  </span>
+                </div>
               </div>
               <Button
                 kind="ghost"
@@ -366,76 +427,21 @@ const UserLLMChat = () => {
                 Clear Chat
               </Button>
             </div>
-            <div 
-              className="messages-container" 
-              role="log" 
-              aria-live="polite"
-              style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: '1rem',
-                scrollBehavior: 'smooth',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-                marginBottom: '0',
-                height: 'calc(100% - 80px)' // Account for input container height
-              }}
-            >
+            <div className="messages-container">
               {messages.length === 0 ? (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  padding: '2rem',
-                  textAlign: 'center',
-                  color: 'var(--cds-text-helper)'
-                }}>
+                <div className="empty-state">
                   <WatsonxAi size={32} />
                   <h4>Start a Conversation</h4>
-                  <p>Ask me anything about career guidance!</p>
+                  <p>Ask me anything!</p>
                 </div>
               ) : (
                 messages.map((msg, idx) => (
-                  <div key={idx} className={`message-group ${msg.sender}`} style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    maxWidth: '85%',
-                    alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                    marginBottom: '1rem'
-                  }}>
-                    <div className="message-bubble" style={{
-                      padding: '0.75rem 1rem',
-                      borderRadius: '1rem',
-                      background: msg.sender === 'bot' ? 'var(--cds-layer-selected)' : 'var(--cds-layer-selected-hover)',
-                      borderTopRightRadius: msg.sender === 'user' ? 0 : '1rem',
-                      borderTopLeftRadius: msg.sender === 'bot' ? 0 : '1rem',
-                      boxShadow: '0 1px 2px rgba(255, 255, 255, 0)'
-                    }}>
-                      <div className="message-content">
-                        {formatContent(msg.text)}
-                      </div>
-                      <div className="message-meta" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        marginTop: '0.5rem',
-                        fontSize: '0.75rem',
-                        color: 'var(--cds-text-helper)'
-                      }}>
-                        <span className="message-time">{msg.timestamp}</span>
-                        {msg.sender === 'bot' && (
-                          <Tag type="blue" size="sm">
-                            AI
-                          </Tag>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <Message key={idx} message={msg} />
                 ))
               )}
-              {loading && renderLoadingState()}
+              {loading && (
+                <LoadingIndicator />
+              )}
               <div ref={messagesEndRef} />
             </div>
             <div className="input-container" style={{
@@ -528,3 +534,5 @@ const UserLLMChat = () => {
 };
 
 export default UserLLMChat;
+
+
