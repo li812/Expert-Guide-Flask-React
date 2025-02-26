@@ -12,7 +12,8 @@ import {
     InlineNotification,
     Pagination,
     Select,
-    SelectItem
+    SelectItem,
+    Tag
 } from '@carbon/react';
 import ViewCourseDetailsModal from '../../components/ViewCourseDetailsModal/ViewCourseDetailsModal';
 import ViewInstituteDetailsModal from '../../components/ViewInstituteDetailsModal/ViewInstituteDetailsModal';

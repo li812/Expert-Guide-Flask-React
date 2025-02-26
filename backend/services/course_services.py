@@ -149,12 +149,23 @@ def get_filtered_courses(filters, page=1, per_page=12):
         elif sort_by == 'fees_high':
             query = query.order_by(CourseMapping.fees.desc())
         elif sort_by == 'rating':
+            # Calculate Wilson Score using a subquery for better SQL syntax
+            wilson_score = text("""
+                (
+                    (COUNT(CASE WHEN course_likes_dislikes.is_like = 1 THEN 1 END) + 1.9208) / 
+                    NULLIF((COUNT(course_likes_dislikes.id) + 3.8416), 0) -
+                    1.96 * SQRT(
+                        ((COUNT(CASE WHEN course_likes_dislikes.is_like = 1 THEN 1 END) * 
+                        COUNT(CASE WHEN course_likes_dislikes.is_like = 0 THEN 1 END)) / 
+                        NULLIF((COUNT(course_likes_dislikes.id) + 3.8416), 0) + 0.9604) /
+                        NULLIF((COUNT(course_likes_dislikes.id) + 3.8416), 0)
+                    )
+                )
+            """)
+            
             query = query.outerjoin(CourseLikesDislikes)\
                 .group_by(CourseMapping.course_mapping_id)\
-                .order_by(
-                    (func.count(case([(CourseLikesDislikes.is_like == True, 1)], else_=0)) * 1.0 / 
-                    func.greatest(func.count(CourseLikesDislikes.id), 1)).desc()
-                )
+                .order_by(wilson_score.desc())
 
         total = query.count()
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -176,8 +187,10 @@ def get_filtered_courses(filters, page=1, per_page=12):
         }
 
     except Exception as e:
-        logger.error("Error in get_filtered_courses: %s", str(e))
-        return {"error": "Internal server error"}
+        logger.error(f"Error in get_filtered_courses: {str(e)}")
+        if "MySQL" in str(e):
+            return {"error": "Database error while sorting courses"}
+        return {"error": "Failed to fetch courses"}
 
 def highlight_text(text, search_term):
     """Helper function to highlight search terms in text"""
@@ -209,6 +222,13 @@ def highlight_text(text, search_term):
 def format_course_mapping(mapping):
     """Helper function to format course mapping data"""
     try:
+        total_ratings = CourseLikesDislikes.query.filter_by(
+            course_mapping_id=mapping.course_mapping_id
+        ).count()
+        
+        likes = get_course_likes(mapping.course_mapping_id)
+        rating = likes / total_ratings if total_ratings > 0 else 0
+        
         return {
             "course_mapping_id": mapping.course_mapping_id,
             "institution": {
@@ -241,7 +261,10 @@ def format_course_mapping(mapping):
             "course_affliation": mapping.course_affliation,
             "likes": get_course_likes(mapping.course_mapping_id),
             "dislikes": get_course_dislikes(mapping.course_mapping_id),
-            "status": mapping.status
+            "status": mapping.status,
+            "rating": rating,
+            "total_ratings": total_ratings,
+            "dislikes": total_ratings - likes
         }
     except Exception as e:
         print(f"Error formatting course mapping: {str(e)}")
