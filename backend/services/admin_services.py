@@ -15,7 +15,7 @@ def get_all_users():
         'email': user.email,
         'phone': user.phone,
         'state': user.state,
-        'profilePicture': f"/user_data/user_profile_picture/{user.login_id}.jpg" if user.profilePicture else None,
+        'profilePicture': f"/data/user_data/user_profile_picture/{user.login_id}.jpg" if user.profilePicture else None,
         'username': Login.query.get(user.login_id).username
     } for user in users]
 
@@ -699,7 +699,7 @@ def handle_institute_logo(logo_file, institute_name):
         
         # Full file path
         file_path = os.path.join(logo_dir, filename)
-        db_path = f"/institute_data/institute_logo/{filename}"
+        db_path = f"/data/institute_data/institute_logo/{filename}"
         
         # Save file
         logo_file.save(file_path)
@@ -788,8 +788,8 @@ def update_institute(institute_id, institute_data, logo_file=None):
 
                 # Save new logo
                 filename = secure_filename(f"{institute_data['institution']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-                logo_path = f"/institute_data/institute_logo/{filename}"
-                logo_file.save(os.path.join('institute_data/institute_logo', filename))
+                logo_path = f"/data/institute_data/institute_logo/{filename}"
+                logo_file.save(os.path.join('data/institute_data/institute_logo', filename))
                 institute.logoPicture = logo_path
             except Exception as e:
                 return {"error": f"Failed to update logo: {str(e)}"}

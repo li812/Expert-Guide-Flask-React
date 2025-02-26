@@ -100,7 +100,7 @@ const SortByFilter = memo(({ value, onChange, isLoading, error }) => (
         <SelectItem value="relevance" text="Most Relevant" />
         <SelectItem value="fees_high" text="Fees: High to Low" />
         <SelectItem value="fees_low" text="Fees: Low to High" />
-        <SelectItem value="rating" text="Rating" />
+        {/* <SelectItem value="rating" text="Rating" /> */}
     </Select>
 ));
 

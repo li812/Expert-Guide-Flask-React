@@ -85,7 +85,7 @@ def register_user(user_data, profile_picture):
         
         # Handle profile picture
         if profile_picture:
-            profile_picture_path = f"user_data/user_profile_picture/{login.login_id}.jpg"
+            profile_picture_path = f"data/user_data/user_profile_picture/{login.login_id}.jpg"
             os.makedirs(os.path.dirname(profile_picture_path), exist_ok=True)
             profile_picture.save(profile_picture_path)
             new_user.profilePicture = profile_picture_path

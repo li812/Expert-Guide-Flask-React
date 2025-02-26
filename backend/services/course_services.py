@@ -149,22 +149,39 @@ def get_filtered_courses(filters, page=1, per_page=12):
         elif sort_by == 'fees_high':
             query = query.order_by(CourseMapping.fees.desc())
         elif sort_by == 'rating':
-            # Calculate Wilson Score using a subquery for better SQL syntax
+            # Calculate Wilson Score with proper SQL syntax
             wilson_score = text("""
                 (
-                    (COUNT(CASE WHEN course_likes_dislikes.is_like = 1 THEN 1 END) + 1.9208) / 
-                    NULLIF((COUNT(course_likes_dislikes.id) + 3.8416), 0) -
+                    (CAST(COUNT(CASE WHEN course_likes_dislikes.is_like = 1 THEN 1 END) AS DECIMAL(10,6)) + 1.9208) / 
+                    NULLIF(CAST((COUNT(course_likes_dislikes.id) + 3.8416) AS DECIMAL(10,6)), 0) - 
                     1.96 * SQRT(
-                        ((COUNT(CASE WHEN course_likes_dislikes.is_like = 1 THEN 1 END) * 
-                        COUNT(CASE WHEN course_likes_dislikes.is_like = 0 THEN 1 END)) / 
-                        NULLIF((COUNT(course_likes_dislikes.id) + 3.8416), 0) + 0.9604) /
-                        NULLIF((COUNT(course_likes_dislikes.id) + 3.8416), 0)
+                        (
+                            CAST(COUNT(CASE WHEN course_likes_dislikes.is_like = 1 THEN 1 END) AS DECIMAL(10,6)) * 
+                            CAST(COUNT(CASE WHEN course_likes_dislikes.is_like = 0 THEN 1 END) AS DECIMAL(10,6))
+                        ) / 
+                        POWER(NULLIF(CAST((COUNT(course_likes_dislikes.id) + 3.8416) AS DECIMAL(10,6)), 0), 2) + 
+                        0.9604
                     )
-                )
+                ) AS wilson_score
             """)
             
+            # Apply the sorting with proper grouping
             query = query.outerjoin(CourseLikesDislikes)\
-                .group_by(CourseMapping.course_mapping_id)\
+                .group_by(
+                    CourseMapping.course_mapping_id,
+                    CourseMapping.institution_id,
+                    CourseMapping.course_type_id,
+                    CourseMapping.course_id,
+                    CourseMapping.description,
+                    CourseMapping.fees,
+                    CourseMapping.website,
+                    CourseMapping.student_qualification,
+                    CourseMapping.course_affliation,
+                    CourseMapping.duration,
+                    CourseMapping.status,
+                    CourseMapping.created_at,
+                    CourseMapping.updated_at
+                )\
                 .order_by(wilson_score.desc())
 
         total = query.count()

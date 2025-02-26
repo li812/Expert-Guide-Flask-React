@@ -1,6 +1,6 @@
 mysql -u root -p
 root
 show databases;
-use HumanDB;
+use expert_guide_db;
 show tables;
 

@@ -270,7 +270,7 @@ def verify_face():
             return jsonify({'error': 'No username provided'}), 400
             
         # Create temp directory for verification videos
-        temp_dir = os.path.join(os.getcwd(), 'temp_verification')
+        temp_dir = os.path.join(os.getcwd(), 'data/temp_verification')
         os.makedirs(temp_dir, exist_ok=True)
         
         # Save video temporarily
@@ -471,7 +471,7 @@ def get_user_profile():
             'state': user.state,
             'district': user.district,
             'postalPinCode': user.postalPinCode,
-            'profilePicture': f"/user_data/user_profile_picture/{user.login_id}.jpg" if user.profilePicture else None
+            'profilePicture': f"/data/user_data/user_profile_picture/{user.login_id}.jpg" if user.profilePicture else None
         }
         
         # print(f"Returning profile data: {profile_data}")
@@ -652,7 +652,7 @@ def save_face_video():
             
         # Create videos directory structure
         base_dir = os.path.join(os.getcwd(), 'user_data')
-        temp_dir = os.path.join(base_dir, 'temp_videos')
+        temp_dir = os.path.join(base_dir, 'data/temp_videos')
         os.makedirs(temp_dir, exist_ok=True)
         
         # Generate timestamp

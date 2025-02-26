@@ -27,7 +27,7 @@ app.config.update(
 )
 
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['UPLOAD_FOLDER'] = 'institute_data/institute_logo'
+app.config['UPLOAD_FOLDER'] = 'data/institute_data/institute_logo'
 
 # Configure CORS
 configure_cors(app)
@@ -71,18 +71,18 @@ def serve(path):
         return send_from_directory(app.static_folder, 'index.html')
 
 # Add specific route for profile pictures
-@app.route('/user_data/user_profile_picture/<filename>')
+@app.route('/data/user_data/user_profile_picture/<filename>')
 def serve_user_profile_picture(filename):
     try:
-        return send_from_directory('user_data/user_profile_picture', filename)
+        return send_from_directory('data/user_data/user_profile_picture', filename)
     except:
         return '', 404
 
 # Add route for institute logos
-@app.route('/institute_data/institute_logo/<filename>')
+@app.route('/data/institute_data/institute_logo/<filename>')
 def serve_institute_logo(filename):
     try:
-        return send_from_directory('institute_data/institute_logo', filename)
+        return send_from_directory('data/institute_data/institute_logo', filename)
     except:
         return '', 404
 

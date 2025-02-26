@@ -55,7 +55,7 @@ def get_user_profile(login_id):
             "state": user.state,
             "district": user.district,
             "postalPinCode": user.postalPinCode,
-            "profilePicture": f"/user_data/user_profile_picture/{user.login_id}.jpg" if user.profilePicture else None
+            "profilePicture": f"/data/user_data/user_profile_picture/{user.login_id}.jpg" if user.profilePicture else None
         }
     except Exception as e:
         return {"error": str(e)}
@@ -80,7 +80,7 @@ def update_user_profile(login_id, profile_data, profile_picture=None):
         # Handle profile picture
         if profile_picture:
             try:
-                picture_directory = "user_data/user_profile_picture"
+                picture_directory = "data/user_data/user_profile_picture"
                 os.makedirs(picture_directory, exist_ok=True)
                 picture_path = f"{picture_directory}/{login_id}.jpg"
                 profile_picture.save(picture_path)
@@ -131,7 +131,7 @@ def update_user_facial_data(login_id, video_file):
         
         # Save and process new video
         from services.face_lock import register_user_face_video
-        temp_dir = "temp_videos"
+        temp_dir = "data/temp_videos"
         os.makedirs(temp_dir, exist_ok=True)
         video_path = os.path.join(temp_dir, f"{username}_update.webm")
         
