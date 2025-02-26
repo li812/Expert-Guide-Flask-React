@@ -35,6 +35,10 @@ const FACE_REGISTRATION_STEPS = {
 
 // Add these validation patterns at the top with other constants
 const VALIDATION_RULES = {
+  fullName: {
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+    message: 'Full name must contain only letters and spaces (2-50 characters)'
+  },
   email: {
     pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     message: 'Please enter a valid email address'
@@ -44,22 +48,26 @@ const VALIDATION_RULES = {
     message: 'Phone number must be exactly 10 digits'
   },
   username: {
-    pattern: /^[a-zA-Z0-9_]{6,}$/,
-    message: 'Username must be at least 6 characters and can only contain letters, numbers, and underscores',
+    pattern: /^[a-zA-Z0-9_]{6,20}$/,
+    message: 'Username must be 6-20 characters',
     requirements: [
-      { pattern: /.{6,}/, message: 'At least 6 characters long' },
-      { pattern: /^[a-zA-Z0-9_]*$/, message: 'Only letters, numbers, and underscores allowed' }
+      { pattern: /.{6,20}/, message: 'Between 6-20 characters' },
+      { pattern: /^[a-zA-Z0-9_]*$/, message: 'Only letters, numbers, and underscores' }
     ]
   },
   password: {
     pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/,
-    message: 'Password must meet all requirements below',
+    message: 'Password must meet all requirements',
     requirements: [
-      { pattern: /.{6,}/, message: 'At least 6 characters long' },
+      { pattern: /.{6,}/, message: 'At least 6 characters' },
       { pattern: /(?=.*[A-Za-z])/, message: 'At least one letter' },
       { pattern: /(?=.*\d)/, message: 'At least one number' },
-      { pattern: /(?=.*[@$!%*#?&])/, message: 'At least one special character (@$!%*#?&)' }
+      { pattern: /(?=.*[@$!%*#?&])/, message: 'At least one special character' }
     ]
+  },
+  postalPinCode: {
+    pattern: /^\d{6}$/,
+    message: 'Postal pin code must be exactly 6 digits'
   }
 };
 
@@ -258,30 +266,47 @@ function RegisterUser() {
   // Update handleNextStep to include new validations for step 1 and 2
   const handleNextStep = (e) => {
     e.preventDefault();
-    
-    if (step === 1) {
-      // Validate email and phone
-      if (!validateField('email', formData.email) || 
-          !validateField('phone', formData.phone)) {
-        return;
-      }
-    }
-  
-    if (step === 2) {
-      // Validate username and passwords
-      if (!validateField('username', formData.username) || 
-          !validateField('password', formData.password) ||
-          !validatePasswordMatch()) {
-        return;
-      }
-    }
-  
-    // Existing date validation
-    if (!formData.dateOfBirth || !validateDate(formData.dateOfBirth)) {
+
+    // Validate all fields in current step
+    if (!validateForm()) {
       return;
     }
-  
+
+    // Additional step-specific validations
+    switch (step) {
+      case 1:
+        if (!validateDate(formData.dateOfBirth)) {
+          return;
+        }
+        break;
+
+      case 2:
+        if (!validatePasswordMatch()) {
+          return;
+        }
+        break;
+
+      case 3:
+        // Validate postal code format
+        if (!validateField('postalPinCode', formData.postalPinCode)) {
+          return;
+        }
+        break;
+
+      case 4:
+        // Validate profile picture
+        if (!validateProfilePicture()) {
+          return;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    // Proceed to next step
     setStep(step + 1);
+    setError(null);
   };
 
   const handlePrevStep = (e) => {
@@ -298,7 +323,7 @@ function RegisterUser() {
       case 'username':
         const usernameValid = rule.requirements.every(req => req.pattern.test(value));
         const usernameReqs = {
-          length: /.{6,}/.test(value),
+          length: /.{6,20}/.test(value),
           validChars: /^[a-zA-Z0-9_]*$/.test(value)
         };
         setUsernameRequirements(usernameReqs);
@@ -336,7 +361,7 @@ function RegisterUser() {
   // Add validatePasswordMatch function
   const validatePasswordMatch = () => {
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Make sure the passwords match');
       return false;
     }
     return true;
@@ -346,32 +371,50 @@ function RegisterUser() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Special validation for specific fields
-    if (name === 'phone') {
-      // Only allow digits and max 10 characters
-      if (!/^\d*$/.test(value) || value.length > 10) {
-        return;
-      }
+    // Clear error when user starts typing
+    setError(null);
+  
+    // Input-specific validation
+    switch (name) {
+      case 'phone':
+      case 'postalPinCode':
+        // Only allow digits
+        if (!/^\d*$/.test(value)) return;
+        
+        // Enforce length limits
+        const maxLength = name === 'phone' ? 10 : 6;
+        if (value.length > maxLength) return;
+        break;
+  
+      case 'fullName':
+        // Only allow letters and spaces
+        if (!/^[a-zA-Z\s]*$/.test(value)) return;
+        break;
+  
+      case 'username':
+        // Only allow letters, numbers, and underscore
+        if (!/^[a-zA-Z0-9_]*$/.test(value)) return;
+        if (value.length > 20) return;
+        break;
+  
+      default:
+        break;
     }
   
-    if (name === 'username') {
-      // Only allow letters, numbers and underscore
-      if (!/^[a-zA-Z0-9_]*$/.test(value)) {
-        return;
-      }
-    }
-  
-    // Validate field if it has validation rules
-    if (VALIDATION_RULES[name]) {
-      const isValid = validateField(name, value);
-      if (!isValid) {
-        setFormData(prev => ({ ...prev, [name]: value }));
-        return;
-      }
-    }
-  
+    // Update form data
     setFormData(prev => ({ ...prev, [name]: value }));
-    setError(null); // Clear error when input changes
+  
+    // Validate field if it has rules
+    if (VALIDATION_RULES[name]) {
+      validateField(name, value);
+    }
+  
+    // Special validation for confirm password
+    if (name === 'confirmPassword' || name === 'password') {
+      if (formData.password && formData.confirmPassword) {
+        validatePasswordMatch();
+      }
+    }
   };
 
   // Inside RegisterUser component, before return statement
@@ -651,19 +694,61 @@ function RegisterUser() {
   };
 
   const validateForm = () => {
-    if (!formData.fullName) return false;
-    if (!formData.gender) return false;
-    if (!formData.dateOfBirth) return false;
-    if (!formData.email) return false;
-    if (!formData.phone) return false;
-    if (!formData.address) return false;
-    if (!formData.state) return false;
-    if (!formData.district) return false;
-    if (!formData.postalPinCode) return false;
-    if (!formData.username) return false;
-    if (!formData.password) return false;
-    if (formData.password !== formData.confirmPassword) return false;
-    if (!formData.profilePicture) return false;
+    const requiredFields = {
+      1: [
+        { name: 'fullName', label: 'Full Name' },
+        { name: 'gender', label: 'Gender' },
+        { name: 'dateOfBirth', label: 'Date of Birth' },
+        { name: 'email', label: 'Email' },
+        { name: 'phone', label: 'Phone Number' }
+      ],
+      2: [
+        { name: 'username', label: 'Username' },
+        { name: 'password', label: 'Password' },
+        { name: 'confirmPassword', label: 'Confirm Password' }
+      ],
+      3: [
+        { name: 'address', label: 'Address' },
+        { name: 'state', label: 'State' },
+        { name: 'district', label: 'District' },
+        { name: 'postalPinCode', label: 'Postal Pin Code' }
+      ],
+      4: [
+        { name: 'profilePicture', label: 'Profile Picture' }
+      ]
+    };
+  
+    const currentFields = requiredFields[step];
+    if (!currentFields) return true;
+  
+    // Clear previous errors
+    setError(null);
+  
+    for (const field of currentFields) {
+      const value = formData[field.name];
+      
+      // Check if field is empty
+      if (!value) {
+        setError(`${field.label} is required`);
+        return false;
+      }
+  
+      // Validate field if it has validation rules
+      if (VALIDATION_RULES[field.name]) {
+        const isValid = validateField(field.name, value);
+        if (!isValid) return false;
+      }
+    }
+  
+    // Special validations for specific steps
+    if (step === 1) {
+      if (!validateDate(formData.dateOfBirth)) return false;
+    }
+  
+    if (step === 2) {
+      if (!validatePasswordMatch()) return false;
+    }
+  
     return true;
   };
 
@@ -694,6 +779,30 @@ function RegisterUser() {
       validChars: 'Only letters, numbers, and underscores'
     };
     return labels[key] || key;
+  };
+
+  // Add validateProfilePicture function
+  const validateProfilePicture = () => {
+    if (!formData.profilePicture) {
+      setError('Please upload a profile picture');
+      return false;
+    }
+  
+    const file = formData.profilePicture;
+    const validTypes = ['image/jpeg', 'image/png'];
+    const maxSize = 500 * 1024; // 500KB
+  
+    if (!validTypes.includes(file.type)) {
+      setError('Please upload only JPG or PNG files');
+      return false;
+    }
+  
+    if (file.size > maxSize) {
+      setError('File size must be less than 500KB');
+      return false;
+    }
+  
+    return true;
   };
 
   return (
@@ -810,6 +919,8 @@ function RegisterUser() {
                     onChange={handleInputChange}
                     invalid={!!error && error.includes('phone')}
                     invalidText={error && error.includes('phone') ? error : ''}
+                    maxLength={10}
+                    helperText="Enter 10-digit phone number"
                     required
                   />
 
@@ -943,6 +1054,10 @@ function RegisterUser() {
                     labelText="Postal Pin Code"
                     value={formData.postalPinCode}
                     onChange={handleInputChange}
+                    invalid={!!error && error.includes('postal')}
+                    invalidText={error && error.includes('postal') ? error : ''}
+                    maxLength={6}
+                    helperText="Enter 6-digit postal code"
                     required
                   />
                   <div className="button-group">
