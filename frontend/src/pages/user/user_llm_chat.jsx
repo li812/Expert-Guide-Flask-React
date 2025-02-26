@@ -413,7 +413,7 @@ const UserLLMChat = () => {
                     fontSize: '0.875rem',
                     color: 'var(--cds-text-helper)'
                   }}>
-                    Powered by Google Gemma
+                    Powered by Gemini 1.5 Flash
                   </span>
                 </div>
               </div>
