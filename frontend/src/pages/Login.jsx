@@ -126,7 +126,7 @@ const Login = () => {
       const data = await response.json();
       console.log("Identifier response data:", data);
 
-      const face_lock = false;
+      const face_lock = true;
 
       if (face_lock == true) {
         if (response.ok) {
@@ -428,27 +428,30 @@ const Login = () => {
                 <video ref={videoRef} autoPlay playsInline />
               </div>
               {isVideoReady && (
-                <Stack gap={5}>
-                  <Button
-                    kind="primary"
-                    onClick={handleFaceVerification}
-                    disabled={isVerifying}
-                    renderIcon={isVerifying ? FaceDissatisfied : FaceSatisfied}
-                    className="verify-button"
-                    size="lg"
-                  >
-                    {isVerifying ? (
-                      <InlineLoading
-                        description={`Verifying (${captureCount}/${MAX_CAPTURES})`}
-                        status="active"
-                      />
-                    ) : (
-                      "Start Verification"
-                    )}
-                  </Button>
-                  <Button kind="ghost" renderIcon={Information} disabled>
-                    Ensure your face is well-lit and centered
-                  </Button>
+                <Stack gap={5} >
+                  <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+
+                    <Button kind="ghost"disabled>
+                    Ensure your face is centered   and lited  
+                    </Button>
+                    <Button
+                      kind="primary"
+                      onClick={handleFaceVerification}
+                      disabled={isVerifying}
+                      renderIcon={isVerifying ? FaceDissatisfied : FaceSatisfied}
+                      className="verify-button"
+                      size="lg"
+                    >
+                      {isVerifying ? (
+                        <InlineLoading
+                          description={`Verifying (${captureCount}/${MAX_CAPTURES})`}
+                          status="active"
+                        />
+                      ) : (
+                        "Start Verification"
+                      )}
+                    </Button>
+                  </div>
                 </Stack>
               )}
             </Stack>

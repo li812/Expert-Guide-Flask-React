@@ -151,7 +151,7 @@ function RegisterUser() {
     }
   };
 
-  const face_lock = false;
+  const face_lock = true;
 
   useEffect(() => {
     if (step === 5) {
