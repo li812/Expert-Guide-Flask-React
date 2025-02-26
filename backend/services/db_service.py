@@ -6,12 +6,22 @@ from sqlalchemy import or_
 from db.db_models import db, Login, Users
 
 def authenticate_user(username, password):
-    user = Login.query.filter_by(username=username).first()
-    if user and user.check_password(password):
-        return {
-            'login_id': user.login_id,
-            'type_id': user.type_id
-        }
+    """Authenticate user and update login statistics"""
+    try:
+        user = Login.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            # Update last login time and increment login count
+            user.last_login = datetime.utcnow()
+            user.login_count = (user.login_count or 0) + 1
+            db.session.commit()
+            
+            return {
+                'login_id': user.login_id,
+                'type_id': user.type_id
+            }
+    except Exception as e:
+        print(f"Error in authenticate_user: {str(e)}")
+        db.session.rollback()
     return None
 
 def get_user_type(type_id):

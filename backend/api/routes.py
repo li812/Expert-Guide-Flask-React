@@ -91,6 +91,9 @@ from services.course_services import (
     update_course_rating,
     get_institution_details
     )
+from services.front_end_services import (
+    get_success_metrics
+)
 
 # Database models
 from db.db_models import Users, Login, UserType, Complaints, Questions, Careers
@@ -1577,3 +1580,16 @@ def get_careers_route():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+@api.route('/api/success-metrics', methods=['GET'])
+def get_success_metrics_route():
+    """Get success metrics for front page"""
+    try:
+        metrics = get_success_metrics()
+        return jsonify(metrics)
+    except Exception as e:
+        print(f"Error in success metrics route: {str(e)}")
+        return jsonify({
+            "error": "Failed to fetch metrics"
+        }), 500

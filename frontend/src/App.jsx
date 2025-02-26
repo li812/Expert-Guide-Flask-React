@@ -60,6 +60,9 @@ function App() {
               <HeaderMenuItem as={Link} to="/for_students" style={{ fontSize: "1rem" }}>
                 For Students
               </HeaderMenuItem>
+              <HeaderMenuItem as={Link} to="/for_students" style={{ fontSize: "1rem" }}>
+                Find Courses
+              </HeaderMenuItem>
             </HeaderNavigation>
             <HeaderGlobalBar id="Top-Bar-left">
               <HeaderGlobalAction aria-label="Theme Toggle" onClick={() => setDarkMode(!darkMode)}>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Column,
@@ -34,6 +34,30 @@ import careerStudent from "../assets/student_career.png";
 import "./For_Students.css";
 
 function ForStudents() {
+  const [metrics, setMetrics] = useState({
+    students_guided: 0,
+    career_paths: 0,
+    success_rate: 0,
+    daily_users: 0
+  });
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/success-metrics');
+        if (!response.ok) throw new Error('Failed to fetch metrics');
+        const data = await response.json();
+        setMetrics(data);
+      } catch (err) {
+        console.error('Error fetching metrics:', err);
+        setError(err.message);
+      }
+    };
+
+    fetchMetrics();
+  }, []);
+
   const features = [
     {
       icon: <MachineLearning_01 size={48} />,
@@ -70,10 +94,10 @@ function ForStudents() {
   ];
 
   const successMetrics = [
-    { label: "Students Guided", value: 50000, icon: <FaceSatisfied size={32} /> },
-    { label: "Career Paths", value: 200, icon: <ChartBubblePacked size={32} /> },
-    { label: "Success Rate", value: 95, icon: <Certificate size={32} /> },
-    { label: "Daily Users", value: 5000, icon: <Calendar size={32} /> },
+    { label: "Students Guided", value: metrics.students_guided, icon: <FaceSatisfied size={32} /> },
+    { label: "Career Paths", value: metrics.career_paths, icon: <ChartBubblePacked size={32} /> },
+    { label: "Success Rate", value: metrics.success_rate, icon: <Certificate size={32} /> },
+    { label: "Daily Users", value: metrics.daily_users, icon: <Calendar size={32} /> },
   ];
 
   return (
