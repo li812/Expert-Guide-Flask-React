@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from functools import wraps
 import time
+import logger
 import os
 from db.db_models import db, Users, Login, Complaints, Careers, CourseType, Course, InstitutionType, Institution, CourseMapping
 
@@ -486,6 +487,7 @@ def check_session_status():
         'login_id': session.get('login_id'),
         'username': get_username_by_login_id(session.get('login_id'))
     })
+
 
 @api.route('/api/admin/server-info', methods=['GET'])
 @check_session(required_type=1)  # Admin type_id = 1
@@ -1452,23 +1454,36 @@ def get_course_mapping_details_route(mapping_id):
 
 # Add these routes after your existing routes
 
+
+
 @api.route('/api/courses/search', methods=['GET'])
 def search_courses():
     """Search and filter courses"""
     try:
-        # Get query parameters
+        # Validate page and per_page
+        page = max(1, request.args.get('page', 1, type=int))
+        per_page = min(max(1, request.args.get('per_page', 12, type=int)), 48)
+
+        # Validate and sanitize fees
+        try:
+            min_fees = max(0, float(request.args.get('min_fees', 0)))
+            max_fees = max(min_fees, float(request.args.get('max_fees', 5000000)))
+        except ValueError:
+            return jsonify({"error": "Invalid fee values"}), 400
+
+        # Sanitize search term
+        search = request.args.get('search', '').strip()
+
         filters = {
-            'search': request.args.get('search', ''),
-            'course_types': [int(x) for x in request.args.getlist('course_types[]') if x],
-            'careers': [int(x) for x in request.args.getlist('careers[]') if x],
+            'search': search,
+            'course_types': request.args.getlist('course_types[]'),
+            'careers': request.args.getlist('careers[]'),
             'state': request.args.get('state'),
-            'min_fees': float(request.args.get('min_fees', 0)),
-            'max_fees': float(request.args.get('max_fees', 5000000)),
+            'district': request.args.get('district'),
+            'min_fees': min_fees,
+            'max_fees': max_fees,
             'sort_by': request.args.get('sort_by', 'relevance')
         }
-        
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 12, type=int)
 
         result = get_filtered_courses(filters, page, per_page)
         
@@ -1478,8 +1493,8 @@ def search_courses():
         return jsonify(result)
 
     except Exception as e:
-        print(f"Error in search_courses: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error in search_courses: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
 
 @api.route('/api/courses/filters', methods=['GET'])
 def get_course_filter_options():

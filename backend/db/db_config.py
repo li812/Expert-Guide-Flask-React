@@ -79,6 +79,8 @@ def ensure_database(run_env):
             print(f"Creating database {DB_CONFIG['database']} if not exists...")
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_CONFIG['database']}")
             
+                        
+
             cursor.close()
             conn.close()
             print("Database ensured.")

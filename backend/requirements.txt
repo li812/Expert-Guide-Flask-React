@@ -16,6 +16,7 @@ flask_sockets
 colorama==0.4.6
 requests
 werkzeug
+logger
 
 # Testing and db
 pytest==7.4.3

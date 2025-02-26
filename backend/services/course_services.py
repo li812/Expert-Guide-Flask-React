@@ -1,5 +1,7 @@
+import logger
 from sqlalchemy import func, case, text
 from sqlalchemy.sql.expression import or_, and_
+from sqlalchemy.orm import joinedload
 from db.db_models import (
     db, CourseMapping, Institution, Course, CourseType, 
     CourseLikesDislikes, InstitutionLikesDislikes, Careers, InstitutionType
@@ -66,44 +68,62 @@ def get_course_mapping_details(mapping_id):
 
 
 def get_filtered_courses(filters, page=1, per_page=12):
+    """Get filtered and paginated courses"""
     try:
-        # Create base query with all necessary joins
+        # Input validation
+        if not isinstance(page, int) or page < 1:
+            return {"error": "Invalid page number"}
+        if not isinstance(per_page, int) or per_page < 1 or per_page > 48:
+            return {"error": "Invalid page size"}
+
+        # Create optimized base query with necessary joins
         query = CourseMapping.query\
             .join(Institution)\
             .join(Course)\
-            .join(CourseType)
+            .join(CourseType)\
+            .options(
+                joinedload(CourseMapping.institution),
+                joinedload(CourseMapping.course),
+                joinedload(CourseMapping.course_type)
+            )
 
-        # Apply filters
+        # Apply search filter with optimization
         if filters.get('search'):
-            search_term = f"%{filters['search'].strip()}%"
+            search_term = filters['search'].strip()
+            if len(search_term) < 2:
+                return {"error": "Search term too short"}
+            search_term = f"%{search_term}%"
             query = query.filter(
                 or_(
                     Course.course.ilike(search_term),
                     Institution.institution.ilike(search_term),
-                    # Use func.substring for TEXT columns
-                    func.substring(CourseMapping.description, 1, 500).ilike(search_term),
-                    func.substring(Course.course_description, 1, 500).ilike(search_term)
+                    CourseMapping.description.ilike(search_term)
                 )
             )
 
         # Apply course type filter with validation
         if filters.get('course_types'):
             try:
-                course_type_ids = [int(ct_id) for ct_id in filters['course_types'].split(',') if ct_id]
+                course_type_ids = [
+                    int(ct_id) for ct_id in filters['course_types'] 
+                    if str(ct_id).isdigit()
+                ]
                 if course_type_ids:
-                    query = query.filter(CourseType.course_type_id.in_(course_type_ids))
-            except (ValueError, AttributeError):
-                pass
+                    query = query.filter(Course.course_type_id.in_(course_type_ids))
+            except (ValueError, AttributeError) as e:
+                logger.error(f"Error processing course types: {str(e)}")
 
         # Apply career filter with validation
         if filters.get('careers'):
             try:
-                career_ids = [int(c_id) for c_id in filters['careers'].split(',') if c_id]
+                career_ids = [
+                    int(c_id) for c_id in filters['careers'] 
+                    if str(c_id).isdigit()
+                ]
                 if career_ids:
-                    query = query.join(Careers, Course.career_id == Careers.career_id)\
-                               .filter(Course.career_id.in_(career_ids))
-            except (ValueError, AttributeError):
-                pass
+                    query = query.filter(Course.career_id.in_(career_ids))
+            except (ValueError, AttributeError) as e:
+                logger.error(f"Error processing careers: {str(e)}")
 
         # Apply location filters
         if filters.get('state'):
@@ -111,19 +131,26 @@ def get_filtered_courses(filters, page=1, per_page=12):
             if filters.get('district'):
                 query = query.filter(Institution.district == filters['district'])
 
-        # Apply fees filter
+        # Apply fees filter with validation
         try:
-            if filters.get('min_fees'):
-                min_fees = float(filters['min_fees'])
-                query = query.filter(CourseMapping.fees >= min_fees)
-            if filters.get('max_fees'):
-                max_fees = float(filters['max_fees'])
-                query = query.filter(CourseMapping.fees <= max_fees)
-        except (ValueError, TypeError):
-            pass
+            min_fees = float(filters.get('min_fees', 0))
+            max_fees = float(filters.get('max_fees', 5000000))
+            if min_fees < 0 or max_fees < min_fees:
+                return {"error": "Invalid fees range"}
+            query = query.filter(
+                and_(
+                    CourseMapping.fees >= min_fees,
+                    CourseMapping.fees <= max_fees
+                )
+            )
+        except ValueError:
+            return {"error": "Invalid fees values"}
 
-        # Apply sorting
+        # Apply sorting with validation
         sort_by = filters.get('sort_by', 'relevance')
+        if sort_by not in ['relevance', 'fees_low', 'fees_high', 'rating']:
+            return {"error": "Invalid sort option"}
+
         if sort_by == 'fees_low':
             query = query.order_by(CourseMapping.fees.asc())
         elif sort_by == 'fees_high':
@@ -136,9 +163,21 @@ def get_filtered_courses(filters, page=1, per_page=12):
                     func.greatest(func.count(CourseLikesDislikes.id), 1)).desc()
                 )
 
+        # Add index hint for large datasets
+        query = query.with_hint(CourseMapping, 'USE INDEX (idx_course_mapping_status)')
+
         # Get total and paginate
         total = query.count()
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        if not paginated.items:
+            return {
+                "courses": [],
+                "total": 0,
+                "pages": 0,
+                "current_page": page,
+                "message": "No courses found matching the criteria"
+            }
 
         return {
             "courses": [format_course_mapping(m) for m in paginated.items],
@@ -148,8 +187,8 @@ def get_filtered_courses(filters, page=1, per_page=12):
         }
 
     except Exception as e:
-        print(f"Error in get_filtered_courses: {str(e)}")
-        return {"error": str(e)}
+        logger.error(f"Error in get_filtered_courses: {str(e)}")
+        return {"error": "Internal server error"}
 
 def highlight_text(text, search_term):
     """Helper function to highlight search terms in text"""
@@ -347,3 +386,29 @@ def get_institution_details(institution_id):
     except Exception as e:
         print(f"Error in get_institution_details: {str(e)}")
         return {"error": str(e)}
+
+# Backend - Enhanced Course Type Filter Logic
+def apply_course_type_filter(query, course_types):
+    """Apply course type filter with validation and error handling"""
+    try:
+        if not course_types:
+            return query
+
+        # Validate course type IDs
+        course_type_ids = []
+        for ct_id in course_types.split(','):
+            try:
+                ct_id = int(ct_id)
+                if CourseType.query.get(ct_id):
+                    course_type_ids.append(ct_id)
+            except ValueError:
+                continue
+
+        if course_type_ids:
+            query = query.filter(CourseType.course_type_id.in_(course_type_ids))
+
+        return query
+
+    except Exception as e:
+        logger.error(f"Error applying course type filter: {str(e)}")
+        raise FilterError("Failed to apply course type filter")
