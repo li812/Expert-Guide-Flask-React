@@ -34,6 +34,10 @@ function Sum() {
     <Grid className="bx--grid--full-width">
       <Column lg={8} md={4} sm={2}>
         <h1>Sum Calculator</h1>
+        <br></br>
+        <h2>Enter two numbers</h2>
+        <br/>
+        <br/>
         <Form onSubmit={calculateSum}>
           <Stack gap={7}>
             <TextInput

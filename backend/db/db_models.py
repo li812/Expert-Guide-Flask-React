@@ -12,7 +12,10 @@ class UserType(db.Model):
     type_id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
     users = relationship('Login', backref='user_type', lazy=True)
+    
+
 
 class Login(db.Model):
     __tablename__ = 'login'

@@ -186,90 +186,63 @@ function Home() {
           <br />
           <br />
         </div>
-        <div className="bx--row how-it-works-section">
-          <div className="bx--col-lg-8 how-it-works-image">
+        <Grid>
+          <Column lg={8} md={4} sm={4} className="how-it-works-image">
             <AspectRatio ratio="16x9">
-              <img src={howWorkImage} alt="How It Works" />
+              <img 
+                src={howWorkImage} 
+                alt="How It Works" 
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover"
+                }}
+              />
             </AspectRatio>
-          </div>
-          <div className="bx--col-lg-8 how-it-works-steps">
-            <Grid>
-              <Column lg={8} md={4} sm={4}>
-                <h3>Career Assessment</h3>
-                <Tile className="step-tile">
-                  <div className="step-icon">
-                    <span>1</span>
-                  </div>
-                  <div className="step-content">
-                    <h4>Take the Assessment</h4>
-                    <p>
-                      Answer our 30 carefully crafted questions to uncover your interests, strengths, and career aspirations.
-                    </p>
-                  </div>
-                </Tile>
-                <Tile className="step-tile">
-                  <div className="step-icon">
-                    <span>2</span>
-                  </div>
-                  <div className="step-content">
-                    <h4>Receive Tailored Insights</h4>
-                    <p>
-                      Our advanced TensorFlow model processes your answers to generate personalized career recommendations that align with your future goals.
-                    </p>
-                  </div>
-                </Tile>
-                <Tile className="step-tile">
-                  <div className="step-icon">
-                    <span>3</span>
-                  </div>
-                  <div className="step-content">
-                    <h4>Explore Opportunities</h4>
-                    <p>
-                      Browse through curated college lists and online courses that match your recommended career paths.
-                    </p>
-                  </div>
-                </Tile>
-              </Column>
-              
-              <Column lg={8} md={4} sm={4}>
-                <h3>AI Chat Guidance</h3>
-                <Tile className="step-tile">
-                  <div className="step-icon">
-                    <span>1</span>
-                  </div>
-                  <div className="step-content">
-                    <h4>Start a Conversation</h4>
-                    <p>
-                      Initiate a chat with our AI bot powered by Google's Gemma model to ask any career-related questions.
-                    </p>
-                  </div>
-                </Tile>
-                <Tile className="step-tile">
-                  <div className="step-icon">
-                    <span>2</span>
-                  </div>
-                  <div className="step-content">
-                    <h4>Get Real-Time Advice</h4>
-                    <p>
-                      Receive instant, accurate responses on everything from course selection to future job prospects.
-                    </p>
-                  </div>
-                </Tile>
-                <Tile className="step-tile">
-                  <div className="step-icon">
-                    <span>3</span>
-                  </div>
-                  <div className="step-content">
-                    <h4>Plan Your Next Steps</h4>
-                    <p>
-                      Use our AI insights to set actionable goals and design a step-by-step plan for your academic and career journey.
-                    </p>
-                  </div>
-                </Tile>
-              </Column>
-            </Grid>
-          </div>
-        </div>
+          </Column>
+          
+          <Column lg={4} md={4} sm={4}>
+            <h3>Career Assessment</h3>
+            {[1, 2, 3].map((step) => (
+              <Tile key={step} className="step-tile" style={{height:"230px"}}>
+                <div className="step-icon">
+                  <span>{step}</span>
+                </div>
+                <div className="step-content">
+                  <h4>{step === 1 ? "Take the Assessment" : step === 2 ? "Receive Tailored Insights" : "Explore Opportunities"}</h4>
+                  <p>
+                    {step === 1 
+                      ? "Answer our 30 carefully crafted questions to uncover your interests, strengths, and career aspirations."
+                      : step === 2
+                      ? "Our advanced TensorFlow model processes your answers to generate personalized career recommendations that align with your future goals."
+                      : "Browse through curated college lists and online courses that match your recommended career paths."}
+                  </p>
+                </div>
+              </Tile>
+            ))}
+          </Column>
+          
+          <Column lg={4} md={4} sm={4}>
+            <h3>AI Chat Guidance</h3>
+            {[1, 2, 3].map((step) => (
+              <Tile key={step} className="step-tile" style={{height:"230px"}}>
+                <div className="step-icon">
+                  <span>{step}</span>
+                </div>
+                <div className="step-content">
+                  <h4>{step === 1 ? "Start a Conversation" : step === 2 ? "Get Real-Time Advice" : "Plan Your Next Steps"}</h4>
+                  <p>
+                    {step === 1
+                      ? "Initiate a chat with our AI bot powered by Google's Gemma model to ask any career-related questions."
+                      : step === 2
+                      ? "Receive instant, accurate responses on everything from course selection to future job prospects."
+                      : "Use our AI insights to set actionable goals and design a step-by-step plan for your academic and career journey."}
+                  </p>
+                </div>
+              </Tile>
+            ))}
+          </Column>
+        </Grid>
       </div>
       <br />
       <br />

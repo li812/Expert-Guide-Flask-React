@@ -117,6 +117,7 @@ def calculate_sum():
         
     try:
         data = request.json
+        print(data)
         num1 = float(data.get('num1', 0))
         num2 = float(data.get('num2', 0))
         result = calculate_sum_service(num1, num2)

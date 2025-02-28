@@ -61,6 +61,9 @@ function App() {
               <HeaderMenuItem as={Link} to="/find-courses" style={{ fontSize: "1rem" }}>
                 Find Courses
               </HeaderMenuItem>
+              <HeaderMenuItem as={Link} to="/sum" style={{ fontSize: "1rem" }}>
+                Sum
+              </HeaderMenuItem>
             </HeaderNavigation>
             <HeaderGlobalBar id="Top-Bar-left">
               <HeaderGlobalAction aria-label="Theme Toggle" onClick={() => setDarkMode(!darkMode)}>
