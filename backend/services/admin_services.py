@@ -352,7 +352,8 @@ def delete_course_type(course_type_id):
             return {"error": "Course type not found"}
 
         # Check if course type is being used
-        if course_type.courses:
+        # Fix: Need to count or check first() instead of directly checking the query object
+        if course_type.courses.count() > 0:
             return {"error": "Cannot delete course type that has associated courses"}
             
         db.session.delete(course_type)
@@ -362,8 +363,6 @@ def delete_course_type(course_type_id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}
-    
-    
     
 def get_all_courses(page=1, per_page=10, sort_key='course_id', sort_direction='asc'):
     """Get all courses with pagination and sorting"""
