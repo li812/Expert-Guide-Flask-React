@@ -690,7 +690,7 @@ def handle_institute_logo(logo_file, institute_name):
             return None, "Invalid file type. Only JPEG, PNG and GIF allowed"
             
         # Create base directory
-        logo_dir = os.path.join('institute_data', 'institute_logo')
+        logo_dir = os.path.join('data/institute_data/institute_logo')
         os.makedirs(logo_dir, exist_ok=True)
         
         # Generate unique filename
@@ -698,7 +698,7 @@ def handle_institute_logo(logo_file, institute_name):
         filename = secure_filename(f"{institute_name}_{timestamp}.png")
         
         # Full file path
-        file_path = os.path.join(logo_dir, filename)
+        file_path = os.path.join('data/institute_data/institute_logo', filename)
         db_path = f"/data/institute_data/institute_logo/{filename}"
         
         # Save file
@@ -764,7 +764,8 @@ def add_institute(institute_data, logo_file=None):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}
-
+    
+    
 def update_institute(institute_id, institute_data, logo_file=None):
     """Update an existing institution"""
     try:
@@ -837,13 +838,14 @@ def delete_institute(institute_id):
         if not institute:
             return {"error": "Institution not found"}
 
-# Check if institution has any course mappings
-        if institute.course_mappings:
+        # Check if institution has any course mappings
+        # Fix: Need to count or check first() instead of directly checking the query object
+        if institute.course_mappings.count() > 0:
             return {"error": "Cannot delete institution that has course mappings"}
 
         # Delete logo file if exists
         if institute.logoPicture:
-            logo_path = os.path.join('institute_data', institute.logoPicture.lstrip('/'))
+            logo_path = os.path.join('data', institute.logoPicture.lstrip('/'))
             if os.path.exists(logo_path):
                 os.remove(logo_path)
             
