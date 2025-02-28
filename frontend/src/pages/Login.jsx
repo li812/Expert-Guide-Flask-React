@@ -106,6 +106,8 @@ const Login = () => {
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [captureCount, setCaptureCount] = useState(0);
   const MAX_CAPTURES = 3;
+  const [countdown, setCountdown] = useState(3);
+  const [videoProcessing, setVideoProcessing] = useState(false);
 
   // Media references
   const streamRef = useRef(null);
@@ -159,8 +161,10 @@ const Login = () => {
   // Handle face verification
   const handleFaceVerification = async () => {
     try {
-      console.log("Starting face verification...");
+      // Immediately set states to show recording has started
       setIsVerifying(true);
+      setVideoProcessing(true); // Add this to show immediate feedback
+      console.log("Starting face verification...");
       chunksRef.current = [];
 
       const stream = videoRef.current.srcObject;
@@ -173,10 +177,13 @@ const Login = () => {
         throw new Error("No supported video MIME type found");
       }
 
+      // Set videoProcessing to false once we're about to start actual recording
+      setVideoProcessing(false);
+
       console.log("Creating MediaRecorder...");
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
-        videoBitsPerSecond: 2500000,
+        videoBitsPerSecond: 25000,
       });
       console.log("MediaRecorder created successfully");
 
@@ -191,6 +198,8 @@ const Login = () => {
 
       mediaRecorder.onstop = async () => {
         try {
+          // Set processing state back to true during upload and processing
+          setVideoProcessing(true);
           console.log("MediaRecorder stopped");
           const blob = new Blob(chunksRef.current, { type: mimeType });
           console.log("Created video blob:", blob.size, "bytes");
@@ -226,6 +235,9 @@ const Login = () => {
           console.error("Error in verification:", error);
           setError(error.message);
           setStep(LOGIN_STEPS.PASSWORD);
+        } finally {
+          // Make sure to reset processing state if there's an error
+          setVideoProcessing(false);
         }
       };
 
@@ -240,13 +252,13 @@ const Login = () => {
           console.log("Stopping recording after 5s");
           mediaRecorderRef.current.stop();
         }
-      }, 5000);
+      }, 2500);
     } catch (error) {
       console.error("Error starting verification:", error);
       setError(error.message);
       setStep(LOGIN_STEPS.PASSWORD);
-    } finally {
       setIsVerifying(false);
+      setVideoProcessing(false);
     }
   };
 
@@ -326,6 +338,16 @@ const Login = () => {
       };
     }
   }, [step]);
+
+  useEffect(() => {
+    let timer;
+    if (isVerifying) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev > 0 ? prev - 1 : 0);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isVerifying]);
 
   return (
     <Grid className="login-page" fullWidth>
@@ -431,10 +453,11 @@ const Login = () => {
                 <Stack gap={5} >
                   <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
 
-                    <Button kind="ghost"disabled>
-                    Ensure your face is centered   and lited  
+                    <Button kind="ghost" disabled>
+                      Ensure your face is centered   and lited
                     </Button>
                     <Button
+                      id="start-verification-button"
                       kind="primary"
                       onClick={handleFaceVerification}
                       disabled={isVerifying}
@@ -443,10 +466,11 @@ const Login = () => {
                       size="lg"
                     >
                       {isVerifying ? (
-                        <InlineLoading
-                          description={`Verifying (${captureCount}/${MAX_CAPTURES})`}
-                          status="active"
-                        />
+                        videoProcessing ? (
+                          <InlineLoading description="Anlysing your facial data..." />
+                        ) : (
+                          <InlineLoading description={`Starting facial verification...`} />
+                        )
                       ) : (
                         "Start Verification"
                       )}
