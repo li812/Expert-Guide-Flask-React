@@ -513,8 +513,9 @@ def delete_course(course_id):
             return {"error": "Course not found"}
 
         # Check if course has any mappings
-        if course.institution_mappings:
-            return {"error": "Cannot delete course that has institution mappings"}
+        # Fix: Need to count or check first() instead of directly checking the query object
+        if course.course_mappings.count() > 0:
+            return {"error": "Cannot delete course that has associated mappings"}
             
         db.session.delete(course)
         db.session.commit()
@@ -523,7 +524,7 @@ def delete_course(course_id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}
-    
+
     
 def get_all_institute_types(page=1, per_page=10, sort_key='institution_type_id', sort_direction='asc'):
     """Get all institution types with pagination and sorting"""
