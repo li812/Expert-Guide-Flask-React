@@ -7,9 +7,12 @@ import {
   Stack,
   InlineNotification,
   Form,
-  PasswordInput
+  PasswordInput,
+  Modal,
+  TextInput
 } from '@carbon/react';
-import { Password } from '@carbon/icons-react';
+import { Password, TrashCan } from '@carbon/icons-react';
+import { useNavigate } from 'react-router-dom';
 
 const UserSettings = ({ username }) => {
   // Account Settings State
@@ -18,11 +21,17 @@ const UserSettings = ({ username }) => {
     newPassword: '',
     confirmPassword: '',
   });
+  
+  // Delete Account States
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState('');
 
   // UI State
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   // Handle Account Settings Changes
   const handleAccountInputChange = (e) => {
@@ -73,6 +82,49 @@ const UserSettings = ({ username }) => {
         newPassword: '',
         confirmPassword: '',
       });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle Delete Account
+  const handleDeleteAccount = async () => {
+    // Validation
+    if (deletePassword.trim() === '') {
+      setError("Please enter your password");
+      return;
+    }
+    
+    if (deleteConfirm !== 'DELETE') {
+      setError("Please type DELETE to confirm");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('http://localhost:5001/api/user/delete-account', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          password: deletePassword
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete account');
+      }
+      
+      // Account deleted successfully, redirect to login
+      navigate('/login');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -145,7 +197,63 @@ const UserSettings = ({ username }) => {
             />
           )}
         </Tile>
+        
+        {/* Delete Account Section */}
+        <Tile className="settings-tile" style={{ marginTop: '2rem' }}>
+          <Stack gap={7}>
+            <h3>Delete Account</h3>
+            <p>
+              Warning: This action cannot be undone. All your data will be permanently deleted.
+            </p>
+            <Button 
+              kind="danger" 
+              renderIcon={TrashCan}
+              onClick={() => setShowDeleteModal(true)}
+            >
+              Delete My Account
+            </Button>
+          </Stack>
+        </Tile>
       </Column>
+      
+      {/* Delete Account Modal */}
+      <Modal
+        open={showDeleteModal}
+        modalHeading="Delete Account"
+        danger
+        primaryButtonText="Delete Account"
+        secondaryButtonText="Cancel"
+        primaryButtonDisabled={deleteConfirm !== 'DELETE' || deletePassword === '' || isSubmitting}
+        onRequestClose={() => {
+          setShowDeleteModal(false);
+          setDeletePassword('');
+          setDeleteConfirm('');
+        }}
+        onRequestSubmit={handleDeleteAccount}
+      >
+        <p style={{ marginBottom: '1rem' }}>
+          This action will permanently delete your account and all associated data. This cannot be undone.
+        </p>
+        
+        <Stack gap={7}>
+          <PasswordInput
+            id="deletePassword"
+            labelText="Enter your password"
+            value={deletePassword}
+            onChange={(e) => setDeletePassword(e.target.value)}
+            hidePasswordLabel="Hide password"
+            showPasswordLabel="Show password"
+          />
+          
+          <TextInput
+            id="deleteConfirm"
+            labelText="Type DELETE to confirm"
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder="DELETE"
+          />
+        </Stack>
+      </Modal>
     </Grid>
   );
 };

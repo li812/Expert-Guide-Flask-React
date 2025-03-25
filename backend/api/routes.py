@@ -820,7 +820,38 @@ def update_facial_data_route():
         print(f"Error in update_facial_data_route: {str(e)}")
         return jsonify({"error": str(e)}), 500
     
-    
+
+@api.route('/api/user/delete-account', methods=['DELETE'])
+@check_session(required_type=2)  # User type_id = 2
+def delete_user_account():
+    try:
+        data = request.get_json()
+        password = data.get('password')
+        
+        if not password:
+            return jsonify({'error': 'Password is required'}), 400
+            
+        login_id = session.get('login_id')
+        if not login_id:
+            return jsonify({'error': 'Not authenticated'}), 401
+            
+        # Verify password first
+        user = Login.query.get(login_id)
+        if not user or not user.check_password(password):
+            return jsonify({'error': 'Incorrect password'}), 401
+            
+        # Use the existing delete_user function from admin_services
+        result = delete_user(login_id)
+        
+        # Clear session after successful deletion
+        clear_session()
+        
+        return jsonify({'message': 'Account deleted successfully'}), 200
+    except Exception as e:
+        print(f"Error deleting account: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
 @api.route('/api/user/complaints', methods=['POST'])
 @check_session(required_type=2)  # User type_id = 2
 def create_user_complaint():

@@ -213,7 +213,7 @@ const LLMChatBotSmallModal = ({ open, setOpen, isFirstOpen }) => {
             ))
           )}
           {loading && (
-            <div className="typing-indicator">I'm is thinking...</div>
+            <div className="typing-indicator">I'm thinking...</div>
           )}
           <div ref={messagesEndRef} />
         </div>
