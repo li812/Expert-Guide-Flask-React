@@ -11,7 +11,7 @@ import {
   Button,
   Theme,
 } from "@carbon/react";
-import { Light, Asleep, IbmWatsonxCodeAssistantForZRefactor, ArrowRight, Login as LoginIcon } from "@carbon/icons-react";
+import { Light, Asleep, IbmWatsonxCodeAssistantForZRefactor, ArrowRight, Login as LoginIcon, AiGenerate } from "@carbon/icons-react";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Sum from "./pages/Sum";

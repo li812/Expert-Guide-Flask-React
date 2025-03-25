@@ -26,6 +26,9 @@ from services.db_service import (
     verify_password
 )
 
+
+
+
 from services.face_lock import (
     check_user_face,
     register_user_face_video
@@ -331,9 +334,10 @@ def delete_user_route(login_id):
         return '', 204
         
     try:
-        delete_user(login_id)
-        return jsonify({'message': 'User deleted successfully'})
+        result = delete_user(login_id)
+        return jsonify(result)
     except Exception as e:
+        print(f"Error deleting user: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @api.route('/api/admin/stats', methods=['GET'])

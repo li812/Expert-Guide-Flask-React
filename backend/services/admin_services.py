@@ -19,14 +19,51 @@ def get_all_users():
         'username': Login.query.get(user.login_id).username
     } for user in users]
 
+
 def delete_user(login_id):
-    user = Users.query.filter_by(login_id=login_id).first()
-    login = Login.query.filter_by(login_id=login_id).first()
-    if user:
-        db.session.delete(user)
-    if login:
-        db.session.delete(login)
-    db.session.commit()
+    """Delete a user and associated login record"""
+    try:
+        user = Users.query.filter_by(login_id=login_id).first()
+        login = Login.query.filter_by(login_id=login_id).first()
+        
+        if not user and not login:
+            raise Exception(f"User with login_id {login_id} not found")
+        
+        # Delete profile picture if exists
+        if user and user.profilePicture:
+            profile_pic_path = f"data/user_data/user_profile_picture/{login_id}.jpg"
+            if os.path.exists(profile_pic_path):
+                try:
+                    os.remove(profile_pic_path)
+                except Exception as e:
+                    print(f"Error removing profile picture: {str(e)}")
+        
+        # Delete user's facial data if exists
+        try:
+            if login:
+                from services.face_lock import delete_user_face
+                delete_user_face(login.username)
+        except Exception as e:
+            print(f"Error deleting facial data: {str(e)}")
+            
+        # Delete records from database - IMPORTANT: Delete Users FIRST, then Login
+        if user:
+            db.session.delete(user)
+            # Commit the deletion of the user first to respect foreign key constraints
+            db.session.commit()
+            
+        # Now that the user is deleted, we can delete the login
+        if login:
+            db.session.delete(login)
+            db.session.commit()
+            
+        return {"message": "User deleted successfully"}
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in delete_user: {str(e)}")
+        raise e
+
 
 def get_server_info():
     try:
@@ -1132,3 +1169,4 @@ def get_admin_stats():
             "pending_user_complaints": 0,
             "total_courses": 0
         }
+
