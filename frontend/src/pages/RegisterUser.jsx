@@ -1150,6 +1150,7 @@ function RegisterUser() {
 
 
               </div>
+
               <Button
                 id="video-capture-button"
                 onClick={startFaceRegistration}
@@ -1171,6 +1172,18 @@ function RegisterUser() {
               >
                 Back
               </Button>
+              <Button 
+                kind="danger"
+                onClick={() => {
+                  cleanupCamera();
+                  alert("Face registration skipped. You can use password login instead.");
+                  navigate('/login');
+                }}
+                disabled={isRecording || currentProgressStep > 0}
+              >
+                Skip
+              </Button>
+
             </div>
           </div>
         </Tile>

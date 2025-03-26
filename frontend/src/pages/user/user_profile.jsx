@@ -30,7 +30,7 @@ const UserProfile = () => {
         district: '',
         postalPinCode: '',
         profilePicture: null,
-        profilePicturePreview: null  // Add this for preview
+        profilePicturePreview: null
     });
 
     const [error, setError] = useState(null);
@@ -65,7 +65,7 @@ const UserProfile = () => {
         try {
             const formData = new FormData();
             Object.keys(profile).forEach(key => {
-                if (key !== 'profilePicture') {
+                if (key !== 'profilePicture' && key !== 'profilePicturePreview') {
                     formData.append(key, profile[key]);
                 }
             });
@@ -89,11 +89,18 @@ const UserProfile = () => {
         }
     };
 
-    // Add this function before the return statement
+    // Improved file change handler
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Revoke previous preview URL if exists
+            if (profile.profilePicturePreview) {
+                URL.revokeObjectURL(profile.profilePicturePreview);
+            }
+
+            // Create new preview URL
             const previewUrl = URL.createObjectURL(file);
+
             setProfile(prev => ({
                 ...prev,
                 profilePicturePreview: previewUrl
@@ -108,7 +115,7 @@ const UserProfile = () => {
                 URL.revokeObjectURL(profile.profilePicturePreview);
             }
         };
-    }, [profile.profilePicturePreview]);
+    }, []);
 
     // Add these handlers for state and district changes
     const handleStateChange = ({ selectedItem }) => {
@@ -127,7 +134,28 @@ const UserProfile = () => {
     };
 
     return (
+
         <Grid className="profile-page">
+            <Column lg={16} md={8} sm={4}>
+            {error && (
+                <InlineNotification
+                    kind="error"
+                    title="Error"
+                    subtitle={error}
+                    onCloseButtonClick={() => setError(null)}
+                />
+            )}
+            {success && (
+                <InlineNotification
+                    kind="success"
+                    title="Success"
+                    subtitle={success}
+                    onCloseButtonClick={() => setSuccess(null)}
+                />
+            )}
+            <br />
+            </Column>
+            
             <Column lg={16} md={8} sm={4}>
                 <ContentSwitcher onChange={({ index }) => setSelectedSection(index)} selectedIndex={selectedSection}>
                     <Switch name="personal" text="Personal Information" />
@@ -140,11 +168,21 @@ const UserProfile = () => {
                             <Stack gap={7}>
                                 <Tile className="profile-picture-tile">
                                     <div className="profile-picture-container-big">
-                                        {profile.profilePicture ? (
+                                        {profile.profilePicturePreview ? (
+                                            <img
+                                                src={profile.profilePicturePreview}
+                                                alt="Profile Preview"
+                                                className="profile-picture"
+                                            />
+                                        ) : profile.profilePicture ? (
                                             <img
                                                 src={`http://localhost:5001${profile.profilePicture}`}
                                                 alt="Profile"
                                                 className="profile-picture"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "/default-profile.jpg";
+                                                }}
                                             />
                                         ) : (
                                             <UserAvatar size={48} />
@@ -155,14 +193,7 @@ const UserProfile = () => {
                                         ref={fileInputRef}
                                         accept="image/*"
                                         style={{ display: 'none' }}
-                                        onChange={(e) => {
-                                            if (e.target.files[0]) {
-                                                setProfile({
-                                                    ...profile,
-                                                    profilePicture: URL.createObjectURL(e.target.files[0])
-                                                });
-                                            }
-                                        }}
+                                        onChange={handleFileChange}
                                     />
                                     <Button
                                         kind="tertiary"
@@ -229,9 +260,9 @@ const UserProfile = () => {
                                     value={profile.postalPinCode || ''}
                                     onChange={(e) => setProfile({ ...profile, postalPinCode: e.target.value })}
                                 />
-                                <Button 
-                                    type="submit" 
-                                    renderIcon={Save} 
+                                <Button
+                                    type="submit"
+                                    renderIcon={Save}
                                     disabled={isLoading}
                                 >
                                     Save Location Information
@@ -239,26 +270,9 @@ const UserProfile = () => {
                             </Stack>
                         </Form>
                     )}
-
-
                 </Tile>
 
-                {error && (
-                    <InlineNotification
-                        kind="error"
-                        title="Error"
-                        subtitle={error}
-                        onCloseButtonClick={() => setError(null)}
-                    />
-                )}
-                {success && (
-                    <InlineNotification
-                        kind="success"
-                        title="Success"
-                        subtitle={success}
-                        onCloseButtonClick={() => setSuccess(null)}
-                    />
-                )}
+
             </Column>
         </Grid>
     );

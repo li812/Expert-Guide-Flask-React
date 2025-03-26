@@ -452,29 +452,52 @@ const Login = () => {
               {isVideoReady && (
                 <Stack gap={5} >
                   <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
-
-                    <Button kind="ghost" disabled>
-                      Ensure your face is centered   and lited
-                    </Button>
-                    <Button
-                      id="start-verification-button"
-                      kind="primary"
-                      onClick={handleFaceVerification}
-                      disabled={isVerifying}
-                      renderIcon={isVerifying ? FaceDissatisfied : FaceSatisfied}
-                      className="verify-button"
-                      size="lg"
-                    >
-                      {isVerifying ? (
-                        videoProcessing ? (
-                          <InlineLoading description="Anlysing your facial data..." />
+                    <div id="face-buttons" style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '100%',
+                      gap: '1rem'
+                    }}>
+                      <Button kind="ghost" disabled>
+                        Ensure your face is centered   and lited
+                      </Button>
+                      <br />
+                      <Button
+                        id="start-verification-button"
+                        kind="primary"
+                        onClick={handleFaceVerification}
+                        disabled={isVerifying}
+                        renderIcon={isVerifying ? FaceDissatisfied : FaceSatisfied}
+                        className="verify-button"
+                        size="lg"
+                      >
+                        {isVerifying ? (
+                          videoProcessing ? (
+                            <InlineLoading description="Anlysing your facial data..." />
+                          ) : (
+                            <InlineLoading description={`Starting facial verification...`} />
+                          )
                         ) : (
-                          <InlineLoading description={`Starting facial verification...`} />
-                        )
-                      ) : (
-                        "Start Verification"
-                      )}
-                    </Button>
+                          "Start Verification"
+                        )}
+                      </Button>
+                      <br />
+                      <Button
+                        kind="danger"
+                        onClick={() => {
+                          cleanupCamera(streamRef, mediaRecorderRef, videoRef, chunksRef);
+                          setStep(LOGIN_STEPS.PASSWORD);
+                        }}
+                        disabled={isVerifying}
+                        size="lg"
+                      >
+                        Skip to Password
+                      </Button>
+                      <br />
+                    </div>
+
                   </div>
                 </Stack>
               )}
